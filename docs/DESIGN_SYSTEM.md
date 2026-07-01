@@ -39,3 +39,38 @@ export function Example() {
   );
 }
 ```
+
+## Card
+
+`Card` is the official reusable surface primitive. It should be used to group
+related content such as cases, investigation summaries, forum previews and
+dashboard-style modules.
+
+### Variants
+
+- `default`: standard dark surface with border.
+- `elevated`: dark surface with the project card shadow.
+- `outlined`: transparent surface with border only.
+- `glass`: translucent surface for layered mystery/investigation UI.
+
+### Padding
+
+- `none`
+- `small`
+- `medium`
+- `large`
+
+### Usage
+
+```tsx
+import { Card } from "../components/ui/Card";
+
+export function Example() {
+  return (
+    <Card variant="elevated" padding="large" hoverable>
+      <h2>UFO spotted over Leonida?</h2>
+      <p>Community investigators are gathering evidence.</p>
+    </Card>
+  );
+}
+```
