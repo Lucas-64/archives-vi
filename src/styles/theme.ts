@@ -29,7 +29,9 @@ export const theme = {
   },
 
   fonts: {
-    primary: "'Inter', sans-serif",
+    // Variables are set by next/font in src/app/layout.tsx
+    display: "var(--font-display), 'Barlow Condensed', sans-serif",
+    primary: "var(--font-inter), 'Inter', sans-serif",
     secondary: "'Poppins', sans-serif",
   },
 

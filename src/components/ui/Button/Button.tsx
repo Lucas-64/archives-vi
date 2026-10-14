@@ -1,3 +1,5 @@
+"use client";
+
 import { Spinner, StyledButton } from "./Button.styles";
 import type { ButtonProps } from "./Button.types";
 

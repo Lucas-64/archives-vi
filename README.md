@@ -16,11 +16,30 @@ Inspired by classic communities such as GameVicio, GTA Forums and The X-Files, t
 
 ## 🚀 Technologies
 
+* Next.js (App Router)
 * React
 * TypeScript
-* Vite
 * Styled Components
 * Git & GitHub
+
+## 🛠️ Getting Started
+
+Requirements: Node.js 20.9 or later.
+
+```bash
+npm install
+npm run dev
+```
+
+Open http://localhost:3000.
+
+Other scripts:
+
+```bash
+npm run typecheck   # TypeScript check (tsc --noEmit)
+npm run build       # production build
+npm run start       # serve the production build
+```
 
 ---
 
@@ -39,16 +58,18 @@ Inspired by classic communities such as GameVicio, GTA Forums and The X-Files, t
 ```bash
 src
 │
+├── app              Next.js App Router (layout, page, providers, SSR registry)
 ├── assets
 ├── components
 │   ├── home
 │   ├── layout
 │   └── ui
 ├── data
-├── pages
 ├── styles
 └── types
 ```
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for details.
 
 ---
 

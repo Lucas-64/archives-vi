@@ -1,163 +1,171 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
 import styled from "styled-components";
 
-export function Hero() {
+import { ROUTES } from "../../constants/routes";
+import type { Destaque } from "../../types/Destaque";
+
+export interface HeroProps {
+  destaques: Destaque[];
+}
+
+// Featured carousel from the approved prototype: text on the left, image on the right, dots below.
+export function Hero({ destaques }: HeroProps) {
+  const [indice, setIndice] = useState(0);
+
+  if (destaques.length === 0) return null;
+
+  const destaque = destaques[indice] ?? destaques[0];
+
   return (
-    <Section>
-      <FeaturedCard>
+    <Section aria-roledescription="carrossel" aria-label="Em destaque">
+      <Slide
+        style={{ backgroundImage: `url("${destaque.image.src}")` }}
+        aria-live="polite"
+      >
         <Content>
-          <Tag>Featured Case</Tag>
-          <Title>UFO spotted over Leonida?</Title>
-          <Description>
-            Reports indicate strange lights over Vice Beach. The community is
-            gathering evidence and tracking sightings across the map.
-          </Description>
-          <Button type="button">Open Case</Button>
+          <Tag>Em destaque</Tag>
+          <Titulo>{destaque.titulo}</Titulo>
+          <Descricao>{destaque.descricao}</Descricao>
+          <Acao href={ROUTES.publicacao(destaque.investigacaoId)}>Ver mais</Acao>
         </Content>
-      </FeaturedCard>
 
-      <SideCard>
-        <Online>
-          <span />
-          <strong>312</strong> investigators online
-        </Online>
-
-        <h3>Latest forum topics</h3>
-
-        <Topic>
-          <p>Possible sea creature spotted?</p>
-          <strong>24</strong>
-        </Topic>
-
-        <Topic>
-          <p>Strange signal on Frequency 99.1</p>
-          <strong>32</strong>
-        </Topic>
-
-        <Topic>
-          <p>Secret bunker near Vice Beach?</p>
-          <strong>17</strong>
-        </Topic>
-      </SideCard>
+        <Dots role="group" aria-label="Escolher destaque">
+          {destaques.map((item, i) => (
+            <Dot
+              key={item.id}
+              type="button"
+              aria-label={`Destaque ${i + 1}`}
+              aria-pressed={i === indice}
+              $active={i === indice}
+              onClick={() => setIndice(i)}
+            />
+          ))}
+        </Dots>
+      </Slide>
     </Section>
   );
 }
 
 const Section = styled.section`
-  width: min(1440px, 100%);
-  margin: 0 auto;
-  padding: 48px;
-  display: grid;
-  grid-template-columns: 1fr 370px;
-  gap: 24px;
+  width: 100%;
 `;
 
-const FeaturedCard = styled.div`
-  min-height: 520px;
+const Slide = styled.div`
+  position: relative;
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   border-radius: ${({ theme }) => theme.borderRadius.xl};
   overflow: hidden;
-  position: relative;
-  background:
-    linear-gradient(
-      90deg,
-      rgba(9, 11, 18, 0.95) 0%,
-      rgba(9, 11, 18, 0.65) 45%,
-      rgba(9, 11, 18, 0.25) 100%
-    ),
-    url("/src/assets/images/hero.jpg");
-  background-size: cover;
-  background-position: center;
   border: 1px solid ${({ theme }) => theme.colors.border};
+  background-color: ${({ theme }) => theme.colors.card};
+  background-size: cover;
+  background-position: center right;
   box-shadow: ${({ theme }) => theme.shadows.card};
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(9, 11, 18, 0.96) 0%,
+      rgba(9, 11, 18, 0.8) 42%,
+      rgba(9, 11, 18, 0.15) 100%
+    );
+  }
+
+  @media (max-width: 767px) {
+    min-height: 320px;
+
+    &::before {
+      background: linear-gradient(
+        180deg,
+        rgba(9, 11, 18, 0.2) 0%,
+        rgba(9, 11, 18, 0.92) 70%
+      );
+    }
+  }
 `;
 
 const Content = styled.div`
-  max-width: 560px;
-  height: 100%;
-  padding: 64px;
+  position: relative;
+  max-width: 520px;
+  padding: 40px 40px 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 12px;
+
+  @media (max-width: 767px) {
+    padding: 24px 20px 0;
+  }
 `;
 
 const Tag = styled.span`
-  color: ${({ theme }) => theme.colors.pink};
+  font-size: 12px;
   font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 16px;
+  color: ${({ theme }) => theme.colors.pink};
 `;
 
-const Title = styled.h2`
-  font-size: 4rem;
-  line-height: 1;
-  margin-bottom: 24px;
+const Titulo = styled.h1`
+  font-family: ${({ theme }) => theme.fonts.display};
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 0.95;
+  text-transform: uppercase;
+
+  @media (max-width: 767px) {
+    font-size: 36px;
+  }
 `;
 
-const Description = styled.p`
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font-size: 18px;
+const Descricao = styled.p`
+  font-size: 15px;
   line-height: 1.6;
-  margin-bottom: 32px;
-`;
-
-const Button = styled.button`
-  width: fit-content;
-  padding: 14px 22px;
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  color: ${({ theme }) => theme.colors.white};
-  background: linear-gradient(
-    135deg,
-    ${({ theme }) => theme.colors.pink},
-    ${({ theme }) => theme.colors.purple}
-  );
-`;
-
-const SideCard = styled.aside`
-  padding: 28px;
-  border-radius: ${({ theme }) => theme.borderRadius.xl};
-  background: ${({ theme }) => theme.colors.card};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  box-shadow: ${({ theme }) => theme.shadows.card};
-
-  h3 {
-    margin: 32px 0 20px;
-    text-transform: uppercase;
-    font-size: 18px;
-  }
-`;
-
-const Online = styled.div`
-  padding: 18px;
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  background: ${({ theme }) => theme.colors.backgroundSecondary};
   color: ${({ theme }) => theme.colors.textSecondary};
+`;
 
-  span {
-    width: 10px;
-    height: 10px;
-    display: inline-block;
-    border-radius: 50%;
-    background: ${({ theme }) => theme.colors.confirmed};
-    margin-right: 10px;
-  }
+const Acao = styled(Link)`
+  width: fit-content;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.pink};
 
-  strong {
-    color: ${({ theme }) => theme.colors.confirmed};
-    margin-right: 4px;
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.pink};
+    outline-offset: 3px;
   }
 `;
 
-const Topic = styled.div`
-  padding: 18px 0;
+const Dots = styled.div`
+  position: relative;
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  gap: 8px;
+  padding: 0 40px 20px;
 
-  p {
-    color: ${({ theme }) => theme.colors.text};
+  @media (max-width: 767px) {
+    padding: 0 20px 16px;
   }
+`;
 
-  strong {
-    color: ${({ theme }) => theme.colors.pink};
+const Dot = styled.button<{ $active: boolean }>`
+  width: ${({ $active }) => ($active ? "24px" : "8px")};
+  height: 8px;
+  padding: 0;
+  border-radius: 999px;
+  background: ${({ $active, theme }) =>
+    $active ? theme.colors.pink : theme.colors.border};
+  transition: width ${({ theme }) => theme.transitions.default};
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.pink};
+    outline-offset: 3px;
   }
 `;
