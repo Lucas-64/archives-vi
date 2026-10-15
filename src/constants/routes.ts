@@ -3,6 +3,7 @@ export const ROUTES = {
   misterios: "/investigacoes",
   teorias: "/publicacoes",
   investigacoes: "/investigacoes",
+  investigacao: (slug: string) => `/investigacoes/${slug}`,
   publicacoes: "/publicacoes",
   publicacao: (slug: string) => `/publicacao/${slug}`,
   criar: "/criar",

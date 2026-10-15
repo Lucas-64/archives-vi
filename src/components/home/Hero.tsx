@@ -29,7 +29,7 @@ export function Hero({ destaques }: HeroProps) {
           <Tag>Em destaque</Tag>
           <Titulo>{destaque.titulo}</Titulo>
           <Descricao>{destaque.descricao}</Descricao>
-          <Acao href={ROUTES.publicacao(destaque.investigacaoId)}>Ver mais</Acao>
+          <Acao href={ROUTES.investigacoes}>Ver mais</Acao>
         </Content>
 
         <Dots role="group" aria-label="Escolher destaque">

@@ -88,6 +88,19 @@ export const investigacoes: Case[] = [
     evidenceCount: 7,
     updatedAt: "2026-06-26",
   },
+  {
+    // Investigação de demonstração com página de detalhe completa (ver investigacaoDetalhe.ts).
+    id: "simbolos-vice-city",
+    title: "Os símbolos misteriosos espalhados por Vice City estão conectados?",
+    description:
+      "Alguns símbolos identificados em diferentes locais podem fazer parte de um mesmo enigma. Dados demonstrativos.",
+    image: heroImage,
+    status: "investigating",
+    category: "symbol",
+    location: "Vice City",
+    evidenceCount: 12,
+    updatedAt: "2026-10-13",
+  },
 ];
 
 // Slides do carrossel da Home. Cada um aponta para uma investigação existente.

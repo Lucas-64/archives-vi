@@ -285,3 +285,48 @@ Rules: no horizontal scroll at 375px. Text and cards must wrap, never overflow.
 Explorar, Criadores, Busca, Perfil, Entrar and Criar conta have no approved
 mockup. They use the same shell, tokens, Card, Badge, Button, EmptyState and
 Skeleton. They must not introduce new colors, fonts or visual patterns.
+
+---
+
+# Shared Components Added with the Investigation Page
+
+These components are stable and reusable. They are documented here because other pages will use them.
+
+## Avatar
+
+`Avatar` (`src/components/ui/Avatar`) shows a person as initials on a neutral surface.
+
+- Sizes: `small` (28px) and `medium` (40px, default).
+- Derives up to two initials from `nome`. Accepts native span props.
+- Decorative (`aria-hidden`): the visible name must be rendered next to it.
+- A real image can be added later through the same component.
+
+## AcaoRestrita
+
+`AcaoRestrita` (`src/components/acoes/AcaoRestrita.tsx`) shows an action that requires authentication.
+
+- Renders a disabled `Button` with a message and a link to `/entrar`.
+- Never simulates the action. Use it for follow, add evidence, vote, comment and close actions until sign-in exists.
+
+## ComposerBloqueado
+
+`ComposerBloqueado` (`src/components/comentarios/ComposerBloqueado.tsx`) is the disabled comment composer.
+
+- Used by publication comments and by the investigation discussion.
+- Nothing is saved. The link points to `/entrar`.
+
+## Typography Token: mono
+
+`theme.fonts.mono` is a system monospace stack (no web font is loaded). Use it for identifiers such as `EVIDÊNCIA #001`.
+
+---
+
+# Section Images and Visual Themes
+
+- Section images are registered in `src/constants/imagensSecoes.ts` (`IMAGENS_SECOES`). Components read them through `imagemDaSecao()` and never hardcode image paths.
+- Each section is tagged with a visual theme: `dia` (galeria, mapa) or `noite` (misterios, teorias). The tag is metadata only. Nothing switches themes automatically yet.
+- A `null` entry means the file is not available and the tile renders without media. All four section images are registered: `misterys_night.jpg` (misterios), `teory_night.jpg` (teorias), `galery_day.jpg` (galeria) and `map_day.jpg` (mapa).
+- Explore tiles: full-bleed background image (`object-fit: cover`) with a bottom-only gradient so the text stays readable. Icons are pink line icons without glow.
+- Section images are decorative (`alt=""`). They must never fill user content such as publications, evidence, comments or galleries.
+- The "Explorar" tiles are the reference for section cards with a background image.
+

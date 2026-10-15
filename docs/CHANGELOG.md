@@ -6,8 +6,17 @@ The project follows Semantic Versioning and Conventional Commits.
 
 ## [Unreleased]
 
+### Added
+
+- `/publicacoes` listing with filters (Todas, Teorias, Investigações), loading, empty and error states.
+- `/investigacoes/[slug]` detail page (demonstrative data): theory, evidence, discussion, connections graph, history and synthesis. Authenticated actions are disabled with a link to sign-in.
+- `Avatar`, `AcaoRestrita` and `ComposerBloqueado` shared components.
+- Section images (`galery_day`, `map_day`, `teory_night`) on the Explore tiles, registered in `src/constants/imagensSecoes.ts`.
+
 ### Changed
 
+- Home investigation cards link to `/investigacoes/[slug]`; the "Ver mais" link points to `/investigacoes`.
+- `/publicacoes` lists publications in a single vertical column with the sidebar on the right.
 - Migrated from React + Vite to Next.js 16.4.0 with the App Router (ADR-008).
 - Upgraded React and React DOM from 18.3.1 to 19.2.9.
 - Styled Components now uses an SSR registry and a client provider in the App Router.

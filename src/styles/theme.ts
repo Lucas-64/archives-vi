@@ -33,6 +33,8 @@ export const theme = {
     display: "var(--font-display), 'Barlow Condensed', sans-serif",
     primary: "var(--font-inter), 'Inter', sans-serif",
     secondary: "'Poppins', sans-serif",
+    // System monospace stack for identifiers such as "EVIDÊNCIA #001". No web font is loaded.
+    mono: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
   },
 
   fontSize: {

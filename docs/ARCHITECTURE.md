@@ -143,6 +143,19 @@ Design system rules:
 - Public exports should go through `index.ts`.
 - New pages should be built from primitives whenever possible.
 
+## Demonstrative Data
+
+- All data under `src/mocks/` is demonstrative and in pt-BR. It does not describe real users, content or activity.
+- The online counter (`src/mocks/atividade.ts`, `investigadoresOnline = 312`) is a demonstrative value.
+  There is no backend and no real-time presence, so the number must never be presented as a real count.
+- `src/data/cases.ts` (English, unused) is superseded by `src/mocks/investigacoes.ts`.
+
+## Test States (development only)
+
+- `getPublicacoes` accepts a simulation flag from the URL (`?simular=vazio|erro|lento`).
+- The flag only has effect when `NODE_ENV !== "production"`. In production builds it is ignored.
+- Use `npm run dev` to test empty, error and loading states.
+
 ## Build and Validation
 
 Commands (run from the project root):

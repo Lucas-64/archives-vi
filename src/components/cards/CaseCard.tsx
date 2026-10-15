@@ -38,7 +38,7 @@ export function CaseCard({ caso }: CaseCardProps) {
           uppercase
         />
         <Titulo>
-          <Link href={ROUTES.publicacao(caso.id)}>{caso.title}</Link>
+          <Link href={ROUTES.investigacao(caso.id)}>{caso.title}</Link>
         </Titulo>
         <Descricao>{caso.description}</Descricao>
         <Meta>
