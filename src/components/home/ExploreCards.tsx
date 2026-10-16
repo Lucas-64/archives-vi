@@ -21,7 +21,7 @@ export function ExploreCards() {
   );
 }
 
-function ExploreTile({ item }: { item: ExplorarItem }) {
+export function ExploreTile({ item }: { item: ExplorarItem }) {
   const Icon = item.icon;
   // The background image is decorative: the tile title already names the section.
   const imagem = imagemDaSecao(item.secao);

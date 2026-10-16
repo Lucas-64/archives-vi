@@ -2,8 +2,9 @@
 
 ## Tech Stack
 
+- Next.js (App Router)
 - React
-- TypeScript
+- TypeScript (strict)
 - Styled Components
 
 ## Naming
@@ -16,7 +17,7 @@ Always use theme tokens.
 
 ## Folder structure
 
-...
+See `docs/ARCHITECTURE.md`.
 
 ## Commit convention
 

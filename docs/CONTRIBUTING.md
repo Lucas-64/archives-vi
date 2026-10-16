@@ -11,7 +11,7 @@ Primary rules:
 - Use Styled Components for official component styling.
 - Use theme tokens from `src/styles/theme.ts`.
 - Do not add dependencies without a documented reason.
-- Do not create new pages before the current sprint scope allows it.
+- Do not create new pages outside the scope approved for the current task and recorded in `docs/PROJECT_STATE.md`.
 - Prefer reusable components over one-off UI.
 - Keep generated legacy UI untouched unless a task explicitly targets it.
 

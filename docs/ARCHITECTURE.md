@@ -12,61 +12,84 @@ before adding complex pages or backend integrations.
 
 ## Folder Structure
 
-Current official structure:
+Current structure (verified against the repository):
 
 ```txt
 src/
   app/
-    layout.tsx        Root layout (html/body, fonts, metadata)
-    page.tsx          Home route (/)
-    providers.tsx     Client providers (ThemeProvider, GlobalStyle)
-    registry.tsx      Styled Components SSR registry (client)
-    components/ui/    Generated legacy shadcn UI (untouched, see below)
-  assets/
-    images/
+    layout.tsx            Root layout: html lang pt-BR, fonts, metadata
+    providers.tsx         Client providers (ThemeProvider, GlobalStyle)
+    registry.tsx          Styled Components SSR registry (client)
+    (site)/               Public route group (does not change URLs)
+      layout.tsx          Header, main, footer and mobile tab bar
+      page.tsx            Home (/)
+      loading.tsx, error.tsx, not-found.tsx
+      publicacoes/        /publicacoes
+      publicacao/[slug]/  /publicacao/[slug]
+      investigacoes/        /investigacoes (listing)
+      investigacoes/[slug]/ /investigacoes/[slug]
+      criar/                /criar (theory form with preview, simulated)
+      entrar/               /entrar (demonstrative sign-in)
+      criar-conta/          /criar-conta (demonstrative sign-up)
+      buscar/               /buscar (search with tabs, URL state)
+      criadores/            /criadores (creators list)
+      perfil/[usuario]/     /perfil/[usuario] (public profile)
+      explorar/             /explorar (discovery hub)
+    components/          Legacy shadcn UI (ADR-006). Not a route, untouched.
+  assets/images/         Source images, always imported (never referenced by path)
   components/
-    home/
-    layout/
-    ui/
-      Badge/
-      Button/
-      Card/
-      StatusBadge/
-  constants/
-  data/
-  styles/
-  types/
+    acoes/               AcaoRestrita: disabled actions that need sign-in
+    auth/                Demonstrative sign-in and sign-up forms
+    busca/               Search form and result groups
+    cards/               CaseCard, PublicationCard, CreatorCard
+    comentarios/         ComposerBloqueado: disabled comment composer
+    criar/               Theory form, preview and simulated submission
+    perfil/              Profile header and publications section
+    common/              Button (unused duplicate of ui/Button)
+    filters/             FilterTabs (filters through URL)
+    home/                Hero, ExploreCards, TrendingCases, Sidebar
+    investigacao/        Investigation detail sections and graph
+    layout/              Header, Navigation, MobileTabBar, Footer, ContentGrid, Container
+    navigation/          Breadcrumb
+    page/                PageHeader, PageBody, CardList
+    publicacao/          Publication header and comments structure
+    sidebar/             SidebarBox, ForumTopicList, UpdateList, AutorCard, RelacionadasList
+    states/              Skeleton, EmptyState, ErrorState
+    ui/                  Primitives: Avatar, Badge, Button, Card, StatusBadge, Input, Textarea, FormField
+  constants/             Routes, navigation, filters, explore items, section images
+  data/cases.ts         Unused; superseded by mocks/investigacoes.ts
+  imports/              One PNG, not referenced by code
+  lib/                   Data access (data.ts), investigation status mapping, formatting
+  mocks/                 Demonstrative data in pt-BR
+  styles/                theme.ts (official), global.ts, styled.d.ts. theme.css and globals.css are unused
+  types/                 Domain types
 ```
 
 Folder responsibilities:
 
-- `src/app`: Next.js App Router. Only `layout.tsx` and `page.tsx` (and route
-  files added later) are routes. Other files here are shared app-shell modules.
-- `src/components`: official component directory for layout, feature and UI
-  primitives. Imported by routes in `src/app`.
-- `src/components/ui`: official reusable design system primitives.
-- `src/components/layout`: layout-level components such as Header, Footer and
-  Container.
-- `src/components/home`: Home-specific sections.
+- `src/app`: Next.js App Router. Route files are `page.tsx`, `layout.tsx`,
+  `loading.tsx`, `error.tsx` and `not-found.tsx`. Other files are app-shell modules.
+- `src/components`: official components, grouped by domain. Routes import them.
+- `src/components/ui`: generic primitives. Each has styles, types and `index.ts`.
+- `src/constants`: route map, navigation items, filters, explore items and section images.
+- `src/lib`: data access (`data.ts`) and small pure helpers. Pages never import mocks directly.
+- `src/mocks`: demonstrative data. One file per type.
 - `src/styles`: theme, global styles and styling type declarations.
-- `src/data`: static or mocked domain data during MVP development.
-- `src/types`: shared domain TypeScript types.
-- `src/constants`: shared constants such as future route definitions.
+- `src/types`: shared domain types.
 
 Generated legacy UI:
 
-- `src/app/components/ui` contains generated shadcn/Tailwind-style components.
-- This folder is kept untouched (ADR-006). It is not imported by any route.
-- It is excluded from `tsconfig.json` (`exclude`) so it does not affect
-  typecheck or build.
-- It is not the official design system.
-- New official UI primitives must be created under `src/components/ui`.
+- `src/app/components/` contains generated shadcn/Tailwind-style components.
+- It is kept untouched (ADR-006) and is not imported by any route.
+- It is excluded from `tsconfig.json` and from ESLint, so it does not affect typecheck, lint or build.
+- It is not the design system. New primitives go under `src/components/ui`.
 
 ## Rendering Model
 
 - `src/app/layout.tsx` is a Server Component. It sets the document shell and
   metadata and wraps children in the Styled Components registry and providers.
-- `src/app/page.tsx` is a Server Component and is prerendered as static HTML.
+- `src/app/(site)/page.tsx` (Home) is a Server Component and is prerendered as static HTML.
+  Detail and listing pages are dynamic.
 - Components that define or use Styled Components are marked `'use client'`.
   Styled Components creates React context at module level, which is not
   available in Server Components. Components with no styles and no state
@@ -82,13 +105,14 @@ Current MVP flow:
 1. `src/app/layout.tsx` sets `<html>`, `<body>` and the Inter font variable.
 2. `StyledComponentsRegistry` collects styles during SSR.
 3. `Providers` injects the Styled Components `ThemeProvider` and `GlobalStyle`.
-4. `src/app/page.tsx` composes Home-level components.
+4. `src/app/(site)/layout.tsx` renders the shell; the route `page.tsx` composes the sections.
+   Data comes from `src/lib/data.ts`, which reads the mocks in `src/mocks/`.
 5. Components consume theme tokens through Styled Components.
 
 Target MVP flow:
 
 1. Static case data is modeled in `src/types`.
-2. Mock case data is stored in `src/data`.
+2. Mock data is stored in `src/mocks/` and accessed only through `src/lib/data.ts`.
 3. Home sections receive data through props.
 4. UI primitives render reusable presentation states.
 5. Future API/backend integrations can replace mock data without rewriting UI.
@@ -99,9 +123,10 @@ Target MVP flow:
   its `.src` value (for example `url("${heroImage.src}")`), never a path
   string such as `/src/assets/...`, which does not exist in the production
   output.
-- Inter is loaded with `next/font/google` in `src/app/layout.tsx`, self-hosted
-  at build time, and exposed as `--font-inter`. `theme.fonts.primary` uses that
-  variable.
+- Barlow Condensed (`--font-display`, weights 600, 700, 800) is used for headings.
+- Inter (`--font-inter`) is used for body text. Both are loaded with `next/font/google`
+  in `src/app/layout.tsx`, self-hosted at build time.
+- Section images are registered in `src/constants/imagensSecoes.ts` and imported there.
 - Poppins (`theme.fonts.secondary`) is declared in the theme but not loaded
   yet, because no component uses it.
 
@@ -112,7 +137,7 @@ The official theme lives in `src/styles/theme.ts`.
 Token groups:
 
 - `colors`: backgrounds, surfaces, brand colors, text and status colors.
-- `fonts`: primary and secondary font families.
+- `fonts`: `display` (headings), `primary` (body), `secondary` (declared, not loaded) and `mono` (system monospace for identifiers).
 - `fontSize`: reusable typography scale.
 - `spacing`: spacing scale for layout and components.
 - `borderRadius`: shape scale.
@@ -130,6 +155,7 @@ The design system is built with Styled Components and lives in
 
 Created primitives:
 
+- Avatar
 - Button
 - Card
 - Badge

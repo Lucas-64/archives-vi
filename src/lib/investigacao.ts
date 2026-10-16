@@ -24,3 +24,13 @@ export const CATEGORIA_POR_STATUS: Record<CaseStatus, CategoriaInvestigacao | nu
 export function categoriaDoStatus(status: CaseStatus): CategoriaInvestigacao | null {
   return CATEGORIA_POR_STATUS[status];
 }
+
+// "Todas" (categoria undefined) returns every record, including unmapped statuses.
+// Any category returns only the records mapped to it.
+export function filtrarInvestigacoes<T extends { status: CaseStatus }>(
+  casos: readonly T[],
+  categoria?: CategoriaInvestigacao,
+): T[] {
+  if (!categoria) return [...casos];
+  return casos.filter((caso) => categoriaDoStatus(caso.status) === categoria);
+}

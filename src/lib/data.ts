@@ -34,7 +34,11 @@ export async function getDestaques(): Promise<Destaque[]> {
   return destaques;
 }
 
-export async function getInvestigacoes(): Promise<Case[]> {
+export async function getInvestigacoes(
+  filtro: { simular?: Simulacao } = {},
+): Promise<Case[]> {
+  await aplicarSimulacao(filtro.simular);
+  if (filtro.simular === "vazio") return [];
   return investigacoes;
 }
 

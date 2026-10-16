@@ -12,6 +12,8 @@ import { Badge } from "../ui/Badge";
 export interface PublicationCardProps {
   publicacao: Publicacao;
   autor: Criador | undefined;
+  // Heading level of the title. Use 3 when the card sits under an h2 section heading.
+  nivelTitulo?: 2 | 3;
 }
 
 const ROTULO_TIPO = {
@@ -19,7 +21,7 @@ const ROTULO_TIPO = {
   investigacao: { texto: "Investigação", variant: "info" },
 } as const;
 
-export function PublicationCard({ publicacao, autor }: PublicationCardProps) {
+export function PublicationCard({ publicacao, autor, nivelTitulo = 2 }: PublicationCardProps) {
   const tipo = ROTULO_TIPO[publicacao.tipo];
 
   return (
@@ -28,7 +30,7 @@ export function PublicationCard({ publicacao, autor }: PublicationCardProps) {
         {tipo.texto}
       </Badge>
 
-      <Titulo>
+      <Titulo as={nivelTitulo === 3 ? "h3" : "h2"}>
         <Link href={ROUTES.publicacao(publicacao.slug)}>{publicacao.titulo}</Link>
       </Titulo>
 

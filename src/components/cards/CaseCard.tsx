@@ -12,15 +12,18 @@ import { StatusBadge } from "../ui/StatusBadge";
 
 export interface CaseCardProps {
   caso: Case;
+  // "vertical" (default, used in grids). "horizontal" puts the image beside the text
+  // and is used in one-card-per-row lists.
+  orientacao?: "vertical" | "horizontal";
 }
 
 // Investigation card. The status text is the visible category; color follows the internal status.
-export function CaseCard({ caso }: CaseCardProps) {
+export function CaseCard({ caso, orientacao = "vertical" }: CaseCardProps) {
   const categoria = categoriaDoStatus(caso.status);
 
   return (
-    <Article>
-      <Media>
+    <Article $horizontal={orientacao === "horizontal"}>
+      <Media $horizontal={orientacao === "horizontal"}>
         <Image
           src={caso.image}
           alt=""
@@ -51,9 +54,9 @@ export function CaseCard({ caso }: CaseCardProps) {
   );
 }
 
-const Article = styled.article`
+const Article = styled.article<{ $horizontal: boolean }>`
   display: flex;
-  flex-direction: column;
+  flex-direction: ${({ $horizontal }) => ($horizontal ? "row" : "column")};
   min-width: 0;
   overflow: hidden;
   border-radius: ${({ theme }) => theme.borderRadius.lg};
@@ -64,12 +67,30 @@ const Article = styled.article`
   &:hover {
     border-color: ${({ theme }) => theme.colors.pink};
   }
+
+  @media (max-width: 1023px) {
+    flex-direction: column;
+  }
 `;
 
-const Media = styled.div`
+const Media = styled.div<{ $horizontal: boolean }>`
   position: relative;
   aspect-ratio: 16 / 9;
   background: ${({ theme }) => theme.colors.backgroundSecondary};
+
+  ${({ $horizontal }) =>
+    $horizontal &&
+    `
+    width: 280px;
+    flex: 0 0 280px;
+    aspect-ratio: auto;
+  `}
+
+  @media (max-width: 1023px) {
+    width: auto;
+    flex: none;
+    aspect-ratio: 16 / 9;
+  }
 `;
 
 const Body = styled.div`
