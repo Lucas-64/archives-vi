@@ -1,6 +1,6 @@
 # Especificação: `/criar`
 
-**Status**: pendente de implementação. Escopo aprovado.
+**Status**: implementada (fase 2, commit `e29e2e96`; ajustes de acabamento na fase 2.1). Verificada no navegador em 1440, 768 e 375 px, sem rolagem horizontal. Escopo aprovado: somente teorias, sem seletor de tipo, sem tags e sem vínculo com investigação. Qualquer ampliação exige nova decisão. Pendências dentro do escopo: nenhuma.
 **Fonte de verdade**: decisões aprovadas abaixo, `docs/ROADMAP.md`, o protótipo aprovado (painel "Criar publicação") e o código atual.
 
 ## 1. Objetivo e responsabilidade

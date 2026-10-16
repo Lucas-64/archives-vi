@@ -1,6 +1,6 @@
 # Especificação: `/entrar`
 
-**Status**: pendente de implementação. Escopo aprovado.
+**Status**: implementada (fase 2, commit `e29e2e96`). Verificada no navegador em 1440, 768 e 375 px: validação, aviso de demonstração, envio demonstrativo sem sessão e sem armazenamento, sem rolagem horizontal. Container não é aninhado: o layout `(site)` já o aplica. Pendências: nenhuma dentro do escopo.
 **Fonte de verdade**: decisões aprovadas abaixo, `docs/DECISIONS.md` (ADR-010) e o código atual.
 
 ## 1. Objetivo e responsabilidade

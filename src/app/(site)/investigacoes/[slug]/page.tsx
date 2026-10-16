@@ -3,10 +3,10 @@ import { notFound } from "next/navigation";
 
 import { ContentGrid } from "../../../../components/layout/ContentGrid";
 import { AnchorNav } from "../../../../components/investigacao/AnchorNav";
-import { ConexoesGrafo } from "../../../../components/investigacao/ConexoesGrafo";
 import { DiscussaoSection } from "../../../../components/investigacao/DiscussaoSection";
 import { EvidenciasList } from "../../../../components/investigacao/EvidenciasList";
 import { HistoricoTimeline } from "../../../../components/investigacao/HistoricoTimeline";
+import { LocalizacaoEvidencias } from "../../../../components/investigacao/LocalizacaoEvidencias";
 import { InvestigacaoCabecalho } from "../../../../components/investigacao/InvestigacaoCabecalho";
 import { InvestigacaoSidebar } from "../../../../components/investigacao/InvestigacaoSidebar";
 import { Secao, Subtitulo } from "../../../../components/investigacao/Secao";
@@ -65,6 +65,8 @@ export default async function InvestigacaoPage({ params }: { params: Params }) {
           <Secao id="evidencias" titulo="Evidências">
             <EvidenciasList
               evidencias={detalhe.evidencias}
+              sugestoes={detalhe.sugestoes}
+              investigador={detalhe.autor}
               total={detalhe.contagens.evidencias}
             />
           </Secao>
@@ -78,8 +80,8 @@ export default async function InvestigacaoPage({ params }: { params: Params }) {
             />
           </Secao>
 
-          <Secao id="conexoes" titulo="Conexões">
-            <ConexoesGrafo nos={detalhe.conexoes.nos} relacoes={detalhe.conexoes.relacoes} />
+          <Secao id="localizacao" titulo="Localização das evidências">
+            <LocalizacaoEvidencias />
           </Secao>
 
           <Secao id="historico" titulo="Histórico e síntese">

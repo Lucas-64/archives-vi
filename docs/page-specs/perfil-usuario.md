@@ -1,6 +1,6 @@
 # Especificação: `/perfil/[usuario]`
 
-**Status**: pendente de implementação. Escopo aprovado.
+**Status**: implementada (fase 2, commit `e29e2e96`). Verificada no navegador em 1440, 768 e 375 px para os três criadores: nome, usuário, bio, publicações corretas, sem investigações e sem rolagem horizontal. Pendência: usuário inexistente responde HTTP 200 com a página "não encontrada" (soft 404), confirmado em produção. A correção recomendada está em `docs/page-specs/EXECUTION_PLAN.md`, seção 4, e não foi aplicada.
 **Fonte de verdade**: decisões aprovadas abaixo, `docs/ROADMAP.md` e o código atual.
 
 ## 1. Objetivo e responsabilidade

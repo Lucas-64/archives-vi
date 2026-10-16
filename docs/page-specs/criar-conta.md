@@ -1,6 +1,6 @@
 # Especificação: `/criar-conta`
 
-**Status**: pendente de implementação. Escopo aprovado.
+**Status**: implementada (fase 2, commit `e29e2e96`; dica de senha ajustada na fase 2.1). Verificada no navegador em 1440, 768 e 375 px: campos, validações de senha e confirmação, `autocomplete="new-password"`, aviso de demonstração, sem armazenamento e sem rolagem horizontal. Pendências dentro do escopo: nenhuma. Termos de uso e política de privacidade continuam fora do escopo, porque não existem no repositório.
 **Fonte de verdade**: decisões aprovadas abaixo, `docs/DECISIONS.md` (ADR-010) e `docs/page-specs/entrar.md`.
 
 ## 1. Objetivo e responsabilidade

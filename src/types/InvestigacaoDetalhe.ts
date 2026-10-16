@@ -1,5 +1,6 @@
 // Detalhe de uma investigação. Complementa o tipo `Case` (listagem) sem alterá-lo.
 // Os dados que chegam de src/mocks são demonstrativos.
+import type { StaticImageData } from "next/image";
 
 // Estado de investigação exibido no detalhe. Separado de `Case.status`, que é o estado da listagem.
 export type EstadoInvestigacao =
@@ -26,6 +27,30 @@ export interface AvaliacoesEvidencia {
   precisaContexto: number;
 }
 
+// Imagem de uma evidência. Até cinco por evidência, exibidas em carrossel.
+export interface ImagemEvidencia {
+  image: StaticImageData;
+  // Descrição para leitores de tela. Descreve a imagem sem interpretá-la.
+  alt: string;
+}
+
+export type StatusSugestao = "pendente" | "aceita" | "recusada";
+
+// Evidência enviada por um membro da comunidade. Só entra na lista pública depois de aceita
+// pelo investigador responsável.
+export interface SugestaoEvidencia {
+  id: string;
+  status: StatusSugestao;
+  origem: OrigemEvidencia;
+  titulo: string;
+  descricao: string;
+  enviadaPor: Pessoa;
+  data: string;
+  imagens?: ImagemEvidencia[];
+  // Preenchido quando a sugestão é aceita.
+  aceitaPor?: Pessoa;
+}
+
 export interface Evidencia {
   id: string;
   origem: OrigemEvidencia;
@@ -35,11 +60,15 @@ export interface Evidencia {
   data: string;
   // null quando a fonte ainda não foi verificada.
   fonte: string | null;
-  comentarios: number;
-  avaliacoes: AvaliacoesEvidencia;
+  // Ausentes em evidências aceitas da comunidade, que ainda não têm contagens.
+  comentarios?: number;
+  avaliacoes?: AvaliacoesEvidencia;
   // Id de outra evidência relacionada, quando houver.
   relacionadaA?: string;
   temDiscussao: boolean;
+  imagens?: ImagemEvidencia[];
+  // Presente quando a evidência veio de uma sugestão aceita. A aprovação não muda a autoria.
+  origemComunidade?: { enviadaPor: Pessoa; aceitaPor: Pessoa };
 }
 
 export interface Comentario {
@@ -49,20 +78,6 @@ export interface Comentario {
   texto: string;
   contribuicaoUtil?: boolean;
   respostas: Comentario[];
-}
-
-export interface NoConexao {
-  id: string;
-  rotulo: string;
-}
-
-export type TipoRelacao = "mesmo_tracado" | "mesmo_local" | "mesma_cena";
-
-export interface RelacaoConexao {
-  de: string;
-  para: string;
-  tipo: TipoRelacao;
-  rotulo: string;
 }
 
 export interface RegistroHistorico {
@@ -103,11 +118,12 @@ export interface InvestigacaoDetalhe {
     fontes: string[];
   };
   evidencias: Evidencia[];
+  // Sugestões da comunidade. Pendentes e recusadas não aparecem na lista pública.
+  sugestoes: SugestaoEvidencia[];
   discussaoGeral: Comentario[];
   // Discussão contextualizada em uma evidência.
   discussaoEvidenciaId: string;
   discussaoContextual: Comentario[];
-  conexoes: { nos: NoConexao[]; relacoes: RelacaoConexao[] };
   historico: RegistroHistorico[];
   sintese: Sintese;
   participantes: Pessoa[];

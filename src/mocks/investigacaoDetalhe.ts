@@ -2,6 +2,10 @@
 // atividades abaixo são ilustrativos. Não são registros reais, não representam ações
 // de usuários reais e não são referências oficiais sobre GTA VI.
 import type { InvestigacaoDetalhe } from "@/types/InvestigacaoDetalhe";
+// Imagens de exemplo. exemplo.jpg é JPEG. exemplo_2.jpg é PNG com extensão .jpg: a importação
+// estática do Next resolve o formato real, como acontece com hero.jpg.
+import exemploImagem from "@/assets/images/exemplo.jpg";
+import exemploImagem2 from "@/assets/images/exemplo_2.jpg";
 
 const LUCAS = { nome: "Lucas Andrade", usuario: "lucas_andrade" };
 const ANALISTA = { nome: "Analista de Vice Beach", usuario: "analista_vb" };
@@ -46,6 +50,12 @@ export const investigacaoDetalhes: InvestigacaoDetalhe[] = [
         avaliacoes: { relevante: 5, contradiz: 0, precisaContexto: 1 },
         relacionadaA: "004",
         temDiscussao: false,
+        imagens: [
+          {
+            image: exemploImagem,
+            alt: "Imagem de exemplo (demonstrativa): vista noturna de uma cidade, com um prédio iluminado e um helicóptero no céu.",
+          },
+        ],
       },
       {
         id: "004",
@@ -98,6 +108,55 @@ export const investigacaoDetalhes: InvestigacaoDetalhe[] = [
         comentarios: 1,
         avaliacoes: { relevante: 0, contradiz: 0, precisaContexto: 3 },
         temDiscussao: false,
+      },
+    ],
+    // Sugestões da comunidade. "aceita" aparece na lista pública com a identificação de aprovação.
+    // "pendente" só aparece na área do investigador. "recusada" não é apresentada ao público.
+    sugestoes: [
+      {
+        id: "012",
+        status: "aceita",
+        origem: "imagem_terceiro",
+        titulo: "Sugestão de demonstração com duas imagens",
+        descricao:
+          "Sugestão demonstrativa criada para exibir o carrossel. A segunda imagem é um mapa de referência de exemplo, e não uma captura da evidência.",
+        enviadaPor: ARQUIVISTA,
+        data: "2026-10-11",
+        imagens: [
+          { image: exemploImagem, alt: "Imagem de exemplo (demonstrativa): vista noturna de uma cidade, primeira de duas no carrossel." },
+          { image: exemploImagem2, alt: "Mapa de referência de exemplo (demonstrativo), segunda de duas no carrossel." },
+        ],
+        aceitaPor: LUCAS,
+      },
+      {
+        id: "013",
+        status: "pendente",
+        origem: "imagem_terceiro",
+        titulo: "Relato sobre a placa do Mount Kalaga, em outro ângulo",
+        descricao:
+          "Sugestão demonstrativa em texto, sem imagem anexada. A origem ainda não foi verificada.",
+        enviadaPor: ANALISTA,
+        data: "2026-10-13",
+      },
+      {
+        id: "014",
+        status: "pendente",
+        origem: "referencia_textual",
+        titulo: "Relato sobre o padrão visto à noite",
+        descricao:
+          "Relato textual demonstrativo, sem imagem anexada.",
+        enviadaPor: NOTURNO,
+        data: "2026-10-13",
+      },
+      {
+        id: "015",
+        status: "recusada",
+        origem: "origem_nao_verificada",
+        titulo: "Registro sem data nem local",
+        descricao:
+          "Sugestão demonstrativa recusada pelo investigador. Não deve aparecer como evidência aceita.",
+        enviadaPor: ARQUIVISTA,
+        data: "2026-10-12",
       },
     ],
     discussaoGeral: [
@@ -162,18 +221,6 @@ export const investigacaoDetalhes: InvestigacaoDetalhe[] = [
         ],
       },
     ],
-    conexoes: {
-      nos: [
-        { id: "muro", rotulo: "Traçado nos muros da orla" },
-        { id: "placa", rotulo: "Placa do Mount Kalaga" },
-        { id: "letreiro", rotulo: "Letreiro verde no trailer" },
-      ],
-      relacoes: [
-        { de: "muro", para: "placa", tipo: "mesmo_tracado", rotulo: "Traçado parecido" },
-        { de: "muro", para: "letreiro", tipo: "mesmo_local", rotulo: "Mesma área da orla" },
-        { de: "placa", para: "letreiro", tipo: "mesma_cena", rotulo: "Aparecem na mesma cena" },
-      ],
-    },
     historico: [
       {
         id: "h-1",

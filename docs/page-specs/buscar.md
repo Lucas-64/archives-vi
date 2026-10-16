@@ -1,6 +1,6 @@
 # Especificação: `/buscar`
 
-**Status**: pendente de implementação. Escopo aprovado.
+**Status**: implementada (fase 2, commit `e29e2e96`; busca sem acentos na fase 2.1). Verificada no navegador em 1440, 768 e 375 px: consulta vazia, sem resultados, resultados por aba, links corretos e sem rolagem horizontal. Pendências dentro do escopo: nenhuma. Observação: a busca compara texto sem acentos, mas não há ordenação por relevância.
 **Fonte de verdade**: decisões aprovadas abaixo, `docs/ROADMAP.md`, `docs/PROJECT_VISION.md` e o código atual.
 
 ## 1. Objetivo e responsabilidade

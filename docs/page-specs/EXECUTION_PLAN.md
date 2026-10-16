@@ -210,19 +210,21 @@ Detalhes técnicos não são bloqueios. Quando a inspeção mostrar uma alternat
 
 As demonstrações de `/criar`, `/entrar` e `/criar-conta` foram confirmadas como exceção à regra de ações sem persistência. O registro está em `docs/DECISIONS.md` (ADR-010, "Exceções aprovadas") e em `CLAUDE.md`. Cada demonstração é rotulada como simulação, não grava nada e não cria sessão.
 
-## 10. Decisões que ainda dependem de você
+## 10. Decisões de produto
 
-**Bloqueia a inclusão de `/explorar` na navegação**:
-1. **Entrada de `/explorar` na navegação**: as opções são (a) sem entrada, acessível apenas pela URL; (b) entrada no cabeçalho; (c) entrada apenas na barra mobile. A rota pode existir sem entrada. Não bloqueia a implementação da página.
+**Confirmadas pelo usuário em 2026-10-16** (registradas na seção 13):
+1. `/explorar` entra na **navegação principal**. Ainda não implementado.
+2. `/criadores` e `/criar` ganham **entradas no cabeçalho desktop**. Ainda não implementado.
+3. A primeira publicação, `letreiro-praia-trailer`, **não** é vinculada à investigação `simbolos-vice-city` por enquanto.
+4. Perfis inexistentes: o 404 real é objetivo, com a recomendação da seção 13. Ainda não implementado.
+5. A evidência #001 mantém a imagem e a descrição atuais, apesar da inconsistência registrada.
+6. A área do investigador ficará dentro da própria investigação, visível só ao investigador responsável autenticado. Não implementada, e depende de backend.
+7. O backend permanece fora do escopo.
 
-**Proposta mínima para `/explorar` (não aplicada)**:
-- Tornar o título "Explorar" da seção de `src/components/home/ExploreCards.tsx` um link para `ROUTES.explorar`. Assim a rota ganha uma entrada sem alterar cabeçalho, barra mobile nem `MAIN_NAV`. Aplicada pelo coordenador, somente com sua aprovação, e não altera a Home visualmente.
-
-**Não bloqueiam, mas afetam o resultado** (podem ser confirmadas depois, sem refazer as tarefas):
-2. Em `/criadores`, nenhuma contagem é exibida. Confirmar.
-3. Em `/perfil`, investigações não aparecem, por limitação dos dados. Confirmar.
-4. Em `/explorar`, "Mistérios em alta" entra como conteúdo extra. Confirmar.
-5. Limites de validação de `/criar` (título de 3 a 120 caracteres; texto de 20 a 2000) e regra de correspondência e ordenação de `/buscar`. São detalhes técnicos.
+**Pendências de produto que continuam abertas**:
+- Significado e categoria dos status `community` e `classified`.
+- Aba "Sem fontes", que hoje fica sempre vazia.
+- Ordenação e busca de `/buscar`: detalhes técnicos, sem decisão de produto aberta.
 
 **Fora do escopo aprovado** (não serão implementados):
 - Anexos (imagens e vídeo) em `/criar`.
@@ -242,4 +244,76 @@ Não há testes automatizados, nem script de verificação de rotas. A verifica�
 
 ## 12. Próximo passo
 
-Decidir as entradas de navegação de `/explorar`, `/criadores` e `/criar` no desktop, e revisar os textos novos e a busca com acentos (ver `PROJECT_STATE.md`, "Pendências"). Depois, revisar o diff completo e preparar o commit, somente com pedido explícito.
+As sete rotas da fase 2 estão implementadas e verificadas. As próximas tarefas de integração estão priorizadas na seção 13, e a primeira delas é a implementação das entradas de navegação já aprovadas. Nenhuma implementação começa sem autorização específica.
+
+## 13. Auditoria de integração (2026-10-16)
+
+Esta seção registra o estado real verificado no código, no navegador e em produção. Não houve alteração funcional nesta etapa.
+
+### 13.1 Estado das rotas
+
+| Rota | Implementação | Especificação | Larguras verificadas |
+|---|---|---|---|
+| `/criar` | `src/app/(site)/criar/`, `src/components/criar/` | `criar.md`, implementada | 1440, 768, 375 px |
+| `/entrar` | `src/app/(site)/entrar/`, `src/components/auth/` | `entrar.md`, implementada | 1440, 768, 375 px |
+| `/criar-conta` | `src/app/(site)/criar-conta/`, `src/components/auth/` | `criar-conta.md`, implementada | 1440, 768, 375 px |
+| `/buscar` | `src/app/(site)/buscar/`, `src/components/busca/`, `src/lib/busca.ts` | `buscar.md`, implementada | 1440, 768, 375 px |
+| `/criadores` | `src/app/(site)/criadores/` | `criadores.md`, implementada, sem entrada de navegação | 1440, 768, 375 px |
+| `/perfil/[usuario]` | `src/app/(site)/perfil/[usuario]/`, `src/components/perfil/` | `perfil-usuario.md`, implementada; 404 pendente | 1440, 768, 375 px |
+| `/explorar` | `src/app/(site)/explorar/` | `explorar.md`, implementada, sem entrada de navegação | 1440, 768, 375 px |
+
+Não há divergência entre código e especificações além das pendências registradas nas seções 10 e 13.4. As páginas não estavam ausentes: o status "pendente de implementação" estava desatualizado nos sete arquivos, e foi corrigido.
+
+### 13.2 Estado do Git
+
+- Commit atual: `e29e2e96`, na branch `main`. Nenhuma branch ou worktree além da principal.
+- Não commitado: a evolução de `/investigacoes/[slug]` (evidências, galeria, sugestões, localização e ajustes de imagem), além de `exemplo.jpg` e `exemplo_2.jpg`, que estão não rastreados.
+
+### 13.3 Comparação da Home
+
+- Histórico: desde o commit anterior à fase 2 (`86a4fc65`), a única alteração em arquivos da Home é a exportação de `ExploreTile` em `src/components/home/ExploreCards.tsx`. Nenhum outro arquivo de `src/components/home/`, nem `src/app/(site)/page.tsx`, mudou.
+- Visual: verificada no navegador em 1014 px (desktop) e em 375 px. Hero, tiles de "Explorar", sidebar e rodapé renderizam, sem rolagem horizontal.
+- Limitação: não houve comparação pixel a pixel com o commit anterior, porque isso exigiria um build do commit antigo. A equivalência se baseia no diff, que tem uma linha.
+
+### 13.4 Verificações responsivas e console
+
+| Rota | Largura | Resultado visual | Rolagem horizontal |
+|---|---|---|---|
+| `/criadores` | 768 px | três criadores em lista, sem contagens | não |
+| `/entrar` | 768 px | formulário e aviso de demonstração | não |
+| `/criar-conta` | 768 px | campos, dica de senha e aviso | não |
+| `/perfil/inexistente` | 768 px | "Página não encontrada" | não |
+
+Console (desenvolvimento): nas três páginas de formulário e no perfil inexistente, não apareceram erros nem avisos da aplicação. Só mensagens informativas do React DevTools e do HMR.
+
+Limitações do ambiente: a ferramenta de navegador lê o console apenas do lote de navegação em que a página é carregada. Não foram verificados erros de rede ou de rotas em produção pelo console. Em produção, a verificação foi feita por requisições HTTP.
+
+### 13.5 404 de perfis inexistentes
+
+Medido em produção (`next start` com o build atual, porta 3100):
+
+- `/perfil/inexistente`: HTTP 200, com o corpo "Página não encontrada".
+- `/investigacoes/inexistente`: HTTP 200 (mesmo comportamento).
+- `/publicacao/nao-existe`: HTTP 200 (mesmo comportamento).
+- `/criadores`, `/perfil/analista_vb`, `/explorar`, `/buscar`, `/criar`: HTTP 200.
+
+Causa: `src/app/(site)/loading.tsx` envolve todas as rotas do grupo em `Suspense`. A resposta 200 é enviada antes de o `notFound()` ser avaliado, por isso o status não muda.
+
+**Recomendação**: em `src/app/(site)/perfil/[usuario]/page.tsx`, exportar `generateStaticParams` com os usuários de `getCriadores()` e `export const dynamicParams = false`.
+
+- Efeito esperado: o roteamento responde 404 para qualquer usuário que não foi gerado, antes do streaming. O `not-found.tsx` do grupo `(site)` renderiza a página em português.
+- Compatibilidade: a Home já é estática (○), então o projeto já mistura rotas estáticas e dinâmicas. Os dados são mocks, e o build cobre os três criadores existentes.
+- Trade-off: enquanto os dados forem mocks, um criador novo exige novo build. Quando houver backend, a rota deve voltar a ser dinâmica, com verificação de existência antes do streaming ou revalidação.
+- Não verificado: a resposta 404 real. Deve ser conferida com build e `next start` depois da implementação, nos casos `/perfil/inexistente` e `/perfil/analista_vb`.
+- Alternativas descartadas: remover o `loading.tsx` só da rota não funciona, porque o do grupo continua valendo. Mover a rota para outro grupo muda o shell do site. Um `proxy` que reescreve para 404 acopla a requisição aos mocks.
+- Extensão: `/investigacoes/[slug]` e `/publicacao/[slug]` têm o mesmo problema. A mesma abordagem se aplica com `getInvestigacoes()` e `getPublicacoes()`, mas é uma decisão separada.
+
+### 13.6 Tarefas de integração pendentes (em ordem de prioridade)
+
+1. **Entradas de navegação aprovadas**: `/explorar` na navegação principal (`MAIN_NAV`); `/criadores` e `/criar` no cabeçalho desktop. Arquivos compartilhados: `src/constants/routes.ts`, `src/components/layout/Navigation.tsx` e `src/components/layout/Header.tsx`. Verificar em 768, 1024 e 1280 px, porque o cabeçalho já tem três ações. Exige autorização específica.
+2. **404 real em `/perfil/[usuario]`**, conforme a recomendação da seção 13.5. Exige autorização. Depois, decidir o mesmo para os detalhes de investigação e publicação.
+3. **Registro formal das decisões de 2026-10-16** em `docs/DECISIONS.md`, como exige o `CLAUDE.md`. Não foi criado nesta etapa, porque o arquivo não estava na lista autorizada. Recomendo criar uma entrada, após sua confirmação.
+4. **Commit** do trabalho de `/investigacoes` e da fase 2 pendente. Aguarda pedido explícito. Inclui os dois arquivos de imagem não rastreados.
+5. **Pendências de produto**: primeira publicação e investigação (não vinculadas por decisão); evidência #001 (mantida); status `community` e `classified`; aba "Sem fontes".
+6. **Verificações não feitas**: comparação visual da Home contra o commit anterior; erros de rede e de produção pelo console.
+7. **Fora do escopo atual**: área do investigador (depende de autenticação e backend) e qualquer backend.

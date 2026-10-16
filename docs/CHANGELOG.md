@@ -8,6 +8,10 @@ The project follows Semantic Versioning and Conventional Commits.
 
 ### Added
 
+- `/investigacoes/[slug]`: "Evidência do criador" tag on evidences whose author is the investigation's creator. It indicates provenance, not veracity.
+- `/investigacoes/[slug]`: evidence images open in an expanded view inside the card, with up to five images, previous/next controls and a "1 de 3" counter. Keyboard arrows and Escape work.
+- `/investigacoes/[slug]`: community evidence suggestions (demonstrative data). Accepted ones appear in the public list with their sender and the approving investigator. Pending and rejected ones never appear publicly. Accept and reject change only the current page session; nothing is saved.
+- `/investigacoes/[slug]`: "Localização das evidências" section with a reference map image. It is demonstrative: it marks no real location.
 - `/publicacoes` listing with filters (Todas, Teorias, Investigações), loading, empty and error states.
 - `/investigacoes/[slug]` detail page (demonstrative data): theory, evidence, discussion, connections graph, history and synthesis. Authenticated actions are disabled with a link to sign-in.
 - `Avatar`, `AcaoRestrita` and `ComposerBloqueado` shared components.
@@ -24,6 +28,9 @@ The project follows Semantic Versioning and Conventional Commits.
 
 ### Changed
 
+- `/investigacoes/[slug]`: the "Conexões" section is replaced by "Localização das evidências". The anchor navigation follows.
+- `/investigacoes/[slug]`: the first image of each evidence card is about 40% of its previous height (604×135 px on desktop, 341×102 px on mobile). The width and `object-fit: cover` are unchanged.
+- `/investigacoes/[slug]`: the reference map in "Localização das evidências" is about half its previous size (about 188px wide on desktop, 162px on mobile), keeping its proportion.
 - `/buscar` ignores accents and letter case: "frequencia" finds "Frequência". Data and displayed titles are unchanged.
 - `/criadores`: the description no longer says creators publish investigations, because investigations have no author.
 - `/explorar`: the hidden section heading reads "Seções para explorar" instead of "Tipos de conteúdo".
@@ -46,6 +53,7 @@ The project follows Semantic Versioning and Conventional Commits.
 
 ### Removed
 
+- `ConexoesGrafo` component and the connections data of the investigation detail, replaced by the location section.
 - Vite, Tailwind (Vite plugin, PostCSS config, CSS entry files), `@types/styled-components`, and unused `react-popper`, `@popperjs/core` and `react-day-picker`.
 
 ## [0.3.0] - 2026-07-01

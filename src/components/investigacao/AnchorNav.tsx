@@ -7,7 +7,7 @@ const ITENS = [
   { id: "teoria", rotulo: "Teoria" },
   { id: "evidencias", rotulo: "Evidências" },
   { id: "discussao", rotulo: "Discussão" },
-  { id: "conexoes", rotulo: "Conexões" },
+  { id: "localizacao", rotulo: "Localização" },
   { id: "historico", rotulo: "Histórico" },
 ];
 

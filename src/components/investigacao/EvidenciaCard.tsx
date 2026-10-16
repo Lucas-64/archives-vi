@@ -9,25 +9,41 @@ import type { Evidencia, OrigemEvidencia } from "../../types/InvestigacaoDetalhe
 import { Avatar } from "../ui/Avatar";
 import { Badge } from "../ui/Badge";
 import { AvaliacoesContagem } from "./AvaliacoesContagem";
+import { GaleriaEvidencia } from "./GaleriaEvidencia";
 import { MidiaPlaceholder } from "./MidiaPlaceholder";
 
 export interface EvidenciaCardProps {
   evidencia: Evidencia;
+  // True only when the author of the evidence is the investigation's creator.
+  // Acceptance of a community suggestion never sets this.
+  ehDoCriador: boolean;
 }
 
 // Evidence card. Origin, contradictions and support have the same visual weight: no ranking,
 // no percentage, no score.
-export function EvidenciaCard({ evidencia }: EvidenciaCardProps) {
-  const { id, origem, titulo, descricao, autor, data, fonte, comentarios } = evidencia;
+export function EvidenciaCard({ evidencia, ehDoCriador }: EvidenciaCardProps) {
+  const { id, origem, titulo, descricao, autor, data, fonte, comentarios, avaliacoes } = evidencia;
   const tituloId = `evidencia-${id}-titulo`;
+  const temImagens = (evidencia.imagens?.length ?? 0) > 0;
 
   return (
     <Card id={`evidencia-${id}`} aria-labelledby={tituloId}>
-      <MidiaPlaceholder origem={origem} />
+      {temImagens ? (
+        <GaleriaEvidencia imagens={evidencia.imagens ?? []} identificador={`#${id}`} />
+      ) : (
+        <MidiaPlaceholder origem={origem} />
+      )}
 
       <Corpo>
         <Topo>
-          <Identificador>EVIDÊNCIA #{id}</Identificador>
+          <Identificadores>
+            <Identificador>EVIDÊNCIA #{id}</Identificador>
+            {ehDoCriador ? (
+              <Badge size="small" variant="secondary">
+                Evidência do criador
+              </Badge>
+            ) : null}
+          </Identificadores>
           <Badge size="small" variant={variantOrigem(origem)}>
             {ROTULO_ORIGEM[origem]}
           </Badge>
@@ -42,14 +58,25 @@ export function EvidenciaCard({ evidencia }: EvidenciaCardProps) {
             {autor.nome} <Usuario>@{autor.usuario}</Usuario>
           </span>
           <time dateTime={data}>{formatarData(data)}</time>
-          <span>{comentarios} comentários</span>
+          {comentarios !== undefined ? <span>{comentarios} comentários</span> : null}
         </Meta>
+
+        {evidencia.origemComunidade ? (
+          <Procedencia>
+            <span>
+              Evidência enviada por <Usuario>@{evidencia.origemComunidade.enviadaPor.usuario}</Usuario>
+            </span>
+            <span>
+              Status: Aceita pelo investigador <Usuario>@{evidencia.origemComunidade.aceitaPor.usuario}</Usuario>
+            </span>
+          </Procedencia>
+        ) : null}
 
         <Fonte>
           {fonte ? `Fonte: ${fonte}` : "Fonte pendente de verificação."}
         </Fonte>
 
-        <AvaliacoesContagem avaliacoes={evidencia.avaliacoes} />
+        {avaliacoes ? <AvaliacoesContagem avaliacoes={avaliacoes} /> : null}
 
         <Acoes>
           {evidencia.temDiscussao ? (
@@ -99,6 +126,13 @@ const Topo = styled.div`
   gap: 8px;
 `;
 
+const Identificadores = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+`;
+
 const Identificador = styled.span`
   font-family: ${({ theme }) => theme.fonts.mono};
   font-size: 12px;
@@ -128,6 +162,17 @@ const Meta = styled.div`
   gap: 6px 12px;
   font-size: 12px;
   color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const Procedencia = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-left: 2px solid ${({ theme }) => theme.colors.border};
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  overflow-wrap: anywhere;
 `;
 
 const Usuario = styled.span`
