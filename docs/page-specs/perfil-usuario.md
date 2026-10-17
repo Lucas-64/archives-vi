@@ -1,6 +1,6 @@
 # Especificação: `/perfil/[usuario]`
 
-**Status**: implementada (fase 2, commit `e29e2e96`). Verificada no navegador em 1440, 768 e 375 px para os três criadores: nome, usuário, bio, publicações corretas, sem investigações e sem rolagem horizontal. Pendência: usuário inexistente responde HTTP 200 com a página "não encontrada" (soft 404), confirmado em produção. A correção recomendada está em `docs/page-specs/EXECUTION_PLAN.md`, seção 4, e não foi aplicada.
+**Status**: evoluída pelo plano do perfil social (`docs/features/perfil-social.md`), etapas 1 a 9 concluídas em 2026-10-17, sem commit. A versão da fase 2 (commit `e29e2e96`) foi verificada no navegador em 1440, 768 e 375 px. Usuário inexistente responde HTTP 404 real, em build de produção (lote 2, ADR-014). Pendências desta página: "Curtir" e "Favoritar" (não existem), e a aba "Investigações" (placeholder). A página de não encontrado da raiz usa o shell do site desde o lote 3B.
 **Fonte de verdade**: decisões aprovadas abaixo, `docs/ROADMAP.md` e o código atual.
 
 ## 1. Objetivo e responsabilidade
@@ -17,21 +17,21 @@ Perfil público de um criador: apresentação e publicações disponíveis. Para
 ## 3. Detalhes técnicos (a confirmar na inspeção)
 
 - "Publicações disponíveis" = publicações de `src/mocks/publicacoes.ts` cujo `autorId` corresponde ao criador, ordenadas pela data, mais recentes primeiro.
-- **Investigações não aparecem no perfil.** Motivo técnico: `Case` não tem autor, e o único autor de investigação está em `InvestigacaoDetalhe`, com um detalhe publicado. Não há base de dados para listar investigações por criador.
+- **Investigações não aparecem como lista no perfil.** Motivo técnico: `Case` não tem autor, e a autoria está em `InvestigacaoDetalhe`, com um detalhe publicado. Por isso, a investigação em destaque e as contribuições recentes usam o detalhe (etapas 5 e 6). A aba "Investigações" continua sendo placeholder.
 - **Busca por usuário**: a rota usa `usuario`, mas `getCriadorPorId()` procura por `id`. A correspondência por `usuario` fica em `src/lib/criadores.ts` (arquivo novo), que chama `getCriadores()`. Assim `src/lib/data.ts` não precisa mudar.
 - Badges, saved cases e seguidores não existem nos dados e não são exibidos.
 
 ## 4. Estrutura visual e responsividade
 
 - Cabeçalho do perfil: `Avatar` tamanho `medium`, nome, @usuario e bio.
-- Abaixo: título "Publicações" e lista vertical de `PublicationCard` (sem aba, já que só há um tipo de conteúdo).
-- Sidebar com `Sidebar` (tópicos e atualizações), no padrão de `ContentGrid`.
+- Abaixo: abas (Visão geral, Investigações, Teorias e publicações, Conquistas), selecionadas por `?aba=` no cliente (ADR-017). Na Visão geral: investigação em destaque, contribuições recentes e a lista vertical de `PublicationCard`, com o título "Publicações". Na aba "Investigações": investigações criadas e em que participa, com detalhe publicado (etapa 11).
+- Sidebar condicional: aparece somente com conteúdo do perfil (reconhecimento e membros relacionados). Quando não há conteúdo, o layout usa a largura total. Não usa `Sidebar` global (tópicos e atualizações). Ver `docs/features/perfil-social.md`, decisão 3. **Estado atual (etapa 7)**: os dados não têm reconhecimento nem membros relacionados, então a página não passa sidebar e o `ContentGrid` usa a largura total. Carregamento (etapa 8): `loading.tsx` usa `ContentGrid` sem sidebar, com `PerfilSkeleton` na mesma hierarquia da página, sem dados fictícios.
 - Mobile: a sidebar fica abaixo do conteúdo.
 - Sem overflow horizontal em 375, 768 e 1440 px.
 
 ## 5. Componentes
 
-**Reutilizar**: `ContentGrid`, `Sidebar`, `CardList`, `PageBody`, `PublicationCard`, `Avatar`, `Badge`, `Breadcrumb`, `EmptyState`, `Skeleton`.
+**Reutilizar**: `ContentGrid` (sem sidebar, desde a etapa 7), `CardList`, `PublicationCard`, `Avatar`, `Badge`, `Breadcrumb`, `EmptyState`, `Skeleton`. `Sidebar` (global) não é usado no perfil. `PageBody` também não é usado: o espaçamento vem de `AbasPerfil` e `ContentGrid`.
 
 **Novo**: `ProfileHeader` (`src/components/perfil/ProfileHeader.tsx`): avatar, nome, usuário e bio. Justificativa: `CreatorCard` é de lista, e `AutorCard` é de sidebar. Nenhum deles é cabeçalho de página.
 

@@ -12,7 +12,8 @@ export const publicacoes: Publicacao[] = [
     autorId: "analista-vb",
     data: "2026-07-02",
     comentarios: 14,
-    tags: ["trailer", "vice-beach", "letreiro"],
+    tags: ["locais-mapas"],
+    termos: ["trailer", "vice-beach", "letreiro"],
   },
   {
     id: "pub-sinal-99-1",
@@ -24,7 +25,8 @@ export const publicacoes: Publicacao[] = [
     autorId: "noturno-leonida",
     data: "2026-07-01",
     comentarios: 9,
-    tags: ["rádio", "áudio", "frequência"],
+    tags: ["audio-transmissoes"],
+    termos: ["rádio", "áudio", "frequência"],
   },
   {
     id: "pub-simbolos-mural",
@@ -36,7 +38,8 @@ export const publicacoes: Publicacao[] = [
     autorId: "arquivista-99",
     data: "2026-06-30",
     comentarios: 21,
-    tags: ["mural", "símbolos", "mapa"],
+    tags: ["simbolos-mensagens", "locais-mapas"],
+    termos: ["mural", "símbolos", "mapa"],
   },
   {
     id: "pub-bunker-pantanos",
@@ -48,7 +51,8 @@ export const publicacoes: Publicacao[] = [
     autorId: "arquivista-99",
     data: "2026-06-29",
     comentarios: 6,
-    tags: ["pântanos", "mapa", "bunker"],
+    tags: ["locais-mapas"],
+    termos: ["pântanos", "mapa", "bunker"],
   },
   {
     id: "pub-clarao-tempestade",
@@ -60,7 +64,8 @@ export const publicacoes: Publicacao[] = [
     autorId: "noturno-leonida",
     data: "2026-06-28",
     comentarios: 11,
-    tags: ["tempestade", "edição", "quadro"],
+    tags: [],
+    termos: ["tempestade", "edição", "quadro"],
   },
   {
     id: "pub-adesivos-penhores",
@@ -72,6 +77,7 @@ export const publicacoes: Publicacao[] = [
     autorId: "analista-vb",
     data: "2026-06-27",
     comentarios: 17,
-    tags: ["adesivos", "código", "loja"],
+    tags: ["locais-mapas"],
+    termos: ["adesivos", "código", "loja"],
   },
 ];

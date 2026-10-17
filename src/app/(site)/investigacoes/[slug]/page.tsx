@@ -13,9 +13,20 @@ import { Secao, Subtitulo } from "../../../../components/investigacao/Secao";
 import { SinteseSection } from "../../../../components/investigacao/SinteseSection";
 import { TeoriaSection } from "../../../../components/investigacao/TeoriaSection";
 import { EmptyState } from "../../../../components/states/EmptyState";
-import { getInvestigacaoPorSlug } from "../../../../lib/data";
+import { getInvestigacaoPorSlug, getInvestigacoes } from "../../../../lib/data";
 
 type Params = Promise<{ slug: string }>;
+
+// Investigation slugs are the ids of the listing records (Case), generated at build time from
+// the mocks. With dynamicParams = false, an unknown slug gets a real HTTP 404 from the router,
+// before any streaming starts. A new investigation then needs a new build until there is an
+// API. See docs/DECISIONS.md, ADR-014.
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+  const investigacoes = await getInvestigacoes();
+  return investigacoes.map((caso) => ({ slug: caso.id }));
+}
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;

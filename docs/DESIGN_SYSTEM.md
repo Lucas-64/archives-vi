@@ -215,6 +215,7 @@ Shared by every public route through the `(site)` route group:
 - Header in two rows: logo and subtitle on the left, search and sign-in actions on the right.
 - Main navigation below the header, uppercase labels, pink underline on the active item.
 - Content area with a main column and a 320px sidebar on desktop.
+- Without a sidebar (`ContentGrid` with no `sidebar` prop), the main column takes the full width and no empty column is reserved. The profile uses this layout (`/perfil/[usuario]`), because it has no sidebar content yet.
 - Footer at the bottom of the content.
 
 Navigation labels (approved): Início → `/`, Mistérios → `/investigacoes`,
@@ -270,7 +271,7 @@ Rules: no horizontal scroll at 375px. Text and cards must wrap, never overflow.
 
 ## States
 
-- **Loading**: `Skeleton` blocks with the same size as the final content.
+- **Loading**: `Skeleton` blocks with the same size as the final content. The profile loading (`PerfilSkeleton`) has its own heights per breakpoint, measured on the real page, and no sidebar.
 - **Empty**: `EmptyState` with a title, one sentence, and an action when one exists.
 - **Error**: `ErrorState` with a title, one sentence and a "Tentar de novo" button.
 
@@ -368,7 +369,7 @@ Components created for the phase 2 routes. Each is in the folder of its domain. 
 - `src/components/criar/`: `CriarTeoria` (state of the page), `FormularioTeoria` (form with simulated submission), `PreviaTeoria` (live preview, same look as `PublicationCard` but without a link), `validarTeoria.ts` (pure validation and limits).
 - `src/components/auth/`: `AuthCard` (card with title and footer), `AvisoDemonstracao` (persistent notice and result message labeled "Demonstração"), `AuthCardSkeleton`, `FormularioEntrar`, `FormularioCriarConta`, `validacao.ts` (pure e-mail check and password minimum).
 - `src/components/busca/`: `BuscaForm` (GET form with `q`), `ResultadosBusca` (result groups). Logic in `src/lib/busca.ts`.
-- `src/components/perfil/`: `ProfileHeader` (avatar, name, user and bio), `PublicacoesSecao` (publications list or empty state). Lookup in `src/lib/criadores.ts`.
+- `src/components/perfil/`: `ProfileHeader` (avatar, name, user, bio and the disabled actions "Seguir" and a menu with "Denunciar" and "Bloquear"), `MenuAcoesPerfil`, `IndicadoresContribuicao` (compact indicators), `AbasPerfil` (ARIA tabs synchronized with `?aba=` on the client, ADR-017), `InvestigacaoEmDestaque`, `ContribuicoesRecentes` (list with a type label and links), `InvestigacoesPerfil` (Investigações tab: created and participation groups, with `CaseCard` and their own empty states), `PublicacoesSecao` (publications list or empty state) and `PerfilSkeleton` (loading). Disabled "Curtir" and "Favoritar" buttons live on the publication page (`PublicacaoCabecalho`), not on the profile. Lookup of creators in `src/lib/criadores.ts`; metrics, highlight rule and tabs helpers in `src/lib/perfil.ts`. `FilterTabs` is not used by the profile. Its tabs are links, and the profile needs a panel that switches on the client.
 
 Shared card props added in phase 2.1:
 
@@ -389,3 +390,11 @@ Rules that apply to all of them:
 - Section images are decorative (`alt=""`). They must never fill user content such as publications, evidence, comments or galleries.
 - The "Explorar" tiles are the reference for section cards with a background image.
 
+
+## TagTematica and FiltroTemas
+
+Thematic tags come from the controlled catalog in `src/constants/tagsTematicas.ts` (ADR-018). The text shown comes from the catalog; the URL, the mocks and the filter compare the canonical id (for example `simbolos-mensagens`).
+
+- `TagTematica` (`src/components/tags/TagTematica.tsx`): one tag. Without `href`, it is static (used on the publication page). With `href`, it is a filter link. States: static, link, link with `:focus-visible` (pink outline), and active (`aria-current="true"`, pink border). The design system has no tag states, so these reuse the tokens of `Badge` and `FilterTabs`. Shape: `theme.borderRadius.pill`. Links are 44px tall for touch.
+- `FiltroTemas` (`src/components/tags/FiltroTemas.tsx`): filter row of "Todos os temas" and the eight catalog tags, inside a `nav` with an `aria-label`. Each option is a link with `?tag=`, so it works without JavaScript. The row wraps; it never scrolls the page.
+- Do not put functions in the props of `FiltroTemas`. The page builds the data (`opcoes`) on the server, because functions cannot cross from a Server Component to a Client Component.

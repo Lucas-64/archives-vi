@@ -16,7 +16,7 @@ Pesquisar **publicações, investigações e criadores** por texto.
 ## 3. Detalhes técnicos (a confirmar na inspeção)
 
 - Correspondência: texto contido, sem diferenciar maiúsculas de minúsculas, nos campos de cada tipo:
-  - publicações: título, resumo e tags;
+  - publicações: título, resumo, palavras-chave (texto livre, campo `termos`) e rótulos dos temas do catálogo (campo `tags`, desde a etapa 10 de `docs/features/perfil-social.md`);
   - investigações: título, descrição e localização;
   - criadores: nome, usuário e bio.
 - Ordenação: publicações pela data, mais recentes primeiro; investigações pela data de atualização, mais recentes primeiro; criadores na ordem do mock.

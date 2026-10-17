@@ -2,15 +2,19 @@
 
 import styled from "styled-components";
 
+import { AcaoRestrita } from "../acoes/AcaoRestrita";
 import type { Criador } from "../../types/Criador";
 import { Avatar } from "../ui/Avatar";
 import { Card } from "../ui/Card";
+import { MenuAcoesPerfil } from "./MenuAcoesPerfil";
 
 export interface ProfileHeaderProps {
   criador: Criador;
 }
 
-// Cabeçalho do perfil público: avatar, nome, @usuario e bio. Não há ações nesta versão.
+// Cabeçalho do perfil público: avatar de iniciais, nome, @usuario, bio e ações sociais.
+// Data de entrada, jogos e interesses não existem em Criador: não são exibidos, sem texto de
+// substituição. Seguir exige conta (ADR-010): a ação fica desabilitada, com link para /entrar.
 export function ProfileHeader({ criador }: ProfileHeaderProps) {
   return (
     <Card padding="large">
@@ -22,6 +26,10 @@ export function ProfileHeader({ criador }: ProfileHeaderProps) {
         </Identidade>
       </Cabecalho>
       <Bio>{criador.bio}</Bio>
+      <Acoes>
+        <AcaoRestrita rotulo="Seguir" mensagem="Seguir exige conta." />
+        <MenuAcoesPerfil />
+      </Acoes>
     </Card>
   );
 }
@@ -65,4 +73,12 @@ const Bio = styled.p`
   line-height: 1.6;
   color: ${({ theme }) => theme.colors.textSecondary};
   overflow-wrap: anywhere;
+`;
+
+const Acoes = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+  margin-top: ${({ theme }) => theme.spacing.lg};
 `;

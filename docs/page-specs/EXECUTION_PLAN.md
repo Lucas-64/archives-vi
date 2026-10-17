@@ -288,7 +288,7 @@ Console (desenvolvimento): nas três páginas de formulário e no perfil inexist
 
 Limitações do ambiente: a ferramenta de navegador lê o console apenas do lote de navegação em que a página é carregada. Não foram verificados erros de rede ou de rotas em produção pelo console. Em produção, a verificação foi feita por requisições HTTP.
 
-### 13.5 404 de perfis inexistentes
+### 13.5 404 de perfis inexistentes (resolvido no lote 2, ver seção 15)
 
 Medido em produção (`next start` com o build atual, porta 3100):
 
@@ -311,7 +311,7 @@ Causa: `src/app/(site)/loading.tsx` envolve todas as rotas do grupo em `Suspense
 ### 13.6 Tarefas de integração pendentes (em ordem de prioridade)
 
 1. **Entradas de navegação aprovadas** (concluída no lote 1, ver seção 14): `/explorar` na navegação principal (`MAIN_NAV`); `/criadores` e `/criar` no cabeçalho desktop. Arquivos compartilhados: `src/constants/routes.ts`, `src/components/layout/Navigation.tsx` e `src/components/layout/Header.tsx`. Verificar em 768, 1024 e 1280 px, porque o cabeçalho já tem três ações. Exige autorização específica.
-2. **404 real em `/perfil/[usuario]`**, conforme a recomendação da seção 13.5. Exige autorização. Depois, decidir o mesmo para os detalhes de investigação e publicação.
+2. **404 real** em `/perfil/[usuario]`, `/investigacoes/[slug]` e `/publicacao/[slug]`: concluído no lote 2 (seção 15).
 3. **Registro formal das decisões de 2026-10-16** em `docs/DECISIONS.md`, como exige o `CLAUDE.md`. Não foi criado nesta etapa, porque o arquivo não estava na lista autorizada. Recomendo criar uma entrada, após sua confirmação.
 4. **Commit** do trabalho de `/investigacoes` e da fase 2 pendente. Aguarda pedido explícito. Inclui os dois arquivos de imagem não rastreados.
 5. **Pendências de produto**: primeira publicação e investigação (não vinculadas por decisão); evidência #001 (mantida); status `community` e `classified`; aba "Sem fontes".
@@ -357,3 +357,90 @@ Navegador (servidor de desenvolvimento), medições reais:
 - **Barra principal a 768 px**: com sete itens, o contador de investigadores vai para a segunda linha. Não há ajuste pequeno que mantenha uma linha: reduzir o espaçamento não basta (faltam cerca de 87 px). Resolver exigiria esconder o contador ou encurtar rótulos, o que é uma decisão de interface. Não foi alterado.
 - **`/criadores` na barra mobile**: não há entrada. Não foi decidido.
 - **404 real** (ADR-014): não iniciado neste lote, por escopo.
+
+## 15. Lote 2: HTTP 404 real nas rotas dinâmicas (2026-10-16)
+
+### 15.1 Diagnóstico
+
+As três páginas chamam `notFound()` depois de um `await` (`buscarCriadorPorUsuario` sobre `getCriadores()`, `getInvestigacaoPorSlug` e `getPublicacaoPorSlug`). Essa chamada acontece dentro do `Suspense` criado por `src/app/(site)/loading.tsx`, que envolve todas as rotas do grupo. Como o streaming começa antes de `notFound()` ser avaliado, a resposta sai com status 200, e a página "não encontrada" vai no corpo.
+
+Confirmado em produção no build de linha de base, antes da mudança: as seis URLs de teste responderam 200, inclusive as inexistentes. Remover `loading.tsx` só da rota não resolveria, porque o do grupo continua valendo.
+
+### 15.2 Solução
+
+- **Mecanismo**: `dynamicParams = false` com `generateStaticParams` em cada rota. Um identificador fora da lista gerada no build recebe 404 do roteador, antes do streaming.
+- **Por rota**:
+  - `/perfil/[usuario]`: lista de `getCriadores()`. Três perfis hoje.
+  - `/investigacoes/[slug]`: lista de `getInvestigacoes()`, com os oito registros da listagem. Registros sem detalhe continuam renderizando o estado vazio existente.
+  - `/publicacao/[slug]`: lista de `getPublicacoes()`, com as seis publicações.
+- **Página de não encontrado da raiz** (`src/app/not-found.tsx`): o roteador usa a página da raiz para essas respostas. Sem ela, o padrão do Next aparecia em inglês. O conteúdo fica em `src/components/states/PaginaNaoEncontrada.tsx`, compartilhado com `src/app/(site)/not-found.tsx`.
+
+### 15.3 Compatibilidade e trade-off
+
+- Os dados são mocks. Um perfil, investigação ou publicação novos exigem novo build. Com uma API, a geração de parâmetros deve ser trocada por leitura da API, e `dynamicParams` deve ser revisitado.
+- A Home e as páginas de listagem já eram estáticas ou dinâmicas por motivos próprios; não foram alteradas.
+- Os dados continuam vindo de `src/lib/data.ts`. Nenhuma página importa mocks diretamente.
+
+### 15.4 Verificação
+
+Build de produção (`npm run build`) e servidor `next start` em porta livre. Testes com `curl -i`, no build atual:
+
+| URL | Caso | Status | Conteúdo |
+|---|---|---|---|
+| `/perfil/analista_vb` | válido | 200 | nome do criador presente |
+| `/perfil/inexistente` | inexistente | 404 | "Página não encontrada" em português |
+| `/investigacoes/vice-beach-night-lights` | válido | 200 | título da investigação presente |
+| `/investigacoes/inexistente` | inexistente | 404 | "Página não encontrada" em português |
+| `/publicacao/letreiro-praia-trailer` | válido | 200 | título da publicação presente |
+| `/publicacao/nao-existe` | inexistente | 404 | "Página não encontrada" em português |
+
+Extras: `/perfil/noturno_leonida`, `/investigacoes/simbolos-vice-city`, `/publicacao/sinal-99-1-repete` e `/criadores` responderam 200 com o conteúdo esperado. `/perfil/Analista_VB` (grafia diferente) e `/rota-que-nao-existe` responderam 404. A página 404 tem o título "Página não encontrada | ARCHIVES VI".
+
+Typecheck, lint e build passaram.
+
+Navegador no servidor de produção: a página 404 de perfil foi vista em 1024 px e em 375 px, sem rolagem horizontal. Não foi verificada em 768 px nem as páginas válidas no navegador nesta etapa; o conteúdo delas foi conferido por HTTP.
+
+### 15.5 Limitações
+
+- (Resolvido no lote 3B, ver seção 16.) A página 404 do roteador ficava fora do layout do grupo `(site)`, sem cabeçalho nem rodapé.
+- A grafia dos identificadores é exata. `/perfil/Analista_VB` responde 404.
+- O comportamento em `next dev` não foi verificado: a verificação é de produção, como exige a ADR-014.
+- O console do navegador não foi verificado nesta etapa.
+
+## 16. Lote 3B: shell compartilhado na página 404 (2026-10-16)
+
+### 16.1 Implementado
+
+- `src/components/layout/SiteShell.tsx` (novo): cabeçalho, `main` com `Container`, rodapé e barra mobile, com a chamada existente de `getInvestigadoresOnline()`. Extraído de `src/app/(site)/layout.tsx`, que agora apenas o usa.
+- `src/app/not-found.tsx`: passa o conteúdo por `SiteShell`. Continua sendo a página que o roteador usa para os casos do Lote 2.
+- `src/components/states/PaginaNaoEncontrada.tsx`: deixou de ter `Container` próprio. O shell já fornece a moldura da página, e o `EmptyState` interno é o mesmo usado nas demais páginas com estado vazio. Sem isso, a página ganharia um terceiro nível de container.
+- Não alterados: `generateStaticParams`, `dynamicParams = false`, `loading.tsx`, rotas, slugs e dados.
+
+### 16.2 Verificação em produção
+
+Build de produção (`npm run build`) e `next start` em porta livre, testados com `curl -i`:
+
+| URL | Status | Estrutura (header / main / footer) | Conteúdo |
+|---|---|---|---|
+| `/perfil/analista_vb` | 200 | 2 / 1 / 1 | nome do criador presente |
+| `/perfil/inexistente` | 404 | 1 / 1 / 1 | "Página não encontrada" com shell |
+| `/investigacoes/vice-beach-night-lights` | 200 | 1 / 1 / 1 | título presente |
+| `/investigacoes/inexistente` | 404 | 1 / 1 / 1 | "Página não encontrada" com shell |
+| `/publicacao/letreiro-praia-trailer` | 200 | 2 / 1 / 1 | título presente |
+| `/publicacao/nao-existe` | 404 | 1 / 1 / 1 | "Página não encontrada" com shell |
+| `/rota-que-nao-existe` | 404 | 1 / 1 / 1 | "Página não encontrada" com shell |
+
+Os dois `header` nas páginas válidas de perfil e publicação são o cabeçalho semântico do conteúdo (`ProfileHeader` e `PublicacaoCabecalho`), não duplicação do shell: há uma única marca do site em cada resposta. Home e listagens têm um shell cada.
+
+Navegador, servidor de produção:
+
+- 1014 px (maior largura que a janela de teste alcança): 404 de investigação com cabeçalho, uma `main`, rodapé, sem rolagem horizontal. A 1024 px, a primeira verificação do 404 de perfil também registrou largura 1024 sem rolagem horizontal.
+- 768 px: 404 de investigação, sem rolagem horizontal; barra inferior oculta, como nas demais páginas.
+- 375 px: 404 de publicação, sem rolagem horizontal; barra inferior visível, sem aba ativa.
+- Console: a carga de `/criadores` não teve erros. Na 404, o console mostrou erros de pré-busca (`?_rsc`) de links de uma sessão anterior desta aba e de navegações interrompidas, além do 404 do próprio documento, que é esperado. Não foi possível isolar todos os erros de uma única carga com a ferramenta de automação.
+
+### 16.3 Limitações
+
+- Erros de hidratação só aparecem em `next dev`. Não foram verificados com `next dev` nesta etapa; a produção não exibe esses avisos.
+- A janela de teste alcança no máximo 1014 px. A 1024 px exata foi medida só na primeira verificação do 404 de perfil.
+- O console não foi lido de forma isolada para cada página.

@@ -241,7 +241,14 @@ Reasoning:
 - Um status 200 faz mecanismos de busca e ferramentas de verificação indexarem páginas inexistentes.
 - A página em português já existe; falta o status correto.
 
-Status: Accepted (a decisão). Pendente: a estratégia técnica ainda precisa ser verificada contra a arquitetura atual, por exemplo `generateStaticParams` com `dynamicParams = false`, registrada como sugestão em `docs/page-specs/EXECUTION_PLAN.md`. Não é uma decisão.
+Status: Accepted. Implementada no lote 2 (2026-10-16), verificada em build de produção.
+
+Implementação (lote 2):
+
+- `/perfil/[usuario]`, `/investigacoes/[slug]` e `/publicacao/[slug]` exportam `dynamicParams = false` e `generateStaticParams`, com as listas dos mocks (`getCriadores()`, `getInvestigacoes()` e `getPublicacoes()`). Um identificador fora dessas listas recebe HTTP 404 do roteador, antes do streaming.
+- Página de não encontrado da raiz (`src/app/not-found.tsx`), em português, com o mesmo conteúdo da página do grupo `(site)` (`PaginaNaoEncontrada`). Ela é usada pelo roteador. Desde o lote 3B, renderiza o shell compartilhado do site (`src/components/layout/SiteShell.tsx`), com cabeçalho, navegação, rodapé e barra mobile. O layout `(site)` usa o mesmo componente.
+- Trade-off aceito enquanto os dados forem mocks: um perfil, investigação ou publicação novos exigem novo build. Com uma API, a geração de parâmetros deve ser trocada por leitura da API, e a decisão de `dynamicParams` deve ser revisitada.
+- Verificação: `curl -i` em produção. Casos válidos responderam 200 com o conteúdo do registro. Casos inexistentes responderam 404, com a página em português.
 
 ## ADR-015: Investigation Management Area and Backend Priority
 
@@ -269,3 +276,40 @@ Reasoning:
 
 Status: Accepted, em caráter temporário. Deve ser revisto quando houver imagem compatível.
 
+
+## ADR-017: Profile Tabs Selected on the Client
+
+Decision (aprovada em 2026-10-17): as abas de `/perfil/[usuario]` (Visão geral, Investigações, Teorias e publicações, Conquistas) são escolhidas no cliente, a partir de `?aba=`. A página continua gerada estaticamente, e o servidor não lê `searchParams`.
+
+Reasoning:
+
+- Ler `searchParams` no servidor torna a rota dinâmica. Com `dynamicParams = false`, um perfil inexistente passou a responder HTTP 200 (verificado na etapa 4). Isso desfaz o ADR-014, então a leitura foi removida.
+- `FilterTabs` navega por link e não troca o painel no cliente; por isso foi criado um componente pequeno (`src/components/perfil/AbasPerfil.tsx`), com o padrão ARIA de abas (`tablist`, `tab`, `tabpanel`).
+- O conteúdo das quatro abas é montado no servidor e passado ao componente. Só o painel ativo entra no DOM, o que evita `id` duplicado no título "Publicações".
+- Clique em uma aba usa `history.pushState`, então voltar e avançar percorrem as abas. Não se usa `replaceState`, porque a troca de aba deve ser uma etapa do histórico.
+- A sincronização de leitura usa `useSyncExternalStore` sobre `window.location.search`, com `popstate` e um evento próprio disparado após `pushState` (que não emite `popstate`). Não se usa `useSearchParams`, porque ele exige Suspense e impediria o HTML estático com a aba padrão.
+- Setas, Home e End movem só o foco. Enter e Espaço ativam a aba. Assim, uma tecla repetida não empilha entradas no histórico.
+- Um clique na aba já ativa, com a URL já correta, não faz nada. Valores desconhecidos em `?aba=` mostram a Visão geral; ao clicar em uma aba, a URL passa a ter o valor válido.
+- Trade-off aceito: no primeiro carregamento de uma URL com `?aba=` válido, o HTML estático mostra a Visão geral por um instante até a hidratação. A troca de aba não faz requisição nova ao servidor.
+
+Status: Accepted. Implementada na etapa 4 de `docs/features/perfil-social.md` (2026-10-17), verificada em build de produção.
+
+## ADR-018: Profile Social Decisions (Featured Investigation, Tag Catalog, Conditional Sidebar)
+
+Decision (aprovada em 2026-10-17), registrada em `docs/features/perfil-social.md`, seção "Decisões registradas":
+
+1. **Investigação em destaque (híbrida)**: até haver autenticação e persistência, o destaque é um fallback determinístico (investigações criadas pelo membro antes das de participação; depois `atualizadoEm` mais recente; desempate por `id`). O membro não escolhe a investigação nesta fase, e a interface não diz que escolheu. Sem investigação elegível, o bloco não aparece.
+2. **Catálogo controlado de tags temáticas**: investigações e publicações usarão o mesmo catálogo fechado (OVNIs e extraterrestres; Criaturas e lendas; Easter eggs e segredos; Símbolos e mensagens; Áudio e transmissões; Locais e mapas; Crimes e acontecimentos; Teorias e conexões). Tags não são patentes, especializações nem distintivos, e não há XP, conquistas, votação ou progressão nesta decisão.
+3. **Sidebar condicional**: a sidebar do perfil aparece somente com conteúdo do perfil (reconhecimento e membros relacionados). Sem conteúdo, o layout usa a largura total, sem coluna vazia. A sidebar global de tópicos e atualizações não é usada no perfil.
+
+Reasoning:
+
+- Sem autenticação, uma escolha manual seria simulada. O fallback determinístico usa somente dados existentes.
+- Um catálogo único evita categorias duplicadas entre investigações e publicações. Ele serve, no futuro, como contexto para elegibilidade de especializações, cujos critérios continuam privados.
+- Uma sidebar com conteúdo global no perfil não diz respeito ao membro, e uma coluna vazia desperdiça espaço.
+
+Status: Accepted, com estado de implementação por item:
+
+- Item 1: a regra está em `investigacaoEmDestaque` (etapa 1) e o bloco foi implementado na etapa 5 do plano. Verificado em produção.
+- Item 2: implementado na etapa 10 do plano (2026-10-17), com autorização. O catálogo está em `src/constants/tagsTematicas.ts`, e `Publicacao.tags` usa os ids do catálogo. O texto livre anterior ficou em `Publicacao.termos`, sem perda. Nenhuma investigação tem tags (não há dados). A atribuição dos temas foi feita por correspondência com o nome e precisa de revisão do produto. Auditoria da etapa 11: removidas duas associações duvidosas (`letreiro` e `código` → Símbolos e mensagens); os termos continuam em `termos`. Tags não aparecem em nenhuma página de perfil.
+- Item 3: implementado na etapa 7 (`ContentGrid` sem sidebar; perfil sem sidebar, porque ainda não há conteúdo próprio para ela).

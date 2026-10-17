@@ -1,3 +1,5 @@
+import type { TagTematica } from "../constants/tagsTematicas";
+
 export type TipoPublicacao = "teoria" | "investigacao";
 
 export interface Publicacao {
@@ -9,5 +11,9 @@ export interface Publicacao {
   autorId: string;
   data: string;
   comentarios: number;
-  tags: string[];
+  // Temas do catálogo controlado (ADR-018). Pode ser vazio quando nenhum tema do catálogo se aplica.
+  tags: TagTematica[];
+  // Palavras-chave de texto livre, mantidas como estavam. Entram na busca e aparecem na página da
+  // publicação, separadas dos temas, porque não foram migradas para o catálogo.
+  termos: string[];
 }

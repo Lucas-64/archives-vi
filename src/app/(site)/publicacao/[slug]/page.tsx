@@ -11,10 +11,21 @@ import { ROUTES } from "../../../../constants/routes";
 import {
   getCriadorPorId,
   getPublicacaoPorSlug,
+  getPublicacoes,
   getPublicacoesRelacionadas,
 } from "../../../../lib/data";
 
 type Params = Promise<{ slug: string }>;
+
+// Publication slugs are generated at build time from the mocks. With dynamicParams = false, an
+// unknown slug gets a real HTTP 404 from the router, before any streaming starts. A new
+// publication then needs a new build until there is an API. See docs/DECISIONS.md, ADR-014.
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+  const publicacoes = await getPublicacoes();
+  return publicacoes.map((publicacao) => ({ slug: publicacao.slug }));
+}
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;

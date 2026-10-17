@@ -1,6 +1,7 @@
 // Busca da página /buscar. Funções puras: recebem a consulta e as listas já lidas
 // de src/lib/data.ts e devolvem os resultados por tipo. Não acessam dados nem mocks.
 import { ROUTES } from "@/constants/routes";
+import { rotuloDaTag } from "@/lib/tags";
 import { normalizarParaBusca } from "@/lib/texto";
 import type { Case } from "@/types/Case";
 import type { Criador } from "@/types/Criador";
@@ -37,14 +38,16 @@ function contem(texto: string, termo: string): boolean {
   return normalizarParaBusca(texto).includes(termo);
 }
 
-// Publicações: título, resumo e tags. Mais recentes primeiro (data ISO AAAA-MM-DD).
+// Publicações: título, resumo, palavras-chave (termos) e rótulos dos temas. Mais recentes primeiro
+// (data ISO AAAA-MM-DD). Os temas entram pelo rótulo do catálogo, não pelo id.
 function pesquisarPublicacoes(termo: string, publicacoes: readonly Publicacao[]): Publicacao[] {
   return publicacoes
     .filter(
       (item) =>
         contem(item.titulo, termo) ||
         contem(item.resumo, termo) ||
-        item.tags.some((tag) => contem(tag, termo)),
+        item.termos.some((palavra) => contem(palavra, termo)) ||
+        item.tags.some((tag) => contem(rotuloDaTag(tag), termo)),
     )
     .sort((a, b) => b.data.localeCompare(a.data));
 }

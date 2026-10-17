@@ -1,6 +1,7 @@
 import type { StaticImageData } from "next/image";
 
 import type { StatusBadgeStatus } from "../components/ui/StatusBadge";
+import type { TagTematica } from "../constants/tagsTematicas";
 
 export type CaseStatus = StatusBadgeStatus;
 
@@ -22,4 +23,6 @@ export interface Case {
   location?: string;
   evidenceCount?: number;
   updatedAt?: string;
+  // Temas do catálogo controlado (ADR-018). Opcional: nenhum mock de investigação tem tags hoje.
+  tags?: TagTematica[];
 }

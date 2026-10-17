@@ -15,6 +15,8 @@ import type { Criador } from "@/types/Criador";
 import type { Destaque } from "@/types/Destaque";
 import type { Publicacao, TipoPublicacao } from "@/types/Publicacao";
 import type { Topico } from "@/types/Topico";
+import type { TagTematica } from "@/constants/tagsTematicas";
+import { filtrarPorTag } from "./tags";
 
 // Estados de teste da interface. Só têm efeito fora de produção (next dev).
 export const SIMULACOES = ["vazio", "erro", "lento"] as const;
@@ -62,6 +64,7 @@ export async function getInvestigacaoPorSlug(
 
 export interface FiltroPublicacoes {
   tipo?: TipoPublicacao;
+  tag?: TagTematica;
   simular?: Simulacao;
 }
 
@@ -71,9 +74,10 @@ export async function getPublicacoes(
   await aplicarSimulacao(filtro.simular);
   if (filtro.simular === "vazio") return [];
 
-  return publicacoes
-    .filter((item) => !filtro.tipo || item.tipo === filtro.tipo)
-    .sort((a, b) => b.data.localeCompare(a.data));
+  return filtrarPorTag(
+    publicacoes.filter((item) => !filtro.tipo || item.tipo === filtro.tipo),
+    filtro.tag,
+  ).sort((a, b) => b.data.localeCompare(a.data));
 }
 
 export async function getPublicacaoPorSlug(

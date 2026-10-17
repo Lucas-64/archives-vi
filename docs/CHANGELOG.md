@@ -24,10 +24,24 @@ The project follows Semantic Versioning and Conventional Commits.
 - `/buscar`: search across publications, investigations and creators, with tabs and state kept in the URL.
 - `/criadores`: list of the creators in the mocks, with links to their profiles.
 - `/perfil/[usuario]`: public profile with the creator's publications. Unknown users get the "not found" page.
-- `/explorar`: discovery hub with the four explore tiles and "Mistérios em alta". It has no navigation entry yet.
+- `/explorar`: discovery hub with the four explore tiles and "Mistérios em alta". It is in the main navigation (ADR-012).
+- `/perfil/[usuario]`: tabs Visão geral, Investigações, Teorias e publicações and Conquistas, selected by `?aba=` on the client (ADR-017). Clicking a tab adds a history entry, so back and forward move between tabs. Conquistas shows a "not available yet" state, with no invented records (Investigações was filled later, see below). Profiles stay statically generated and missing ones still return HTTP 404.
+- `/perfil/[usuario]`: "Investigação em destaque" block in the Visão geral, after the tabs. The choice is an automatic fallback, not the member's pick: investigations the member created come first, then those they took part in, each group by most recent update. It shows the investigation's status, hypothesis, evidence and participant counts, and links to the investigation. It is omitted when no detailed investigation involves the member. The game field is not shown, because the data has none.
+- `/perfil/[usuario]`: compact contribution indicators (investigations created, theories published, evidence sent), computed from the demonstrative data.
+- `/perfil/[usuario]`: header actions. "Seguir" is shown disabled with a link to `/entrar`, because following requires an account (ADR-010). A menu shows "Denunciar" and "Bloquear" disabled, with a note that moderation does not exist yet.
+- `/perfil/[usuario]`: the "Investigações" tab lists real investigations in two groups, "Criadas por este membro" and "Em que participa". Each item links to the investigation. Only investigations with a published detail are included. Empty groups show their own state.
+- `/publicacao/[slug]`: "Curtir" and "Favoritar" as disabled buttons, with the message "Curtir e favoritar exigem conta" and a link to sign in. Nothing is saved and no count is shown.
+- Thematic tags: a controlled catalog of eight themes (`src/constants/tagsTematicas.ts`, ADR-018), with the `TagTematica` component. Publication tags now use the catalog ids.
+- `/publicacoes`: theme filter (`?tag=`), combined with the type filter. Unknown values are ignored. A theme with no publications shows an empty state.
+- `/perfil/[usuario]`: "Contribuições recentes" list in the Visão geral: publications, public evidence, accepted community suggestions, and investigations the member created or took part in, most recent first (up to 10). Each item links to its publication or investigation, and evidence links to its anchor on the investigation page.
 
 ### Changed
 
+- Tag audit: two theme associations were removed because they were doubtful. "letreiro" no longer maps to "Símbolos e mensagens", and "código" no longer maps to it. Their free-text terms stay in `termos`.
+- Publication tags: `Publicacao.tags` now holds catalog ids. The previous free-text tags moved to `Publicacao.termos`, unchanged, and still feed the search. The publication page shows the themes as tags and the free-text terms on a separate "Palavras-chave" line. Search also matches theme names.
+- `ContentGrid`: without a `sidebar`, the main column takes the full width, with no empty 320px column. Pages that pass a sidebar keep their layout.
+- `/perfil/[usuario]`: the global sidebar (forum topics and updates) is no longer shown, because it has no relation to the profile. The profile content takes the full width of the page.
+- `/perfil/[usuario]`: the loading state follows the profile layout (breadcrumb, identity, indicators, tabs and content) without a sidebar. Placeholders carry no data.
 - Main navigation: "Explorar" (`/explorar`) added after "Teorias" (ADR-012).
 - Desktop header: "Criadores" (`/criadores`) and "Criar teoria" (`/criar`) text actions added (ADR-012). They are hidden below 768px.
 - Active navigation items are matched by path segment, so `/criar` is no longer marked active on `/criar-conta` or `/criadores`.
@@ -48,6 +62,8 @@ The project follows Semantic Versioning and Conventional Commits.
 
 ### Fixed
 
+- Unknown profiles, investigations and publications now return a real HTTP 404 (previously HTTP 200 with a "not found" page). Verified with `curl` on a production build. Records are generated at build time from the mocks (ADR-014).
+- Root "not found" page in Portuguese, used by the router for unknown dynamic segments. It renders the shared site shell (header, navigation, footer and mobile tab bar) through the new `SiteShell` component, which the `(site)` layout also uses.
 - `FormField`: an `id` passed to a control inside it no longer breaks the label link. The generated id wins inside `FormField`.
 - `/criar-conta`: the password hint no longer repeats the minimum-length error.
 - Heading levels: publication and creator results inside `/buscar` and the profile's publications section use `h3` under their `h2` section headings. The `nivelTitulo` prop defaults to `h2`, so other pages are unchanged.

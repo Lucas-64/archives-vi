@@ -1,31 +1,8 @@
 import { ContentGrid } from "../../../../components/layout/ContentGrid";
-import { CardList } from "../../../../components/page/CardList";
-import { PageBody } from "../../../../components/page/PageBody";
-import { Skeleton } from "../../../../components/states/Skeleton";
+import { PerfilSkeleton } from "../../../../components/perfil/PerfilSkeleton";
 
-// Loading state for /perfil/[usuario]. Mirrors breadcrumb, profile header, publications and sidebar.
+// Loading state for /perfil/[usuario]. Mirrors the profile hierarchy: breadcrumb, identity, indicators,
+// tabs and the Visão geral content. No sidebar: the profile page has none (ContentGrid uses full width).
 export default function PerfilLoading() {
-  return (
-    <ContentGrid
-      main={
-        <>
-          <Skeleton height="16px" width="260px" radius="sm" />
-          <Skeleton height="168px" radius="lg" />
-          <PageBody>
-            <Skeleton height="28px" width="200px" radius="sm" />
-            <CardList>
-              <Skeleton height="180px" radius="lg" />
-              <Skeleton height="180px" radius="lg" />
-            </CardList>
-          </PageBody>
-        </>
-      }
-      sidebar={
-        <>
-          <Skeleton height="220px" radius="lg" />
-          <Skeleton height="220px" radius="lg" />
-        </>
-      }
-    />
-  );
+  return <ContentGrid main={<PerfilSkeleton />} />;
 }

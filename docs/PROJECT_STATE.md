@@ -1,10 +1,12 @@
 # Estado do projeto
 
-Última verificação: 2026-10-16, contra o repositório.
+Última verificação: 2026-10-17, contra o repositório.
 
 ## Próximo passo
 
-As sete rotas da fase 2 estão implementadas e verificadas, e a fase 2.1 (acabamento) foi concluída. No lote 1, as entradas de navegação aprovadas foram implementadas (`/explorar` na navegação principal; `/criadores` e `/criar` no cabeçalho desktop) e as decisões de produto foram registradas em `docs/DECISIONS.md` (ADR-012 a ADR-016). Próximas tarefas: (1) implementar o 404 real de rotas inexistentes (ADR-014), começando por `/perfil/[usuario]`, com a estratégia técnica verificada em build de produção; (2) decidir a entrada de `/criadores` na barra mobile; (3) commitar o trabalho pendente, somente com pedido explícito. Nenhuma delas começa sem autorização específica.
+As sete rotas da fase 2 estão implementadas e verificadas, e a fase 2.1 (acabamento) foi concluída. No lote 1, as entradas de navegação aprovadas foram implementadas (`/explorar` na navegação principal; `/criadores` e `/criar` no cabeçalho desktop) e as decisões de produto foram registradas em `docs/DECISIONS.md` (ADR-012 a ADR-016). No lote 2, as rotas `/perfil/[usuario]`, `/investigacoes/[slug]` e `/publicacao/[slug]` passaram a responder HTTP 404 real para recursos inexistentes, verificado em produção (ADR-014). No lote 3B, a página de não encontrado passou a usar o shell compartilhado do site (`SiteShell`), com status 404 mantido. Próximas tarefas: (1) decidir a entrada de `/criadores` na barra mobile; (2) testar erros de hidratação em `next dev` e isolar o console por página; (3) commitar o trabalho pendente, somente com pedido explícito. Nenhuma delas começa sem autorização específica.
+
+**Perfil social** (`docs/features/perfil-social.md`): etapas 1 a 9 do plano concluídas, sem commit. O perfil tem cabeçalho com ações desabilitadas, indicadores, abas por `?aba=` (ADR-017), investigação em destaque (fallback determinístico), contribuições recentes, sidebar condicional e loading próprio. Etapa 10 concluída com autorização: catálogo de oito temas e tags das publicações (ADR-018); investigações ainda não têm tags. Fechamento funcional (etapa 11): "Curtir" e "Favoritar" desabilitados na publicação; aba "Investigações" com dados reais (só investigações com detalhe publicado); auditoria dos temas, com duas associações removidas. Pendências: ações que gravam dependem de backend e autenticação; a catalogação restante precisa de revisão do produto. Auditoria final (etapa 12): `next dev` verificado nos fluxos do perfil, da publicação e do filtro, sem erros de React nem avisos de hidratação; sem defeito comprovado e sem alteração de código. Limitações: leitor de tela não testado; aviso de fonte pré-carregada e 404 de `favicon.ico` preexistentes, fora do perfil. Ver `docs/features/perfil-social.md`, "Auditoria final".
 
 **Decisões confirmadas**: isolamento B (paralelo no checkout atual, com escopos disjuntos); demonstrações de `/criar`, `/entrar` e `/criar-conta` como simulações rotuladas, sem persistência nem sessão (ADR-010, "Exceções aprovadas"); `/investigacoes` com todos os status em "Todas", incluindo `community` e `classified`.
 
@@ -12,7 +14,7 @@ As sete rotas da fase 2 estão implementadas e verificadas, e a fase 2.1 (acabam
 
 **Stack**: Next.js 16.4.0 (App Router), React 19.2.9, TypeScript strict, styled-components 6.6, ESLint 9 com `eslint-config-next`. Node 20.9 ou superior.
 
-**Git**: branch `main`, HEAD `a13c7305`. Os commits `86a4fc65`, `e29e2e96` e `a13c7305` estão locais e ainda não foram enviados (`ahead 3` em relação a `origin/main`, que está em `75c2b87b`). `86a4fc65` reúne publicações, investigação, imagens de seção e a documentação anterior; `e29e2e96` reúne as rotas da fase 2, a fundação de formulários e a documentação; `a13c7305` reúne a evolução de `/investigacoes/[slug]` (evidências, galeria, sugestões e localização). As alterações do lote 1 (navegação, decisões e documentação) estão no working tree, sem commit.
+**Git**: branch `main`, HEAD `b920c65f`, igual a `origin/main`. Os commits `86a4fc65`, `e29e2e96`, `a13c7305` e `b920c65f` já estão enviados. `b920c65f` reúne a navegação (`/explorar`, `/criadores` e `/criar` no cabeçalho), feita no lote 1. Não há commit do trabalho posterior: o working tree tem as correções de 404 (lote 2, ADR-014), o `SiteShell` e a página de não encontrado (lote 3B), e as etapas 1 a 9 do perfil social, com a documentação. Os arquivos não rastreados de Máquinas de Turing e `Microsoft/` não pertencem ao projeto (ver "Fora do projeto").
 
 **Rotas implementadas** (grupo `(site)`):
 
@@ -25,7 +27,7 @@ As sete rotas da fase 2 estão implementadas e verificadas, e a fase 2.1 (acabam
 - `/entrar` e `/criar-conta`: formulários demonstrativos. Informam que nenhuma sessão ou conta é criada.
 - `/buscar`: busca em publicações, investigações e criadores, com abas e consulta na URL (`?q=`, `?tipo=`).
 - `/criadores`: lista dos criadores dos mocks, com links para o perfil. Sem contagens.
-- `/perfil/[usuario]`: perfil público com as publicações do criador. Usuário inexistente mostra "Página não encontrada".
+- `/perfil/[usuario]`: perfil público, com identidade, indicadores, abas (Visão geral, Investigações, Teorias e publicações, Conquistas), investigação em destaque e contribuições recentes na Visão geral. Sem sidebar, porque ainda não há conteúdo próprio para ela. Usuário inexistente responde HTTP 404 real.
 - `/explorar`: hub de descoberta com as quatro tiles e "Mistérios em alta". Está na navegação principal desde o lote 1 (ADR-012).
 
 **Entradas de navegação das rotas novas (verificado no código)**:
@@ -44,7 +46,7 @@ As sete rotas da fase 2 estão implementadas e verificadas, e a fase 2.1 (acabam
 
 ## Decisões
 
-Registradas em `docs/DECISIONS.md`: ADR-008 (migração para Next.js), ADR-009 (mapeamento de status), ADR-010 (dados demonstrativos e ações sem persistência, com as exceções aprovadas), ADR-011 (rotas de publicação e de investigação), e, aprovadas em 2026-10-16: ADR-012 (entradas de navegação), ADR-013 (sem vínculo artificial entre publicação e investigação), ADR-014 (404 real para rotas inexistentes, a implementar), ADR-015 (área de gerenciamento dentro da investigação, backend depois do frontend) e ADR-016 (divergência temporária da evidência #001).
+Registradas em `docs/DECISIONS.md`: ADR-008 (migração para Next.js), ADR-009 (mapeamento de status), ADR-010 (dados demonstrativos e ações sem persistência, com as exceções aprovadas), ADR-011 (rotas de publicação e de investigação), e, aprovadas em 2026-10-16: ADR-012 (entradas de navegação), ADR-013 (sem vínculo artificial entre publicação e investigação), ADR-014 (404 real para rotas inexistentes, implementada no lote 2), ADR-015 (área de gerenciamento dentro da investigação, backend depois do frontend) e ADR-016 (divergência temporária da evidência #001). Em 2026-10-17: ADR-017 (abas do perfil selecionadas no cliente, com `?aba=`, mantendo a geração estática) e ADR-018 (decisões do perfil social: destaque híbrido, catálogo de tags, sidebar condicional). Item 2 do ADR-018 (tags) ainda não está implementado.
 
 ## Pendências
 
@@ -61,7 +63,7 @@ Registradas em `docs/DECISIONS.md`: ADR-008 (migração para Next.js), ADR-009 (
 - Entrada de `/criadores` na barra mobile: não existe. Decisão de produto pendente, não coberta pelo ADR-012.
 - Cabeçalho desktop com cinco ações e a barra de navegação com sete itens: a 768 px, a barra principal quebra em duas linhas e o contador de investigadores vai para a segunda. Medido, não ajustado (ver `docs/page-specs/EXECUTION_PLAN.md`, seção 14).
 - Textos da fase 2 revisados na fase 2.1. Corrigidos: descrição de `/criadores` e título oculto de `/explorar`. Mantidos: avisos demonstrativos de `/entrar` e `/criar-conta`, que dizem explicitamente que nenhuma sessão ou conta é criada e nada é salvo; e o estado vazio de `/perfil`.
-- Soft 404 de `/perfil/[usuario]`, `/investigacoes/[slug]` e `/publicacao/[slug]`: confirmado em produção (HTTP 200). A decisão de corrigir está em ADR-014. A correção ainda não foi implementada nem verificada; a estratégia técnica sugerida (`generateStaticParams` com `dynamicParams = false`) precisa ser verificada contra a arquitetura atual e em build de produção. Não é solução definitiva enquanto a página responder HTTP 200.
+- Soft 404 de `/perfil/[usuario]`, `/investigacoes/[slug]` e `/publicacao/[slug]`: **resolvido no lote 2** (ADR-014). Antes, a resposta era HTTP 200 com a página "não encontrada". Agora, identificadores fora das listas dos mocks respondem 404 real, verificado com `curl -i` em build de produção. Limitações: um registro novo exige novo build enquanto os dados forem mocks; a página de não encontrado do roteador fica fora do layout do site (sem cabeçalho nem rodapé); a correspondência é exata (`/perfil/Analista_VB` responde 404).
 
 **Código e dados**
 
@@ -69,9 +71,9 @@ Registradas em `docs/DECISIONS.md`: ADR-008 (migração para Next.js), ADR-009 (
 - Corrigido na fase 2.1: a dica de senha de `/criar-conta` some quando o erro já diz a mesma regra, e continua aparecendo quando o erro é outro (campo vazio). A associação `aria-describedby` acompanha a mensagem visível.
 - Corrigido na fase 2.1: cards de publicação e de criador têm a prop `nivelTitulo`, padrão `h2`. Dentro de `/buscar` e na seção de publicações do perfil, usam `h3`, sob o `h2` do grupo. Os demais usos não mudaram.
 - Foco em `/criar`: não há gerenciamento de foco no primeiro erro, porque `Input` e `Textarea` não expõem `ref`.
-- Soft 404 em `/perfil/[usuario]` (fase 2.1, análise sem alteração de código): o `notFound()` roda dentro do `Suspense` de `src/app/(site)/loading.tsx`, que envolve todas as rotas do grupo. Por isso o status é 200 e a página "não encontrada" aparece no corpo. Remover `loading.tsx` só da rota não resolve, porque o do grupo continua valendo. Alternativas, sem aplicar: (a) `generateStaticParams` com os usuários de `getCriadores()` e `export const dynamicParams = false`, que devolve 404 pelo roteamento e torna a rota estática, o que muda a estratégia de renderização; (b) mover a rota para um grupo próprio, sem `loading.tsx` do grupo, o que muda o shell; (c) um `proxy` que verifica o usuário e reescreve para 404, que acopla a requisição aos mocks. A alternativa (a) é a menor, e é a que eu recomendaria quando houver decisão. Não verificado em build de produção.
+- Soft 404 em `/perfil/[usuario]` (análise da fase 2.1, histórico): o `notFound()` rodava dentro do `Suspense` de `src/app/(site)/loading.tsx`, e a resposta saía com 200. **Resolvido no lote 2** pela alternativa (a) da análise: `generateStaticParams` com os usuários de `getCriadores()` e `dynamicParams = false` (ADR-014). A etapa 4 do perfil social mostrou que ler `searchParams` no servidor reabriria o problema, por isso a aba é lida no cliente (ADR-017). Verificado em produção.
 - `FormField` (fase 1): um `id` passado diretamente ao controle, dentro de `FormField`, substituía o id gerado e desfazia a ligação com o rótulo. **Corrigido em 2026-10-16**: dentro de `FormField`, o id gerado prevalece. Fora dele, o comportamento não mudou. Sem teste automatizado no repositório; a verificação foi feita por script temporário fora do projeto (ver `docs/page-specs/EXECUTION_PLAN.md`, seção 4).
-- Slug inexistente em páginas de detalhe e usuário inexistente em `/perfil` respondem HTTP 200 (soft 404), por causa do streaming.
+- Slug inexistente em páginas de detalhe e usuário inexistente em `/perfil` respondiam HTTP 200 (soft 404). Resolvido no lote 2 (ADR-014), para os três tipos de rota.
 - `hero.jpg` contém PNG com extensão `.jpg`. As imagens de seção são JPEG 4K de 0,5 a 0,9 MB.
 - Legado `src/app/components/` (52 arquivos, ADR-006), ainda não removido. Sem importadores: `src/components/common/Button.tsx`, `src/styles/theme.css` (sintaxe Tailwind) e `src/styles/globals.css` (vazio). Também sem importadores: `src/components/ui/StatusBadge/StatusBadge.styles.ts`, `src/data/cases.ts` (substituído por `src/mocks/`) e `src/imports/*.png`.
 - `dist/` é saída antiga do Vite.
@@ -89,7 +91,8 @@ Registradas em `docs/DECISIONS.md`: ADR-008 (migração para Next.js), ADR-009 (
 
 ## Próximas etapas do roteiro
 
-1. Lote 2 recomendado: correção do 404 real (ADR-014), começando por `/perfil/[usuario]`, com verificação de status HTTP em build de produção, e depois `/investigacoes/[slug]` e `/publicacao/[slug]`. Não iniciado.
+1. Decisão de entrada de `/criadores` na barra mobile. Os erros de hidratação ainda precisam ser verificados em `next dev`.
 2. Decisões em aberto: entrada de `/criadores` na barra mobile; significado de `community` e `classified`; aba "Sem fontes".
-3. Commit do trabalho pendente (lote 1 e `/investigacoes`), somente com pedido explícito.
-4. Revisão de limpeza do legado e dos arquivos sem importadores, com aprovação.
+3. Perfil social, pendências que exigem autorização: "Curtir" e "Favoritar" (desabilitados, como prevê a especificação); conteúdo da aba "Investigações"; revisão da catalogação dos temas das publicações (etapa 10, ADR-018). Detalhes em `docs/features/perfil-social.md`, "Pendências e limitações".
+4. Commit do trabalho pendente (lotes 2 e 3B, perfil social e documentação), somente com pedido explícito.
+5. Revisão de limpeza do legado e dos arquivos sem importadores, com aprovação.
