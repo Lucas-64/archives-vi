@@ -21,11 +21,13 @@ export interface NavItem {
   href: string | null;
 }
 
-// Main navigation, exactly as in the approved prototype.
+// Main navigation. The prototype items are kept; "Explorar" was added by an approved decision
+// (docs/DECISIONS.md, ADR-012).
 export const MAIN_NAV: readonly NavItem[] = [
   { label: "Início", href: ROUTES.inicio },
   { label: "Mistérios", href: ROUTES.misterios },
   { label: "Teorias", href: ROUTES.teorias },
+  { label: "Explorar", href: ROUTES.explorar },
   { label: "Mapa", href: null },
   { label: "Galeria", href: null },
   { label: "Fórum", href: null },

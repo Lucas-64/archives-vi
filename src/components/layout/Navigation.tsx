@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import styled from "styled-components";
 
 import type { NavItem } from "../../constants/routes";
+import { isRotaAtiva } from "../../lib/navegacao";
 
 export interface NavigationProps {
   items: readonly NavItem[];
@@ -27,8 +28,7 @@ export function Navigation({ items, investigadoresOnline }: NavigationProps) {
             );
           }
 
-          const isActive =
-            item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+          const isActive = isRotaAtiva(pathname, item.href);
 
           return (
             <li key={item.label}>

@@ -1,6 +1,6 @@
 # Especificação: `/explorar`
 
-**Status**: implementada (fase 2, commit `e29e2e96`). Verificada no navegador em 1440, 768 e 375 px: quatro tiles, links corretos, tiles sem rota sem link, "Mistérios em alta" e sem rolagem horizontal. A Home não foi alterada: desde o commit anterior à fase 2, a única mudança em `ExploreCards.tsx` é a exportação de `ExploreTile`. Pendência: entrada na navegação principal, aprovada como decisão de produto e ainda não implementada (aguarda autorização específica).
+**Status**: implementada (fase 2, commit `e29e2e96`). Verificada no navegador em 1440, 768 e 375 px: quatro tiles, links corretos, tiles sem rota sem link, "Mistérios em alta" e sem rolagem horizontal. A Home não foi alterada: desde o commit anterior à fase 2, a única mudança em `ExploreCards.tsx` é a exportação de `ExploreTile`. Entrada na navegação principal integrada no lote 1 (ADR-012, `docs/page-specs/EXECUTION_PLAN.md`, seção 14). Pendência: nenhuma dentro do escopo desta página.
 **Fonte de verdade**: decisões aprovadas abaixo, `docs/DESIGN_SYSTEM.md` e o código atual.
 
 ## 1. Objetivo e responsabilidade

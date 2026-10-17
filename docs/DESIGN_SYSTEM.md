@@ -222,7 +222,7 @@ Teorias → `/publicacoes`. Mapa, Galeria and Fórum keep the prototype appearan
 but have no link yet (rendered with `aria-disabled`). The online counter sits on
 the right of the navigation bar and uses a demonstrative value
 (`src/mocks/atividade.ts`); there is no real-time presence yet.
-Explorar and Criadores are reached from the Home blocks.
+Explorar is in the main navigation after Teorias. Criadores and Criar teoria are text actions in the desktop header, hidden below 768px, where the mobile tab bar provides Criar (ADR-012). Active items are matched by path segment (`isRotaAtiva`, `src/lib/navegacao.ts`).
 
 ## Page Recipes
 

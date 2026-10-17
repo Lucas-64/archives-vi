@@ -1,6 +1,6 @@
 # Especificação: `/criadores`
 
-**Status**: implementada (fase 2, commit `e29e2e96`). Verificada no navegador em 1440, 768 e 375 px: três criadores, links para o perfil, sem contagens e sem rolagem horizontal. Pendência: entrada no cabeçalho desktop, aprovada como decisão de produto e ainda não implementada (aguarda autorização específica).
+**Status**: implementada (fase 2, commit `e29e2e96`). Verificada no navegador em 1440, 768 e 375 px: três criadores, links para o perfil, sem contagens e sem rolagem horizontal. Entrada no cabeçalho desktop integrada no lote 1 (ADR-012, `docs/page-specs/EXECUTION_PLAN.md`, seção 14). Pendência: entrada na barra mobile não decidida.
 **Fonte de verdade**: decisões aprovadas abaixo, `docs/PROJECT_VISION.md`, `docs/ROADMAP.md` e o código atual.
 
 ## 1. Objetivo e responsabilidade

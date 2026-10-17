@@ -202,3 +202,70 @@ Decisões complementares (aprovadas em 2026-10-15):
 - Aba "Todas" da listagem `/investigacoes`: inclui todos os registros `Case`, inclusive `community` e `classified`, com os rótulos existentes. Não há abas adicionais. Os status continuam mapeados como no ADR-009.
 - `src/data/cases.ts` é mantido por enquanto, sem uso, até uma revisão específica.
 
+## ADR-012: Navigation Entries for Explorar, Criadores and Criar
+
+Decision (aprovada em 2026-10-16):
+
+- `/explorar` integra a navegação principal (`MAIN_NAV` em `src/constants/routes.ts`), depois de "Teorias".
+- `/criadores` e `/criar` são ações de texto no cabeçalho desktop, ao lado de "Buscar" e "Entrar". Abaixo de 768 px essas duas ações não aparecem: a barra inferior cobre `/criar`.
+- A página ativa é calculada por segmento de caminho (`isRotaAtiva` em `src/lib/navegacao.ts`). Assim `/criar` não fica ativo em `/criar-conta` nem em `/criadores`.
+
+Reasoning:
+
+- Explorar, criadores e criação de teorias são pontos de entrada da descoberta e da participação. Sem link visível, só são alcançados pela URL ou por blocos da Home.
+- Uma única regra de página ativa evita marcações indevidas em rotas com prefixo comum.
+
+Status: Accepted. Pendente: `/criadores` ainda não tem entrada na barra inferior mobile. Nenhuma decisão foi tomada sobre isso.
+
+## ADR-013: No Artificial Link Between Publication and Investigation
+
+Decision (aprovada em 2026-10-16): a publicação `letreiro-praia-trailer` não é vinculada à investigação `simbolos-vice-city` por enquanto. Não se criam associações entre publicações e investigações apenas para preencher a interface.
+
+Reasoning:
+
+- A correspondência entre os conteúdos não é clara: a investigação trata de uma rede de símbolos, e a publicação, de uma aparição dupla de um letreiro.
+- Uma associação falsa induziria o leitor a acreditar em uma relação que não foi investigada.
+
+Status: Accepted, por enquanto. O campo opcional de vínculo previsto no ADR-011 não foi criado. Qualquer vínculo futuro exige correspondência real e nova decisão.
+
+## ADR-014: Real HTTP 404 for Missing Routes
+
+Decision (aprovada em 2026-10-16):
+
+- Rotas inexistentes devem responder HTTP 404 real. Uma página "Página não encontrada" servida com HTTP 200 (soft 404) não é considerada solução definitiva.
+- A correção será feita em um lote separado e verificada em build de produção, com teste do status HTTP real.
+- Ela vale para os casos conhecidos: `/perfil/[usuario]`, `/investigacoes/[slug]` e `/publicacao/[slug]`.
+
+Reasoning:
+
+- Um status 200 faz mecanismos de busca e ferramentas de verificação indexarem páginas inexistentes.
+- A página em português já existe; falta o status correto.
+
+Status: Accepted (a decisão). Pendente: a estratégia técnica ainda precisa ser verificada contra a arquitetura atual, por exemplo `generateStaticParams` com `dynamicParams = false`, registrada como sugestão em `docs/page-specs/EXECUTION_PLAN.md`. Não é uma decisão.
+
+## ADR-015: Investigation Management Area and Backend Priority
+
+Decision (aprovada em 2026-10-16):
+
+- A futura interface de gerenciamento de uma investigação ficará dentro da própria página da investigação. Ela será visível somente ao responsável autenticado pela investigação. Não é implementada agora.
+- Backend, banco de dados e autenticação real ficam fora do escopo até que o frontend esteja concluído e validado.
+- Ações demonstrativas não são convertidas em operações reais.
+
+Reasoning:
+
+- Manter o gerenciamento junto da investigação evita uma área administrativa separada antes de existir controle de acesso.
+- Validar o frontend primeiro reduz o retrabalho de contratos de dados.
+
+Status: Accepted.
+
+## ADR-016: Temporary Divergence in Evidence #001
+
+Decision (aprovada em 2026-10-16): a descrição e a imagem da evidência #001 de `simbolos-vice-city` são mantidas como estão, apesar da divergência registrada: a descrição fala de um traçado em um muro, e a imagem anexada é uma vista noturna de cidade.
+
+Reasoning:
+
+- A correção depende de uma imagem compatível, que ainda não foi fornecida.
+- Alterar a evidência neste momento ampliaria o escopo de um lote que não trata de conteúdo.
+
+Status: Accepted, em caráter temporário. Deve ser revisto quando houver imagem compatível.
+

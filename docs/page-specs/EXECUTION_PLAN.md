@@ -213,8 +213,8 @@ As demonstrações de `/criar`, `/entrar` e `/criar-conta` foram confirmadas com
 ## 10. Decisões de produto
 
 **Confirmadas pelo usuário em 2026-10-16** (registradas na seção 13):
-1. `/explorar` entra na **navegação principal**. Ainda não implementado.
-2. `/criadores` e `/criar` ganham **entradas no cabeçalho desktop**. Ainda não implementado.
+1. `/explorar` entra na **navegação principal**. Implementado no lote 1 (ADR-012, seção 14).
+2. `/criadores` e `/criar` ganham **entradas no cabeçalho desktop**. Implementado no lote 1 (ADR-012, seção 14).
 3. A primeira publicação, `letreiro-praia-trailer`, **não** é vinculada à investigação `simbolos-vice-city` por enquanto.
 4. Perfis inexistentes: o 404 real é objetivo, com a recomendação da seção 13. Ainda não implementado.
 5. A evidência #001 mantém a imagem e a descrição atuais, apesar da inconsistência registrada.
@@ -244,7 +244,7 @@ Não há testes automatizados, nem script de verificação de rotas. A verifica�
 
 ## 12. Próximo passo
 
-As sete rotas da fase 2 estão implementadas e verificadas. As próximas tarefas de integração estão priorizadas na seção 13, e a primeira delas é a implementação das entradas de navegação já aprovadas. Nenhuma implementação começa sem autorização específica.
+As sete rotas da fase 2 estão implementadas e verificadas. As entradas de navegação aprovadas foram integradas no lote 1 (seção 14). A próxima tarefa é o 404 real de rotas inexistentes (ADR-014), começando por `/perfil/[usuario]`, com verificação de status HTTP em build de produção. Nenhuma implementação começa sem autorização específica.
 
 ## 13. Auditoria de integração (2026-10-16)
 
@@ -310,10 +310,50 @@ Causa: `src/app/(site)/loading.tsx` envolve todas as rotas do grupo em `Suspense
 
 ### 13.6 Tarefas de integração pendentes (em ordem de prioridade)
 
-1. **Entradas de navegação aprovadas**: `/explorar` na navegação principal (`MAIN_NAV`); `/criadores` e `/criar` no cabeçalho desktop. Arquivos compartilhados: `src/constants/routes.ts`, `src/components/layout/Navigation.tsx` e `src/components/layout/Header.tsx`. Verificar em 768, 1024 e 1280 px, porque o cabeçalho já tem três ações. Exige autorização específica.
+1. **Entradas de navegação aprovadas** (concluída no lote 1, ver seção 14): `/explorar` na navegação principal (`MAIN_NAV`); `/criadores` e `/criar` no cabeçalho desktop. Arquivos compartilhados: `src/constants/routes.ts`, `src/components/layout/Navigation.tsx` e `src/components/layout/Header.tsx`. Verificar em 768, 1024 e 1280 px, porque o cabeçalho já tem três ações. Exige autorização específica.
 2. **404 real em `/perfil/[usuario]`**, conforme a recomendação da seção 13.5. Exige autorização. Depois, decidir o mesmo para os detalhes de investigação e publicação.
 3. **Registro formal das decisões de 2026-10-16** em `docs/DECISIONS.md`, como exige o `CLAUDE.md`. Não foi criado nesta etapa, porque o arquivo não estava na lista autorizada. Recomendo criar uma entrada, após sua confirmação.
 4. **Commit** do trabalho de `/investigacoes` e da fase 2 pendente. Aguarda pedido explícito. Inclui os dois arquivos de imagem não rastreados.
 5. **Pendências de produto**: primeira publicação e investigação (não vinculadas por decisão); evidência #001 (mantida); status `community` e `classified`; aba "Sem fontes".
 6. **Verificações não feitas**: comparação visual da Home contra o commit anterior; erros de rede e de produção pelo console.
 7. **Fora do escopo atual**: área do investigador (depende de autenticação e backend) e qualquer backend.
+
+## 14. Lote 1: integração da navegação (2026-10-16)
+
+### 14.1 Implementado
+
+- **Navegação principal**: `/explorar` adicionada a `MAIN_NAV` (`src/constants/routes.ts`), depois de "Teorias". Os itens existentes foram preservados.
+- **Cabeçalho desktop**: ações de texto "Criadores" (`/criadores`) e "Criar teoria" (`/criar`), ao lado de "Buscar" e "Entrar". Ficam ocultas abaixo de 768 px (`DesktopActionLink` em `src/components/layout/Header.tsx`).
+- **Página ativa**: regra única por segmento de caminho, em `src/lib/navegacao.ts` (`isRotaAtiva`), usada por `Header`, `Navigation` e `MobileTabBar`. Antes, a comparação era por prefixo, e `/criar` ficava ativo em `/criar-conta` e em `/criadores`.
+- **Decisões**: registradas em `docs/DECISIONS.md` (ADR-012 a ADR-016). Nenhuma alteração de código de página.
+
+### 14.2 Verificações
+
+Typecheck, lint e build foram executados depois da alteração de código: passaram.
+
+Navegador (servidor de desenvolvimento), medições reais:
+
+| Verificação | Largura | Resultado |
+|---|---|---|
+| Ações do cabeçalho | 768 px | Cinco ações entre 279 e 720 px; a marca termina em 246 px; sem sobreposição; sem rolagem horizontal |
+| Ações do cabeçalho | 1014 px (maior largura que a janela de teste alcança) | Uma linha, sem sobreposição, sem rolagem horizontal |
+| Navegação principal | 768 px | Os sete itens na mesma linha de links; o contador de investigadores vai para a segunda linha; barra com 69 px de altura, contra 54 px a 1014 px. Medido, não corrigido (ver 14.4) |
+| Navegação principal | 1014 px | Uma linha, 54 px de altura |
+| Home | 768 px e 1014 px | Sem rolagem horizontal |
+| `/publicacoes` | 768 px | Sem rolagem horizontal; só "Teorias" ativa |
+| `/explorar` | 1014 px | "Explorar" ativa na navegação principal, com o traço rosa |
+| `/criadores` | 1014 px | "Criadores" ativo no cabeçalho; "Criar teoria" não ativo |
+| Teclado | 1014 px | Tab três vezes a partir do topo leva a "Criadores", com contorno rosa visível, `href="/criadores"` e `aria-current="page"` |
+| Barra mobile | 375 px | `/criar` ativa "Criar"; `/buscar` ativa "Buscar"; `/criadores` e `/criar-conta` não ativam nenhuma aba (antes, `/criadores` ativava "Criar") |
+
+### 14.3 Limitações
+
+- As larguras de 1024 px e 1280 px não foram medidas: a janela de teste alcança no máximo 1014 px, e o emulador reduz a janela para caber. A 1024 e a 1280 px, a barra principal cabe em uma linha pelo cálculo (709 px exigidos contra 880 px disponíveis a 1024 px), mas isso é estimativa, não medição.
+- O console de erros não foi verificado nesta etapa, porque a alteração não tocou nas páginas de formulário nem no perfil. A verificação anterior foi feita na seção 13.4.
+- Erros de rede e de produção não foram verificados pelo navegador.
+
+### 14.4 Pendências desta etapa
+
+- **Barra principal a 768 px**: com sete itens, o contador de investigadores vai para a segunda linha. Não há ajuste pequeno que mantenha uma linha: reduzir o espaçamento não basta (faltam cerca de 87 px). Resolver exigiria esconder o contador ou encurtar rótulos, o que é uma decisão de interface. Não foi alterado.
+- **`/criadores` na barra mobile**: não há entrada. Não foi decidido.
+- **404 real** (ADR-014): não iniciado neste lote, por escopo.

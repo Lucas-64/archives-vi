@@ -13,6 +13,7 @@ import {
 import type { IconType } from "react-icons";
 
 import { MOBILE_NAV } from "../../constants/routes";
+import { isRotaAtiva } from "../../lib/navegacao";
 
 // Icons are matched to the functional items by label. Labels come from MOBILE_NAV.
 const ICONS: Record<string, IconType> = {
@@ -23,10 +24,6 @@ const ICONS: Record<string, IconType> = {
   Buscar: FiSearch,
 };
 
-function isActive(pathname: string, href: string) {
-  return href === "/" ? pathname === "/" : pathname.startsWith(href);
-}
-
 export function MobileTabBar() {
   const pathname = usePathname() ?? "";
 
@@ -34,7 +31,7 @@ export function MobileTabBar() {
     <TabBar aria-label="Navegação inferior">
       {MOBILE_NAV.map((item) => {
         const Icon = ICONS[item.label] ?? FiHome;
-        const active = isActive(pathname, item.href);
+        const active = isRotaAtiva(pathname, item.href);
 
         return (
           <TabLink

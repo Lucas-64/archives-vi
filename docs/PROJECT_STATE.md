@@ -4,7 +4,7 @@
 
 ## Próximo passo
 
-As sete rotas da fase 2 estão implementadas e verificadas, e a fase 2.1 (acabamento) foi concluída. A auditoria de integração de 2026-10-16 está em `docs/page-specs/EXECUTION_PLAN.md`, seção 13. Próximas tarefas, em ordem: (1) implementar as entradas de navegação aprovadas (`/explorar` na navegação principal; `/criadores` e `/criar` no cabeçalho desktop); (2) implementar o 404 real de `/perfil/[usuario]`, conforme a recomendação da seção 13.5; (3) registrar as decisões de produto em `docs/DECISIONS.md`; (4) commitar o trabalho pendente, somente com pedido explícito. Nenhuma delas começa sem autorização específica.
+As sete rotas da fase 2 estão implementadas e verificadas, e a fase 2.1 (acabamento) foi concluída. No lote 1, as entradas de navegação aprovadas foram implementadas (`/explorar` na navegação principal; `/criadores` e `/criar` no cabeçalho desktop) e as decisões de produto foram registradas em `docs/DECISIONS.md` (ADR-012 a ADR-016). Próximas tarefas: (1) implementar o 404 real de rotas inexistentes (ADR-014), começando por `/perfil/[usuario]`, com a estratégia técnica verificada em build de produção; (2) decidir a entrada de `/criadores` na barra mobile; (3) commitar o trabalho pendente, somente com pedido explícito. Nenhuma delas começa sem autorização específica.
 
 **Decisões confirmadas**: isolamento B (paralelo no checkout atual, com escopos disjuntos); demonstrações de `/criar`, `/entrar` e `/criar-conta` como simulações rotuladas, sem persistência nem sessão (ADR-010, "Exceções aprovadas"); `/investigacoes` com todos os status em "Todas", incluindo `community` e `classified`.
 
@@ -12,7 +12,7 @@ As sete rotas da fase 2 estão implementadas e verificadas, e a fase 2.1 (acabam
 
 **Stack**: Next.js 16.4.0 (App Router), React 19.2.9, TypeScript strict, styled-components 6.6, ESLint 9 com `eslint-config-next`. Node 20.9 ou superior.
 
-**Git**: branch `main`, HEAD `e29e2e96`. Os commits `86a4fc65` e `e29e2e96` estão locais e ainda não foram enviados (`ahead 2`). `86a4fc65` reúne publicações, investigação, imagens de seção e a documentação anterior; `e29e2e96` reúne as rotas da fase 2, a fundação de formulários e a documentação. O commit `75c2b87b` já está em `origin/main`. O trabalho de `/investigacoes/[slug]` (evidências, galeria, sugestões e localização) está no working tree, sem commit, junto com `exemplo.jpg` e `exemplo_2.jpg`, que não estão rastreados.
+**Git**: branch `main`, HEAD `a13c7305`. Os commits `86a4fc65`, `e29e2e96` e `a13c7305` estão locais e ainda não foram enviados (`ahead 3` em relação a `origin/main`, que está em `75c2b87b`). `86a4fc65` reúne publicações, investigação, imagens de seção e a documentação anterior; `e29e2e96` reúne as rotas da fase 2, a fundação de formulários e a documentação; `a13c7305` reúne a evolução de `/investigacoes/[slug]` (evidências, galeria, sugestões e localização). As alterações do lote 1 (navegação, decisões e documentação) estão no working tree, sem commit.
 
 **Rotas implementadas** (grupo `(site)`):
 
@@ -26,14 +26,13 @@ As sete rotas da fase 2 estão implementadas e verificadas, e a fase 2.1 (acabam
 - `/buscar`: busca em publicações, investigações e criadores, com abas e consulta na URL (`?q=`, `?tipo=`).
 - `/criadores`: lista dos criadores dos mocks, com links para o perfil. Sem contagens.
 - `/perfil/[usuario]`: perfil público com as publicações do criador. Usuário inexistente mostra "Página não encontrada".
-- `/explorar`: hub de descoberta com as quatro tiles e "Mistérios em alta". Sem entrada de navegação ainda; a entrada na navegação principal foi aprovada e aguarda implementação.
+- `/explorar`: hub de descoberta com as quatro tiles e "Mistérios em alta". Está na navegação principal desde o lote 1 (ADR-012).
 
 **Entradas de navegação das rotas novas (verificado no código)**:
 
-- Cabeçalho: `/buscar`, `/entrar`, `/criar-conta`.
-- Barra mobile: `/criar`, `/buscar`.
-- Sem entrada: `/explorar`. `/criadores` só é alcançada pela migalha de pão do perfil. `/criar` não tem entrada no desktop.
-- Decisões aprovadas (ainda não implementadas): `/explorar` na navegação principal; `/criadores` e `/criar` no cabeçalho desktop.
+- Navegação principal: `/explorar`, depois de "Teorias" (ADR-012).
+- Cabeçalho desktop: `/buscar`, `/criadores`, `/criar` (texto "Criar teoria"), `/entrar`, `/criar-conta` (ADR-012). `/criadores` e `/criar` ficam ocultos abaixo de 768 px.
+- Barra mobile: `/criar`, `/buscar`. `/criadores` ainda não tem entrada na barra mobile.
 
 **Itens de navegação sem rota** (visuais, com `href: null`): Mapa, Galeria e Fórum.
 
@@ -45,7 +44,7 @@ As sete rotas da fase 2 estão implementadas e verificadas, e a fase 2.1 (acabam
 
 ## Decisões
 
-Registradas em `docs/DECISIONS.md`: ADR-008 (migração para Next.js), ADR-009 (mapeamento de status), ADR-010 (dados demonstrativos e ações sem persistência, com as exceções aprovadas) e ADR-011 (rotas de publicação e de investigação).
+Registradas em `docs/DECISIONS.md`: ADR-008 (migração para Next.js), ADR-009 (mapeamento de status), ADR-010 (dados demonstrativos e ações sem persistência, com as exceções aprovadas), ADR-011 (rotas de publicação e de investigação), e, aprovadas em 2026-10-16: ADR-012 (entradas de navegação), ADR-013 (sem vínculo artificial entre publicação e investigação), ADR-014 (404 real para rotas inexistentes, a implementar), ADR-015 (área de gerenciamento dentro da investigação, backend depois do frontend) e ADR-016 (divergência temporária da evidência #001).
 
 ## Pendências
 
@@ -57,12 +56,12 @@ Registradas em `docs/DECISIONS.md`: ADR-008 (migração para Next.js), ADR-009 (
 - `docs/CONTRIBUTING.md`: regra de páginas corrigida para depender do escopo aprovado em `PROJECT_STATE.md` (o escopo de sprint não existe mais como fonte).
 - Conteúdo de Mapa, Galeria e Fórum, quando forem funcionais.
 - Autenticação, para liberar seguir, comentar, avaliar, adicionar pista e encerrar investigação.
-- Primeira publicação ligada à investigação: não feito. O conteúdo de "Por que o letreiro da praia aparece duas vezes no trailer?" (`letreiro-praia-trailer`) não corresponde claramente a nenhuma investigação. A candidata mais próxima é `simbolos-vice-city` (o letreiro verde do trailer é um nó do grafo e a evidência #009 trata dele), mas a pergunta da publicação é mais estreita. Aguarda decisão.
-- Imagens de exemplo: `exemplo.jpg` mostra uma vista noturna de cidade, e não o traçado ou a placa que as evidências #001 e #013 descrevem. Antes, a tag e a imagem estavam em evidência com descrição diferente. A #001 mantém a imagem com texto alternativo fiel. Precisa de uma imagem compatível com a evidência. `exemplo_2.jpg` é PNG com extensão `.jpg` e é o mapa de referência; também é usado como segunda imagem do carrossel da sugestão #012, rotulada como mapa.
-- Entrada de `/explorar` na navegação: sem entrada, no cabeçalho ou só na barra mobile. A proposta mínima (título "Explorar" da Home como link) não foi aplicada.
-- Entradas de `/criadores` e de `/criar` no desktop. Hoje não há link de entrada no cabeçalho nem na Home.
+- Primeira publicação ligada à investigação: não feito. O conteúdo de "Por que o letreiro da praia aparece duas vezes no trailer?" (`letreiro-praia-trailer`) não corresponde claramente a nenhuma investigação. A candidata mais próxima é `simbolos-vice-city` (o letreiro verde do trailer é um nó do grafo e a evidência #009 trata dele), mas a pergunta da publicação é mais estreita. Decisão: não vincular por enquanto (ADR-013).
+- Imagens de exemplo: `exemplo.jpg` mostra uma vista noturna de cidade, e não o traçado ou a placa que as evidências #001 e #013 descrevem. Antes, a tag e a imagem estavam em evidência com descrição diferente. A #001 mantém a imagem com texto alternativo fiel. Precisa de uma imagem compatível com a evidência. A divergência é mantida temporariamente (ADR-016). `exemplo_2.jpg` é PNG com extensão `.jpg` e é o mapa de referência; também é usado como segunda imagem do carrossel da sugestão #012, rotulada como mapa.
+- Entrada de `/criadores` na barra mobile: não existe. Decisão de produto pendente, não coberta pelo ADR-012.
+- Cabeçalho desktop com cinco ações e a barra de navegação com sete itens: a 768 px, a barra principal quebra em duas linhas e o contador de investigadores vai para a segunda. Medido, não ajustado (ver `docs/page-specs/EXECUTION_PLAN.md`, seção 14).
 - Textos da fase 2 revisados na fase 2.1. Corrigidos: descrição de `/criadores` e título oculto de `/explorar`. Mantidos: avisos demonstrativos de `/entrar` e `/criar-conta`, que dizem explicitamente que nenhuma sessão ou conta é criada e nada é salvo; e o estado vazio de `/perfil`.
-- Soft 404 de `/perfil/[usuario]`: confirmado em produção (HTTP 200). Recomendação técnica registrada em `docs/page-specs/EXECUTION_PLAN.md`, seção 13.5 (`generateStaticParams` com `dynamicParams = false`). Não implementada; aguarda autorização.
+- Soft 404 de `/perfil/[usuario]`, `/investigacoes/[slug]` e `/publicacao/[slug]`: confirmado em produção (HTTP 200). A decisão de corrigir está em ADR-014. A correção ainda não foi implementada nem verificada; a estratégia técnica sugerida (`generateStaticParams` com `dynamicParams = false`) precisa ser verificada contra a arquitetura atual e em build de produção. Não é solução definitiva enquanto a página responder HTTP 200.
 
 **Código e dados**
 
@@ -90,6 +89,7 @@ Registradas em `docs/DECISIONS.md`: ADR-008 (migração para Next.js), ADR-009 (
 
 ## Próximas etapas do roteiro
 
-1. Revisão e commit do working tree: `/investigacoes`, fundação de formulários e fase 2. Aguarda pedido explícito.
-2. Decisões em aberto listadas em "Pendências": entradas de navegação, estratégia do soft 404 de `/perfil/[usuario]` e status `community` e `classified`.
-3. Revisão de limpeza do legado e dos arquivos sem importadores, com aprovação.
+1. Lote 2 recomendado: correção do 404 real (ADR-014), começando por `/perfil/[usuario]`, com verificação de status HTTP em build de produção, e depois `/investigacoes/[slug]` e `/publicacao/[slug]`. Não iniciado.
+2. Decisões em aberto: entrada de `/criadores` na barra mobile; significado de `community` e `classified`; aba "Sem fontes".
+3. Commit do trabalho pendente (lote 1 e `/investigacoes`), somente com pedido explícito.
+4. Revisão de limpeza do legado e dos arquivos sem importadores, com aprovação.

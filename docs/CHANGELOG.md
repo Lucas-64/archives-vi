@@ -28,6 +28,9 @@ The project follows Semantic Versioning and Conventional Commits.
 
 ### Changed
 
+- Main navigation: "Explorar" (`/explorar`) added after "Teorias" (ADR-012).
+- Desktop header: "Criadores" (`/criadores`) and "Criar teoria" (`/criar`) text actions added (ADR-012). They are hidden below 768px.
+- Active navigation items are matched by path segment, so `/criar` is no longer marked active on `/criar-conta` or `/criadores`.
 - `/investigacoes/[slug]`: the "Conexões" section is replaced by "Localização das evidências". The anchor navigation follows.
 - `/investigacoes/[slug]`: the first image of each evidence card is about 40% of its previous height (604×135 px on desktop, 341×102 px on mobile). The width and `object-fit: cover` are unchanged.
 - `/investigacoes/[slug]`: the reference map in "Localização das evidências" is about half its previous size (about 188px wide on desktop, 162px on mobile), keeping its proportion.

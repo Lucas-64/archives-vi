@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import styled from "styled-components";
 import { FiSearch } from "react-icons/fi";
 
 import { MAIN_NAV, ROUTES } from "../../constants/routes";
+import { isRotaAtiva } from "../../lib/navegacao";
 import { Navigation } from "./Navigation";
 
 export interface HeaderProps {
@@ -12,6 +14,9 @@ export interface HeaderProps {
 }
 
 export function Header({ investigadoresOnline }: HeaderProps) {
+  const pathname = usePathname() ?? "";
+  const ativo = (href: string) => isRotaAtiva(pathname, href);
+
   return (
     <HeaderContainer>
       <TopRow>
@@ -23,11 +28,36 @@ export function Header({ investigadoresOnline }: HeaderProps) {
         </Brand>
 
         <Actions>
-          <ActionLink href={ROUTES.buscar} aria-label="Buscar">
+          <ActionLink
+            href={ROUTES.buscar}
+            aria-label="Buscar"
+            aria-current={ativo(ROUTES.buscar) ? "page" : undefined}
+            $active={ativo(ROUTES.buscar)}
+          >
             <FiSearch aria-hidden="true" />
             <span>Buscar</span>
           </ActionLink>
-          <ActionLink href={ROUTES.entrar}>Entrar</ActionLink>
+          <DesktopActionLink
+            href={ROUTES.criadores}
+            aria-current={ativo(ROUTES.criadores) ? "page" : undefined}
+            $active={ativo(ROUTES.criadores)}
+          >
+            Criadores
+          </DesktopActionLink>
+          <DesktopActionLink
+            href={ROUTES.criar}
+            aria-current={ativo(ROUTES.criar) ? "page" : undefined}
+            $active={ativo(ROUTES.criar)}
+          >
+            Criar teoria
+          </DesktopActionLink>
+          <ActionLink
+            href={ROUTES.entrar}
+            aria-current={ativo(ROUTES.entrar) ? "page" : undefined}
+            $active={ativo(ROUTES.entrar)}
+          >
+            Entrar
+          </ActionLink>
           <PrimaryLink href={ROUTES.criarConta}>Criar conta</PrimaryLink>
         </Actions>
       </TopRow>
@@ -97,23 +127,37 @@ const Actions = styled.div`
   gap: 20px;
 `;
 
-const ActionLink = styled(Link)`
+const ActionLink = styled(Link)<{ $active?: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm};
   font-size: 14px;
   font-weight: 500;
-  color: ${({ theme }) => theme.colors.textSecondary};
+  white-space: nowrap;
+  color: ${({ $active, theme }) => ($active ? theme.colors.text : theme.colors.textSecondary)};
   transition: color ${({ theme }) => theme.transitions.default};
 
   &:hover {
     color: ${({ theme }) => theme.colors.text};
   }
 
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.pink};
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+
   @media (max-width: 767px) {
     span {
       display: none;
     }
+  }
+`;
+
+// Desktop-only text actions. Below 768px the mobile tab bar provides these routes.
+const DesktopActionLink = styled(ActionLink)`
+  @media (max-width: 767px) {
+    display: none;
   }
 `;
 
