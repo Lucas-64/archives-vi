@@ -10,11 +10,16 @@ import { EmptyState } from "../../../../components/states/EmptyState";
 import { ROUTES } from "../../../../constants/routes";
 import { buscarCriadorPorUsuario } from "../../../../lib/criadores";
 import {
+  getConquistasDoMembro,
   getCriadores,
   getInvestigacaoPorSlug,
   getInvestigacoes,
+  getPatentesDoMembro,
   getPublicacoes,
 } from "../../../../lib/data";
+import { ConquistasInvestigador } from "../../../../components/perfil/ConquistasInvestigador";
+import { PatenteInvestigador } from "../../../../components/perfil/PatenteInvestigador";
+import { TeoriasPublicacoesPerfil } from "../../../../components/perfil/TeoriasPublicacoesPerfil";
 import {
   contarContribuicoes,
   contribuicoesRecentes,
@@ -57,7 +62,12 @@ export default async function PerfilPage({ params }: { params: Params }) {
   // Unknown usuario: render the (site) not-found page instead of an empty profile.
   if (!criador) notFound();
 
-  const [publicacoes, casos] = await Promise.all([getPublicacoes(), getInvestigacoes()]);
+  const [publicacoes, casos, patentes, conquistas] = await Promise.all([
+    getPublicacoes(),
+    getInvestigacoes(),
+    getPatentesDoMembro(criador.id),
+    getConquistasDoMembro(criador.id),
+  ]);
 
   // Only investigations with a published detail have author and participants (see lib/perfil.ts).
   const detalhes = (await Promise.all(casos.map((caso) => getInvestigacaoPorSlug(caso.id))))
@@ -83,11 +93,16 @@ export default async function PerfilPage({ params }: { params: Params }) {
   // getPublicacoes already sorts by date, most recent first.
   const publicacoesDoCriador = publicacoes.filter((item) => item.autorId === criador.id);
 
-  // Sem sidebar: o perfil ainda não tem conteúdo próprio para ela (reconhecimento e membros
-  // relacionados não têm dados). A sidebar global de tópicos e atualizações não é usada aqui
-  // (docs/features/perfil-social.md, seção 8). Sem sidebar, o conteúdo ocupa a largura toda.
+  // Lateral própria do perfil: patente e conquistas do próprio membro (ADR-019). A sidebar global de
+  // tópicos e atualizações não é usada aqui (docs/features/perfil-social.md, seção 8).
   return (
     <ContentGrid
+      sidebar={
+        <>
+          <PatenteInvestigador patentes={patentes} />
+          <ConquistasInvestigador conquistas={conquistas} />
+        </>
+      }
       main={
         <>
           <Breadcrumb
@@ -115,7 +130,7 @@ export default async function PerfilPage({ params }: { params: Params }) {
                 <InvestigacoesPerfil criadas={investigacoesCriadas} participacoes={investigacoesParticipadas} />
               ),
               "teorias-publicacoes": (
-                <PublicacoesSecao publicacoes={publicacoesDoCriador} autor={criador} />
+                <TeoriasPublicacoesPerfil publicacoes={publicacoesDoCriador} autor={criador} />
               ),
               conquistas: (
                 <EmptyState

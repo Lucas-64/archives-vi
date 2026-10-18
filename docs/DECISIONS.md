@@ -313,3 +313,62 @@ Status: Accepted, com estado de implementação por item:
 - Item 1: a regra está em `investigacaoEmDestaque` (etapa 1) e o bloco foi implementado na etapa 5 do plano. Verificado em produção.
 - Item 2: implementado na etapa 10 do plano (2026-10-17), com autorização. O catálogo está em `src/constants/tagsTematicas.ts`, e `Publicacao.tags` usa os ids do catálogo. O texto livre anterior ficou em `Publicacao.termos`, sem perda. Nenhuma investigação tem tags (não há dados). A atribuição dos temas foi feita por correspondência com o nome e precisa de revisão do produto. Auditoria da etapa 11: removidas duas associações duvidosas (`letreiro` e `código` → Símbolos e mensagens); os termos continuam em `termos`. Tags não aparecem em nenhuma página de perfil.
 - Item 3: implementado na etapa 7 (`ContentGrid` sem sidebar; perfil sem sidebar, porque ainda não há conteúdo próprio para ela).
+
+## ADR-019: Demonstrative Patents and Achievements on the Profile
+
+Decision (aprovada pelo produto em 2026-10-17): o perfil exibe, na lateral, a seção "Patente do Investigador" (medalha atual, nome, frase descritiva futura e medalhas das patentes anteriores) e a seção "Conquistas do Investigador" (nomes em rótulos compactos). A aba "Teorias e publicações" ganha um filtro temático recolhível. Os dados são demonstrativos e vivem em `src/mocks/patentes.ts` e `src/mocks/conquistas.ts`.
+
+Reasoning:
+
+- Dar identidade ao investigador sem depender de um sistema de progressão definido.
+- A composição fica pronta para receber os dados reais quando as regras existirem: só os mocks e os tipos mudam.
+
+Limites:
+
+- Não há XP, pontuação, progressão automática, desbloqueio, classificação nem cálculo de nível. A medalha e a patente são só dados.
+- A medalha é um SVG provisório, colorido por tokens do tema. Não há imagens externas.
+- A frase descritiva (`descricao`) é opcional e não tem texto provisório: sem valor, não aparece.
+- Os dados são rotulados como demonstrativos na própria seção.
+
+Supersedes: o risco R3 de `docs/features/perfil-social.md` (gamificação antecipada) e a seção "Patente, especializações e distintivos" deixam de ser aplicáveis à exibição demonstrativa. Permanecem em vigor para XP, especializações e qualquer regra de progressão, que continuam fora de escopo.
+
+Também substitui "Membros relacionados" da sidebar, que não tem dados. A lateral passa a mostrar as conquistas do próprio membro, não outros usuários.
+
+Status: Accepted, em caráter demonstrativo. Deve ser revisto quando as regras de patente e os dados reais forem definidos.
+
+## ADR-020: Editorial Mysteries and Community Theories
+
+Decision (aprovada pelo produto em 2026-10-17): a rota `/investigacoes/[slug]` é a página editorial de Mistério, e `/publicacoes` é a área comunitária unificada de Teorias e Investigações. As URLs atuais são mantidas.
+
+- `/investigacoes/[slug]`: cabeçalho editorial, vídeo do YouTube opcional (só o link é guardado, o player é o do YouTube), corpo com a hipótese, argumentos, pergunta central e fontes da teoria, seção de fotografias com as imagens das evidências públicas, e transição para a comunidade.
+- `/publicacoes`: lista investigações e publicações em grupos separados, sem vínculo entre eles (ADR-013). A discussão completa de cada investigação fica na rota dedicada `/publicacoes/investigacao/[slug]`: teoria, evidências com sugestões, discussão, localização, histórico e síntese, reutilizando os mesmos componentes. Slug inexistente recebe HTTP 404 real (ADR-014). A forma antiga `?investigacao=slug` é redirecionada na configuração (`next.config.ts`), com 307.
+- O item de menu "Teorias" passa a se chamar "Teorias e investigações".
+
+Resolvida na etapa seguinte: a discussão ganhou a rota dedicada `/publicacoes/investigacao/[slug]`, com `dynamicParams = false` e `generateStaticParams`, o que dá HTTP 404 real para slug inexistente, como em `/investigacoes/[slug]`. Não há mais listagem renderizada para discussão inexistente. O aprendizado: qualquer `notFound()` ou `redirect()` dentro de uma página dinâmica do grupo `(site)` responde 200 com erro, porque roda sob o `loading.tsx` do grupo; por isso o redirecionamento da forma antiga foi feito na configuração.
+
+Status: Accepted, com a pendência acima registrada.
+
+## ADR-021: Meu Perfil como área pessoal demonstrativa
+
+Decisão (implementada em 2026-10-17, aguardando revisão do produto): a área pessoal do membro fica em `/meu-perfil`, com oito abas (Visão geral, Investigações, Teorias e publicações, Evidências, Respostas e discussões, Solicitações e conexões, Notificações e Conquistas). Não há login, backend, persistência nem upload real. A página mostra um criador fixo dos mocks (`ID_CRIADOR_DEMONSTRATIVO`, em `src/lib/meuPerfil.ts`) e rotula isso como demonstração.
+
+- Dados reais, derivados dos mocks por funções puras (`src/lib/meuPerfil.ts`): investigações criadas e em que participa, teorias e publicações, evidências enviadas, respostas nas discussões. Evidências usam o estado do domínio: evidência pública = aceita; sugestão pendente, aceita ou recusada conforme o `status` real. Nenhum motivo de recusa e nenhuma data é inventada.
+- Dados demonstrativos, marcados como tais: notificações, solicitações e conexões (`src/mocks/meuPerfil.ts`). Responder a solicitações exige conta: a ação fica desabilitada, com link para `/entrar`.
+- Edição de nome e bio: validação (nome obrigatório, até 60 caracteres; bio até 240), mensagem de erro por campo e aviso explícito de que nada é salvo. A alteração vale só até recarregar a página.
+- Marcar notificação como lida: só muda a tela, com o mesmo aviso de não persistência.
+- Patente e conquistas: somente leitura, reutilizando `PatenteInvestigador` e `ConquistasInvestigador` (ADR-019).
+- Sem XP, nível, reputação ou regra de progressão. Os dados não existem no domínio.
+- Âncoras: só evidência pública tem `#evidencia-{id}`. Sugestão aceita abre a comunidade sem âncora, porque a lista pública não a identifica por id. Respostas abrem `#discussao`.
+- As abas usam `?aba=` pelo mesmo mecanismo de ADR-017 (`AbasPerfil` generalizado com lista de abas e parâmetro). A aba padrão não aparece na URL.
+- Navegação: link "Meu perfil" no cabeçalho desktop, entre "Criar teoria" e "Entrar", oculto abaixo de 768 px, pelo precedente de ADR-012. A barra mobile não muda.
+- Rota estática sem parâmetros, com `robots` `noindex`. Não há 404 dinâmico a tratar.
+
+Por que: a especificação pede uma área pessoal com identidade, edição e as oito abas, sem backend. Reutilizar os componentes do perfil público evita duplicar a regra de autoria e mantém um único conjunto de dados. Limitar a edição ao estado da página evita simular persistência, o que ADR-010 proíbe.
+
+Pendências: (1) decidir se o link "Meu perfil" deve aparecer para visitantes sem conta, já que o cabeçalho também mostra "Entrar" e "Criar conta"; (2) autenticação e backend para editar, responder, marcar como lida de fato e receber notificações reais; (3) upload de avatar, ainda não existe; (4) leitor de tela não testado nesta área.
+
+Status: Accepted, com as pendências acima registradas. Aguardando a revisão do produto antes da auditoria final do MVP.
+
+Ajuste visual (2026-10-17, após comparação com a referência aprovada): a área passou a usar cinco abas visíveis, como na referência: Visão geral, Teorias e publicações, Investigações, Evidências e Atividade. Solicitações e conexões, respostas e discussões e notificações ficaram na aba Atividade. A aba Conquistas saiu: as conquistas aparecem como rótulos no cabeçalho, e a patente tem cartão próprio, somente leitura. O parâmetro de URL passou a ser `?aba=atividade` (e os valores antigos `respostas`, `solicitacoes`, `notificacoes` e `conquistas` caem na aba padrão). A mudança de oito para cinco abas é uma mudança de decisão e precisa de confirmação do produto. Também saíram do Meu Perfil o indicador de contribuições, a investigação em destaque e as contribuições recentes, que continuam no perfil público.
+
+Esclarecimento (2026-10-17, auditoria final da etapa): a aba Atividade mostra o número de notificações não lidas e atualiza esse contador junto com a lista. Um valor de `?aba=` desconhecido cai na aba Visão geral, como em ADR-017 para o perfil público. A ação "Abrir investigação" usa o mesmo padrão de ação restrita do projeto (desabilitada, com link para `/entrar`), porque não há rota de criação de investigação.

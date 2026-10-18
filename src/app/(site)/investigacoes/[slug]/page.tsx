@@ -2,25 +2,18 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ContentGrid } from "../../../../components/layout/ContentGrid";
-import { AnchorNav } from "../../../../components/investigacao/AnchorNav";
-import { DiscussaoSection } from "../../../../components/investigacao/DiscussaoSection";
-import { EvidenciasList } from "../../../../components/investigacao/EvidenciasList";
-import { HistoricoTimeline } from "../../../../components/investigacao/HistoricoTimeline";
-import { LocalizacaoEvidencias } from "../../../../components/investigacao/LocalizacaoEvidencias";
-import { InvestigacaoCabecalho } from "../../../../components/investigacao/InvestigacaoCabecalho";
 import { InvestigacaoSidebar } from "../../../../components/investigacao/InvestigacaoSidebar";
-import { Secao, Subtitulo } from "../../../../components/investigacao/Secao";
-import { SinteseSection } from "../../../../components/investigacao/SinteseSection";
-import { TeoriaSection } from "../../../../components/investigacao/TeoriaSection";
+import { MisterioCabecalho } from "../../../../components/investigacao/MisterioCabecalho";
+import { FotografiasMisterio, MisterioCorpo, TransicaoComunidade } from "../../../../components/investigacao/MisterioArtigo";
+import { VideoYoutube } from "../../../../components/investigacao/VideoYoutube";
 import { EmptyState } from "../../../../components/states/EmptyState";
 import { getInvestigacaoPorSlug, getInvestigacoes } from "../../../../lib/data";
 
 type Params = Promise<{ slug: string }>;
 
-// Investigation slugs are the ids of the listing records (Case), generated at build time from
-// the mocks. With dynamicParams = false, an unknown slug gets a real HTTP 404 from the router,
-// before any streaming starts. A new investigation then needs a new build until there is an
-// API. See docs/DECISIONS.md, ADR-014.
+// Página editorial do mistério (ADR-020). Os slugs são os ids dos registros Case, gerados no build a
+// partir dos mocks. Com dynamicParams = false, um slug desconhecido recebe HTTP 404 real do roteador,
+// antes do streaming. Ver docs/DECISIONS.md, ADR-014.
 export const dynamicParams = false;
 
 export async function generateStaticParams() {
@@ -33,74 +26,40 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const resultado = await getInvestigacaoPorSlug(slug);
 
   if (!resultado) {
-    return { title: "Investigação não encontrada | ARCHIVES VI" };
+    return { title: "Mistério não encontrado | ARCHIVES VI" };
   }
 
   return { title: `${resultado.caso.title} | ARCHIVES VI`, description: resultado.caso.description };
 }
 
-export default async function InvestigacaoPage({ params }: { params: Params }) {
+export default async function MisterioPage({ params }: { params: Params }) {
   const { slug } = await params;
   const resultado = await getInvestigacaoPorSlug(slug);
 
-  // Unknown slug: the (site) not-found page is rendered.
+  // Slug desconhecido: a página "não encontrada" do grupo (site) é renderizada.
   if (!resultado) notFound();
 
   const { caso, detalhe } = resultado;
 
-  // The listing exists but its detailed content has not been published yet.
+  // O registro existe, mas o conteúdo detalhado ainda não foi publicado.
   if (!detalhe) {
     return (
       <EmptyState
         titulo={caso.title}
-        descricao="Os detalhes desta investigação ainda não foram publicados."
+        descricao="Os detalhes deste mistério ainda não foram publicados."
       />
     );
   }
-
-  const evidenciaDiscussao = detalhe.evidencias.find(
-    (evidencia) => evidencia.id === detalhe.discussaoEvidenciaId,
-  );
 
   return (
     <ContentGrid
       main={
         <>
-          <InvestigacaoCabecalho caso={caso} detalhe={detalhe} />
-          <AnchorNav />
-
-          <Secao id="teoria" titulo="Teoria">
-            <TeoriaSection teoria={detalhe.teoria} revisoes={detalhe.contagens.revisoes} />
-          </Secao>
-
-          <Secao id="evidencias" titulo="Evidências">
-            <EvidenciasList
-              evidencias={detalhe.evidencias}
-              sugestoes={detalhe.sugestoes}
-              investigador={detalhe.autor}
-              total={detalhe.contagens.evidencias}
-            />
-          </Secao>
-
-          <Secao id="discussao" titulo="Discussão">
-            <DiscussaoSection
-              evidenciaId={detalhe.discussaoEvidenciaId}
-              evidenciaTitulo={evidenciaDiscussao?.titulo ?? ""}
-              discussaoContextual={detalhe.discussaoContextual}
-              discussaoGeral={detalhe.discussaoGeral}
-            />
-          </Secao>
-
-          <Secao id="localizacao" titulo="Localização das evidências">
-            <LocalizacaoEvidencias />
-          </Secao>
-
-          <Secao id="historico" titulo="Histórico e síntese">
-            <Subtitulo>Linha do tempo</Subtitulo>
-            <HistoricoTimeline registros={detalhe.historico} />
-            <Subtitulo>Síntese</Subtitulo>
-            <SinteseSection sintese={detalhe.sintese} />
-          </Secao>
+          <MisterioCabecalho caso={caso} detalhe={detalhe} />
+          <VideoYoutube url={caso.video?.url} titulo={caso.video?.titulo} />
+          <MisterioCorpo teoria={detalhe.teoria} />
+          <FotografiasMisterio evidencias={detalhe.evidencias} />
+          <TransicaoComunidade slug={caso.id} />
         </>
       }
       sidebar={<InvestigacaoSidebar caso={caso} detalhe={detalhe} />}

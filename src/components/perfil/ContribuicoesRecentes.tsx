@@ -35,7 +35,7 @@ interface ItemExibido {
 }
 
 // Apresentação de cada tipo. Os destinos existem: /publicacao/[slug] (página de publicação),
-// /investigacoes/[slug] e a âncora #evidencia-{id}, que EvidenciaCard define para cada evidência
+// /publicacoes/investigacao/[slug] (área comunitária) e a âncora #evidencia-{id}, que EvidenciaCard define para cada evidência
 // pública e sugestão aceita.
 function montarItem(item: ContribuicaoRecente, investigacoes: Case[]): ItemExibido | null {
   if (item.tipo === "publicacao") {
@@ -61,7 +61,7 @@ function montarItem(item: ContribuicaoRecente, investigacoes: Case[]): ItemExibi
       rotulo: "Evidência",
       variant: "default",
       titulo: item.titulo,
-      href: `${ROUTES.investigacao(item.investigacaoId)}#evidencia-${item.id}`,
+      href: `${ROUTES.comunidadeInvestigacao(item.investigacaoId)}#evidencia-${item.id}`,
       contexto: `Na investigação ${caso.title}`,
       rotuloData: "Enviada em",
       data: item.data,

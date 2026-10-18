@@ -4,6 +4,8 @@ export const ROUTES = {
   teorias: "/publicacoes",
   investigacoes: "/investigacoes",
   investigacao: (slug: string) => `/investigacoes/${slug}`,
+  // Área comunitária de uma investigação (teoria, evidências, discussão, localização, histórico e síntese).
+  comunidadeInvestigacao: (slug: string) => `/publicacoes/investigacao/${slug}`,
   publicacoes: "/publicacoes",
   publicacao: (slug: string) => `/publicacao/${slug}`,
   criar: "/criar",
@@ -11,6 +13,8 @@ export const ROUTES = {
   criadores: "/criadores",
   buscar: "/buscar",
   perfil: (usuario: string) => `/perfil/${usuario}`,
+  // Área pessoal demonstrativa (ADR-021). Sem login: não há conta real por trás da página.
+  meuPerfil: "/meu-perfil",
   entrar: "/entrar",
   criarConta: "/criar-conta",
 } as const;
@@ -26,7 +30,7 @@ export interface NavItem {
 export const MAIN_NAV: readonly NavItem[] = [
   { label: "Início", href: ROUTES.inicio },
   { label: "Mistérios", href: ROUTES.misterios },
-  { label: "Teorias", href: ROUTES.teorias },
+  { label: "Teorias e investigações", href: ROUTES.teorias },
   { label: "Explorar", href: ROUTES.explorar },
   { label: "Mapa", href: null },
   { label: "Galeria", href: null },

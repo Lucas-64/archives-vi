@@ -25,4 +25,6 @@ export interface Case {
   updatedAt?: string;
   // Temas do catálogo controlado (ADR-018). Opcional: nenhum mock de investigação tem tags hoje.
   tags?: TagTematica[];
+  // Vídeo do YouTube relacionado ao mistério. Só o link é guardado; o player é o do próprio YouTube.
+  video?: { url: string; titulo?: string };
 }

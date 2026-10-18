@@ -1,28 +1,34 @@
 import Link from "next/link";
 
+import { CaseCard } from "../../../components/cards/CaseCard";
 import { PublicationCard } from "../../../components/cards/PublicationCard";
 import { FilterTabs } from "../../../components/filters/FilterTabs";
 import { ContentGrid } from "../../../components/layout/ContentGrid";
+import { Subtitulo } from "../../../components/investigacao/Secao";
 import { CardList } from "../../../components/page/CardList";
 import { PageBody } from "../../../components/page/PageBody";
 import { PageHeader } from "../../../components/page/PageHeader";
 import { Sidebar } from "../../../components/home/Sidebar";
+import { FiltroTemas } from "../../../components/tags/FiltroTemas";
 import { EmptyState } from "../../../components/states/EmptyState";
 import { FILTROS_PUBLICACOES } from "../../../constants/filtros";
 import { ROUTES } from "../../../constants/routes";
+import { TAGS_TEMATICAS, type TagTematica } from "../../../constants/tagsTematicas";
 import {
   getAtualizacoes,
   getCriadores,
+  getInvestigacoes,
   getPublicacoes,
   getTopicosForum,
   SIMULACOES,
   type Simulacao,
 } from "../../../lib/data";
-import type { TipoPublicacao } from "../../../types/Publicacao";
-import { TAGS_TEMATICAS, type TagTematica } from "../../../constants/tagsTematicas";
-import { FiltroTemas } from "../../../components/tags/FiltroTemas";
 import { lerTagTematica } from "../../../lib/tags";
+import type { TipoPublicacao } from "../../../types/Publicacao";
 
+// Área comunitária unificada de Teorias e Investigações (ADR-020). Lista as investigações estruturadas e
+// as publicações, em grupos separados, sem criar vínculos entre elas. A discussão de cada investigação
+// tem rota própria: /publicacoes/investigacao/[slug].
 type SearchParams = Promise<{ tipo?: string; tag?: string; simular?: string }>;
 
 const TIPOS_VALIDOS: readonly TipoPublicacao[] = ["teoria", "investigacao"];
@@ -51,12 +57,17 @@ export default async function PublicacoesPage({
   searchParams: SearchParams;
 }) {
   const params = await searchParams;
+
   const tipo = lerTipo(params.tipo);
   const tag = lerTagTematica(params.tag);
   const simular = lerSimulacao(params.simular);
 
-  const [publicacoes, criadores, topicos, atualizacoes] = await Promise.all([
+  // Investigações só têm tags se o registro tiver. Com um tema ativo, a lista de investigações fica fora.
+  const mostrarInvestigacoes = tag === undefined && (tipo === undefined || tipo === "investigacao");
+
+  const [publicacoes, investigacoes, criadores, topicos, atualizacoes] = await Promise.all([
     getPublicacoes({ tipo, tag, simular }),
+    mostrarInvestigacoes ? getInvestigacoes({ simular }) : Promise.resolve([]),
     getCriadores(),
     getTopicosForum(),
     getAtualizacoes(),
@@ -69,13 +80,18 @@ export default async function PublicacoesPage({
     active: filtro.value === tipo,
   }));
 
+  const rotuloPublicacoes =
+    tipo === "investigacao" ? "Publicações de investigação" : tipo === "teoria" ? "Teorias" : "Publicações";
+
+  const semNada = publicacoes.length === 0 && investigacoes.length === 0;
+
   return (
     <ContentGrid
       main={
         <>
           <PageHeader
-            titulo="Publicações"
-            descricao="Teorias e investigações publicadas pela comunidade de Leonida."
+            titulo="Teorias e investigações"
+            descricao="Teorias, investigações e discussões da comunidade de Leonida."
           />
 
           <FilterTabs label="Filtrar publicações" tabs={abas} />
@@ -93,7 +109,7 @@ export default async function PublicacoesPage({
           />
 
           <PageBody>
-            {publicacoes.length === 0 ? (
+            {semNada ? (
               tag ? (
                 <EmptyState
                   titulo="Nenhuma publicação com este tema"
@@ -102,21 +118,42 @@ export default async function PublicacoesPage({
                 />
               ) : (
                 <EmptyState
-                  titulo="Nenhuma publicação por aqui"
-                  descricao="Ainda não há publicações neste filtro. Tente outra categoria."
+                  titulo="Nada por aqui ainda"
+                  descricao="Ainda não há teorias ou investigações neste filtro. Tente outra categoria."
                 />
               )
-            ) : (
-              <CardList>
-                {publicacoes.map((publicacao) => (
-                  <PublicationCard
-                    key={publicacao.id}
-                    publicacao={publicacao}
-                    autor={autores.get(publicacao.autorId)}
-                  />
-                ))}
-              </CardList>
-            )}
+            ) : null}
+
+            {investigacoes.length > 0 ? (
+              <section aria-label="Investigações">
+                <Subtitulo>Investigações</Subtitulo>
+                <CardList>
+                  {investigacoes.map((caso) => (
+                    <CaseCard
+                      key={caso.id}
+                      caso={caso}
+                      orientacao="horizontal"
+                      href={ROUTES.comunidadeInvestigacao(caso.id)}
+                    />
+                  ))}
+                </CardList>
+              </section>
+            ) : null}
+
+            {publicacoes.length > 0 ? (
+              <section aria-label={rotuloPublicacoes}>
+                <Subtitulo>{rotuloPublicacoes}</Subtitulo>
+                <CardList>
+                  {publicacoes.map((publicacao) => (
+                    <PublicationCard
+                      key={publicacao.id}
+                      publicacao={publicacao}
+                      autor={autores.get(publicacao.autorId)}
+                    />
+                  ))}
+                </CardList>
+              </section>
+            ) : null}
           </PageBody>
         </>
       }

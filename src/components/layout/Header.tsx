@@ -51,6 +51,13 @@ export function Header({ investigadoresOnline }: HeaderProps) {
           >
             Criar teoria
           </DesktopActionLink>
+          <DesktopActionLink
+            href={ROUTES.meuPerfil}
+            aria-current={ativo(ROUTES.meuPerfil) ? "page" : undefined}
+            $active={ativo(ROUTES.meuPerfil)}
+          >
+            Meu perfil
+          </DesktopActionLink>
           <ActionLink
             href={ROUTES.entrar}
             aria-current={ativo(ROUTES.entrar) ? "page" : undefined}

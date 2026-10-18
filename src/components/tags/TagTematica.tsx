@@ -8,16 +8,27 @@ import { rotuloDaTag } from "../../lib/tags";
 
 export interface TagTematicaProps {
   tag: IdTagTematica;
-  // Sem href, a tag é um rótulo estático. Com href, é um filtro, e `ativa` marca a seleção.
+  // Sem href nem onSelecionar, a tag é um rótulo estático. Com href, é um link de filtro. Com
+  // onSelecionar, é um botão de filtro (usado quando o filtro troca a URL no cliente, sem recarregar).
+  // `ativa` marca a seleção.
   href?: string;
+  onSelecionar?: (tag: IdTagTematica) => void;
   ativa?: boolean;
 }
 
 // Tag temática do catálogo (ADR-018). O texto vem do catálogo, pelo id canônico.
-// Estados: estático; link de filtro; link com foco visível; link ativo (aria-current).
+// Estados: estático; link ou botão de filtro; foco visível; ativo (aria-current ou aria-pressed).
 // O design system não define estados de tag. Eles reutilizam os tokens de Badge e de FilterTabs.
-export function TagTematica({ tag, href, ativa = false }: TagTematicaProps) {
+export function TagTematica({ tag, href, onSelecionar, ativa = false }: TagTematicaProps) {
   const rotulo = rotuloDaTag(tag);
+
+  if (onSelecionar) {
+    return (
+      <PilulaBotao type="button" aria-pressed={ativa} $ativa={ativa} onClick={() => onSelecionar(tag)}>
+        {rotulo}
+      </PilulaBotao>
+    );
+  }
 
   if (!href) {
     return <Pilula>{rotulo}</Pilula>;
@@ -49,12 +60,13 @@ const Pilula = styled.span`
   color: ${({ theme }) => theme.colors.textSecondary};
 `;
 
-// Link de filtro. A área de toque tem 44px de altura, como os demais links de navegação.
-export const PilulaLink = styled(Link)<{ $ativa: boolean }>`
+// Estilo interativo compartilhado por link e botão de filtro. A área de toque tem 44px de altura.
+const pilulaInterativa = css<{ $ativa: boolean }>`
   ${pilulaBase}
   min-height: 44px;
   text-decoration: none;
   cursor: pointer;
+  font-family: inherit;
   color: ${({ $ativa, theme }) => ($ativa ? theme.colors.text : theme.colors.textSecondary)};
   border-color: ${({ $ativa, theme }) => ($ativa ? theme.colors.pink : theme.colors.border)};
   background: ${({ $ativa, theme }) => ($ativa ? theme.colors.backgroundSecondary : theme.colors.card)};
@@ -69,4 +81,14 @@ export const PilulaLink = styled(Link)<{ $ativa: boolean }>`
     outline: 2px solid ${({ theme }) => theme.colors.pink};
     outline-offset: 2px;
   }
+`;
+
+// Link de filtro.
+export const PilulaLink = styled(Link)<{ $ativa: boolean }>`
+  ${pilulaInterativa}
+`;
+
+// Botão de filtro (troca a URL no cliente).
+export const PilulaBotao = styled.button<{ $ativa: boolean }>`
+  ${pilulaInterativa}
 `;

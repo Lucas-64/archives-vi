@@ -68,3 +68,18 @@ const Altura = styled.div<{ $desktop: string; $mobile: string }>`
     height: ${({ $mobile }) => $mobile};
   }
 `;
+
+// Skeleton da lateral do perfil (patente e conquistas). As alturas são aproximadas: dependem do
+// número de medalhas e de conquistas de cada membro.
+export function PerfilSkeletonLateral() {
+  return (
+    <>
+      <Altura $desktop="300px" $mobile="300px">
+        <Skeleton height="100%" radius="lg" />
+      </Altura>
+      <Altura $desktop="150px" $mobile="150px">
+        <Skeleton height="100%" radius="lg" />
+      </Altura>
+    </>
+  );
+}

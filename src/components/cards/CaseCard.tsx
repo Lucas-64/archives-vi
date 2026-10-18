@@ -15,10 +15,12 @@ export interface CaseCardProps {
   // "vertical" (default, used in grids). "horizontal" puts the image beside the text
   // and is used in one-card-per-row lists.
   orientacao?: "vertical" | "horizontal";
+  // Destino do título. Padrão: a página editorial do mistério. A área comunitária passa o seu próprio.
+  href?: string;
 }
 
 // Investigation card. The status text is the visible category; color follows the internal status.
-export function CaseCard({ caso, orientacao = "vertical" }: CaseCardProps) {
+export function CaseCard({ caso, orientacao = "vertical", href }: CaseCardProps) {
   const categoria = categoriaDoStatus(caso.status);
 
   return (
@@ -41,7 +43,7 @@ export function CaseCard({ caso, orientacao = "vertical" }: CaseCardProps) {
           uppercase
         />
         <Titulo>
-          <Link href={ROUTES.investigacao(caso.id)}>{caso.title}</Link>
+          <Link href={href ?? ROUTES.investigacao(caso.id)}>{caso.title}</Link>
         </Titulo>
         <Descricao>{caso.description}</Descricao>
         <Meta>

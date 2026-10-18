@@ -186,6 +186,10 @@ No celular, as abas rolam horizontalmente dentro da própria linha, como em `Fil
 | `IndicadoresContribuicao` | criado (etapa 3) | faixa compacta, sem grade grande |
 | `PerfilSidebarBox` | não criado | não há conteúdo para a sidebar do perfil (etapa 7) |
 | `MenuAcoesPerfil` | criado (etapa 2) | menu discreto com itens desabilitados |
+| `PatenteInvestigador` | criado (ajuste final, ADR-019) | lateral: patente atual em destaque, frase descritiva opcional, medalhas das patentes anteriores (demonstrativo). Substitui a ideia de "Reconhecimento" |
+| `ConquistasInvestigador` | criado (ajuste final, ADR-019) | lateral: nomes das conquistas do próprio membro, em rótulos `Badge` (demonstrativo). Substitui "Membros relacionados" |
+| `MedalhaPatente` | criado (ajuste final, ADR-019) | SVG provisório em `src/components/perfil/`, cor por token do tema; informativa (`role="img"`) ou decorativa (`aria-hidden`) |
+| `TeoriasPublicacoesPerfil` | criado (ajuste final) | aba "Teorias e publicações": botão "Filtrar temas" (recolhido por padrão), reutiliza `FiltroTemas` em modo de botões, tema vindo de `?tag=` |
 | `Reconhecimento` (chips) | pendente | depende de distintivos, que não existem nos dados |
 
 ## Modelo de dados proposto
@@ -243,7 +247,7 @@ Cada etapa é pequena e verificável. Nenhuma começa sem autorização.
 
 - **R1 (dados)**: os mocks têm pouca informação por membro. Seções vazias são esperadas; a visão geral precisa funcionar com poucos dados.
 - **R2 (SSG e `searchParams`)**: resolvido na etapa 4 (ADR-017). Ler `searchParams` no servidor tornava a rota dinâmica e fazia perfis inexistentes responderem 200. A aba agora é lida no cliente, e a validação de 404 foi feita por `curl` em produção.
-- **R3 (gamificação antecipada)**: exibir patente ou especialização com valores falsos induziria a crer que o sistema existe. Por isso essas partes ficam fora de todas as etapas.
+- **R3 (gamificação antecipada)**: exibir patente ou especialização com valores falsos induziria a crer que o sistema existe. Por isso essas partes ficam fora de todas as etapas. **Atualizado (ADR-019)**: a exibição demonstrativa de patente e de conquistas foi autorizada pelo produto em 2026-10-17, com dados rotulados como demonstrativos e sem qualquer regra de progressão. XP, especializações e regras de desbloqueio continuam fora de escopo.
 - **R4 (ações desabilitadas)**: botões desabilitados precisam de texto explicativo e link para `/entrar`, sem parecer funcionais.
 - **R5 (identidade de dados)**: o `id` do criador e o `autorId` das publicações precisam continuar iguais.
 

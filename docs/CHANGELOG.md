@@ -7,6 +7,11 @@ The project follows Semantic Versioning and Conventional Commits.
 ## [Unreleased]
 
 ### Added
+- `/meu-perfil`: área pessoal demonstrativa (ADR-021), com identidade, edição de nome e bio com validação e aviso de que nada é salvo, e cinco abas: Visão geral, Teorias e publicações, Investigações, Evidências e Atividade (solicitações, conexões, respostas e notificações). Layout ajustado à referência visual: cabeçalho com identidade, patente em cartão próprio, Aguardando sua ação, Atividade recente e colunas laterais. Evidências, respostas e investigações vêm dos dados reais; solicitações, conexões e notificações são demonstrativas. Patente e conquistas são somente leitura. Sem login, backend ou persistência.
+- Cabeçalho desktop: "Meu perfil" (`/meu-perfil`), oculto abaixo de 768px (ADR-012).
+- `/publicacoes/investigacao/[slug]`: community area of an investigation, with theory, evidence and suggestions, discussion, location, timeline and synthesis (ADR-020). Unknown slugs return HTTP 404.
+- `/investigacoes/[slug]`: editorial page of the mystery: presentation, optional YouTube video (only when a valid link exists), theory text, photographs from public evidence, and a transition to the community area.
+- `/publicacoes`: unified community area of theories and investigations, with investigations and publications in separate groups (no artificial links, ADR-013).
 
 - `/investigacoes/[slug]`: "Evidência do criador" tag on evidences whose author is the investigation's creator. It indicates provenance, not veracity.
 - `/investigacoes/[slug]`: evidence images open in an expanded view inside the card, with up to five images, previous/next controls and a "1 de 3" counter. Keyboard arrows and Escape work.
@@ -29,6 +34,9 @@ The project follows Semantic Versioning and Conventional Commits.
 - `/perfil/[usuario]`: "Investigação em destaque" block in the Visão geral, after the tabs. The choice is an automatic fallback, not the member's pick: investigations the member created come first, then those they took part in, each group by most recent update. It shows the investigation's status, hypothesis, evidence and participant counts, and links to the investigation. It is omitted when no detailed investigation involves the member. The game field is not shown, because the data has none.
 - `/perfil/[usuario]`: compact contribution indicators (investigations created, theories published, evidence sent), computed from the demonstrative data.
 - `/perfil/[usuario]`: header actions. "Seguir" is shown disabled with a link to `/entrar`, because following requires an account (ADR-010). A menu shows "Denunciar" and "Bloquear" disabled, with a note that moderation does not exist yet.
+- `/perfil/[usuario]`: sidebar "Patente do Investigador", with the current medal in large size, the previous medals in a compact row, and demonstrative data (ADR-019). Shows an empty state when a member has no patent data.
+- `/perfil/[usuario]`: sidebar "Conquistas do Investigador", with achievement names as colored labels. Demonstrative data (ADR-019). Shows an empty state when there are none.
+- `/perfil/[usuario]`: the "Teorias e publicações" tab has a collapsible theme filter ("Filtrar temas" / "Ocultar filtros"), closed by default. An active theme from the URL stays applied with the panel closed.
 - `/perfil/[usuario]`: the "Investigações" tab lists real investigations in two groups, "Criadas por este membro" and "Em que participa". Each item links to the investigation. Only investigations with a published detail are included. Empty groups show their own state.
 - `/publicacao/[slug]`: "Curtir" and "Favoritar" as disabled buttons, with the message "Curtir e favoritar exigem conta" and a link to sign in. Nothing is saved and no count is shown.
 - Thematic tags: a controlled catalog of eight themes (`src/constants/tagsTematicas.ts`, ADR-018), with the `TagTematica` component. Publication tags now use the catalog ids.
@@ -37,6 +45,8 @@ The project follows Semantic Versioning and Conventional Commits.
 
 ### Changed
 
+- `/meu-perfil`: layout ajustado à referência visual. Cabeçalho com avatar grande, patente em cartão próprio (somente leitura) e conquistas como rótulos. Cinco abas (ADR-021, ajuste visual), com ações "+ Criar teoria" e "Abrir investigação" (ação restrita) na linha de abas. Visão geral em duas colunas, com atalhos para as abas. A aba Atividade reúne notificações, solicitações e respostas, com contador de não lidas.
+- `AbasPerfil` (opções `variante="caixa"` e `acoes`) e `Avatar` (tamanho `large`) ganharam opções novas. O estilo padrão do perfil público não mudou.
 - Tag audit: two theme associations were removed because they were doubtful. "letreiro" no longer maps to "Símbolos e mensagens", and "código" no longer maps to it. Their free-text terms stay in `termos`.
 - Publication tags: `Publicacao.tags` now holds catalog ids. The previous free-text tags moved to `Publicacao.termos`, unchanged, and still feed the search. The publication page shows the themes as tags and the free-text terms on a separate "Palavras-chave" line. Search also matches theme names.
 - `ContentGrid`: without a `sidebar`, the main column takes the full width, with no empty 320px column. Pages that pass a sidebar keep their layout.

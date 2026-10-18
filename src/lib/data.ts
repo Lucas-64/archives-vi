@@ -16,6 +16,10 @@ import type { Destaque } from "@/types/Destaque";
 import type { Publicacao, TipoPublicacao } from "@/types/Publicacao";
 import type { Topico } from "@/types/Topico";
 import type { TagTematica } from "@/constants/tagsTematicas";
+import { patentesPorCriador } from "@/mocks/patentes";
+import { conquistasPorCriador } from "@/mocks/conquistas";
+import type { PatentesDoMembro } from "@/types/Patente";
+import type { Conquista } from "@/types/Conquista";
 import { filtrarPorTag } from "./tags";
 
 // Estados de teste da interface. Só têm efeito fora de produção (next dev).
@@ -101,6 +105,15 @@ export async function getCriadores(): Promise<Criador[]> {
 
 export async function getCriadorPorId(id: string): Promise<Criador | undefined> {
   return criadores.find((item) => item.id === id);
+}
+
+// Patentes e conquistas demonstrativas por criador (ver mocks e ADR-019). Sem entrada, não há dados.
+export async function getPatentesDoMembro(criadorId: string): Promise<PatentesDoMembro | undefined> {
+  return patentesPorCriador[criadorId];
+}
+
+export async function getConquistasDoMembro(criadorId: string): Promise<Conquista[]> {
+  return conquistasPorCriador[criadorId] ?? [];
 }
 
 export async function getTopicosForum(): Promise<Topico[]> {
