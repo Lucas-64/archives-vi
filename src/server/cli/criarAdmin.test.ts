@@ -383,7 +383,7 @@ describe("script admin:criar: processo real (tsx) em banco descartável", () => 
   });
 
   const rodar = (args: string[], env: Record<string, string>) =>
-    spawnSync("node_modules/.bin/tsx", ["src/server/cli/criarAdmin.ts", ...args], {
+    spawnSync(process.execPath, ["node_modules/tsx/dist/cli.mjs", "src/server/cli/criarAdmin.ts", ...args], {
       env: { PATH: process.env.PATH ?? "", HOME: process.env.HOME ?? "", DATABASE_URL: url, ...env } as unknown as NodeJS.ProcessEnv,
       encoding: "utf8",
       input: "",

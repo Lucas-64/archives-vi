@@ -85,6 +85,8 @@ export const POST = envolver(async (requisicao) => {
 
 - **`docker-compose.yml` não foi testado.** O ambiente onde o backend foi desenvolvido não tem daemon do Docker em funcionamento.
 - **O PostgreSQL usado nos testes e nas migrações foi o 16 instalado nativamente** (porta 5433), não o do Compose. Não foi verificado em outros sistemas operacionais.
+- **Windows (verificado em 2026-10-21, PostgreSQL 16 nativo, porta 5432, colação `Portuguese_Brazil.1252`):** `npm test` passa 476 de 477 testes, rodando em série (`npx vitest run --no-file-parallelism`). `criarAdmin.test.ts` leva cerca de 90 s e só passa com `--hookTimeout=180000`, porque o `hookTimeout` de 30 s do `vitest.config.ts` não basta nessa máquina.
+- **Falha conhecida de colação:** `usuarios.test.ts` > "validações: limite 51 → 422…" falha porque o `lower()` do banco não converte em minúsculas letras como `ŹŽŻĹĽĞØŁĐ` na colação `Portuguese_Brazil.1252` (a colação `C` é pior, e só o provedor ICU converteria tudo). É limitação do PostgreSQL no Windows, aceita por ora; o cluster, o `template1` e `criarBancoDeTeste` não foram alterados. **Hipótese não confirmada:** o teste passa em Linux com colação UTF-8; isso ainda precisa ser verificado em um ambiente Linux real.
 - O registro de erros em `console.error` é provisório.
 - Nada é integrado ao front.
 - A janela do limite de tentativas é fixa (permite uma rajada na virada) e o IP vem de `X-Forwarded-For`, forjável sem proxy confiável.
