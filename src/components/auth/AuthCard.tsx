@@ -35,6 +35,17 @@ export const AuthForm = styled.form`
   gap: 20px;
 `;
 
+// Erro geral de um envio (credenciais incorretas, limite de tentativas, servidor indisponível).
+export const AuthErro = styled.p`
+  padding: 12px 16px;
+  border: 1px solid ${({ theme }) => theme.colors.debunked};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  background: ${({ theme }) => theme.colors.backgroundSecondary};
+  font-size: ${({ theme }) => theme.fontSize.sm};
+  line-height: 1.6;
+  color: ${({ theme }) => theme.colors.text};
+`;
+
 // Makes the submit button fill the card width.
 export const AuthBotao = styled.div`
   & > button {

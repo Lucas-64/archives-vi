@@ -1,34 +1,30 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import styled from "styled-components";
 
 import { ROUTES } from "../../constants/routes";
-import type { Case } from "../../types/Case";
-import type { InvestigacaoDetalhe } from "../../types/InvestigacaoDetalhe";
+import type { DetalheReal } from "../../lib/adaptadores";
+import type { CasoDeCard } from "../../types/Case";
 import { Breadcrumb } from "../navigation/Breadcrumb";
 import { AnchorNav } from "./AnchorNav";
-import { DiscussaoSection } from "./DiscussaoSection";
-import { EvidenciasList } from "./EvidenciasList";
-import { HistoricoTimeline } from "./HistoricoTimeline";
-import { LocalizacaoEvidencias } from "./LocalizacaoEvidencias";
-import { Secao, Subtitulo } from "./Secao";
-import { SinteseSection } from "./SinteseSection";
+import { Secao } from "./Secao";
 import { TeoriaSection } from "./TeoriaSection";
 
 export interface ComunidadeInvestigacaoProps {
-  caso: Case;
-  detalhe: InvestigacaoDetalhe;
+  caso: CasoDeCard;
+  detalhe: DetalheReal;
+  // Seções com dados do servidor, montadas pela página (cada uma com o seu estado de carregamento).
+  historico: ReactNode;
+  // Seção de evidências (lista pública, envio, sugestões e fila), montada pela página com dados do servidor.
+  evidencias: ReactNode;
 }
 
-// Área comunitária de um mistério, em /publicacoes/investigacao/[slug] (ADR-020). Reúne as seções que
-// antes ficavam no detalhe da investigação: teoria, evidências com sugestões, discussão, localização,
-// histórico e síntese. Os componentes são os mesmos; só a página mudou.
-export function ComunidadeInvestigacao({ caso, detalhe }: ComunidadeInvestigacaoProps) {
-  const evidenciaDiscussao = detalhe.evidencias.find(
-    (evidencia) => evidencia.id === detalhe.discussaoEvidenciaId,
-  );
-
+// Área comunitária de uma investigação, em /publicacoes/investigacao/[slug] (ADR-020), com dados reais:
+// teoria, evidências e histórico. Discussão, localização das evidências e síntese não aparecem porque a API
+// não tem esses dados (ADR-031); nada é inventado para preenchê-las.
+export function ComunidadeInvestigacao({ caso, detalhe, historico, evidencias }: ComunidadeInvestigacaoProps) {
   return (
     <>
       <Cabecalho>
@@ -39,7 +35,7 @@ export function ComunidadeInvestigacao({ caso, detalhe }: ComunidadeInvestigacao
             { label: caso.title },
           ]}
         />
-        <Rotulo>Discussão da comunidade</Rotulo>
+        <Rotulo>Área da comunidade</Rotulo>
         <Titulo>{caso.title}</Titulo>
         <LinkMisterio href={ROUTES.investigacao(caso.id)}>Ler o mistério</LinkMisterio>
       </Cabecalho>
@@ -51,32 +47,11 @@ export function ComunidadeInvestigacao({ caso, detalhe }: ComunidadeInvestigacao
       </Secao>
 
       <Secao id="evidencias" titulo="Evidências">
-        <EvidenciasList
-          evidencias={detalhe.evidencias}
-          sugestoes={detalhe.sugestoes}
-          investigador={detalhe.autor}
-          total={detalhe.contagens.evidencias}
-        />
+        {evidencias}
       </Secao>
 
-      <Secao id="discussao" titulo="Discussão">
-        <DiscussaoSection
-          evidenciaId={detalhe.discussaoEvidenciaId}
-          evidenciaTitulo={evidenciaDiscussao?.titulo ?? ""}
-          discussaoContextual={detalhe.discussaoContextual}
-          discussaoGeral={detalhe.discussaoGeral}
-        />
-      </Secao>
-
-      <Secao id="localizacao" titulo="Localização das evidências">
-        <LocalizacaoEvidencias />
-      </Secao>
-
-      <Secao id="historico" titulo="Histórico e síntese">
-        <Subtitulo>Linha do tempo</Subtitulo>
-        <HistoricoTimeline registros={detalhe.historico} />
-        <Subtitulo>Síntese</Subtitulo>
-        <SinteseSection sintese={detalhe.sintese} />
+      <Secao id="historico" titulo="Histórico">
+        {historico}
       </Secao>
     </>
   );

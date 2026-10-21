@@ -1,52 +1,37 @@
 import { CaseCard } from "../../../components/cards/CaseCard";
 import { FilterTabs } from "../../../components/filters/FilterTabs";
-import { Sidebar } from "../../../components/home/Sidebar";
 import { ContentGrid } from "../../../components/layout/ContentGrid";
 import { CardList } from "../../../components/page/CardList";
+import { LinkDeAcao } from "../../../components/page/LinkDeAcao";
+import { NotaLista } from "../../../components/page/NotaLista";
 import { PageBody } from "../../../components/page/PageBody";
 import { PageHeader } from "../../../components/page/PageHeader";
 import { EmptyState } from "../../../components/states/EmptyState";
 import { FILTROS_INVESTIGACOES } from "../../../constants/filtros";
 import { ROUTES } from "../../../constants/routes";
-import {
-  getAtualizacoes,
-  getInvestigacoes,
-  getTopicosForum,
-  SIMULACOES,
-  type Simulacao,
-} from "../../../lib/data";
-import {
-  filtrarInvestigacoes,
-  type CategoriaInvestigacao,
-} from "../../../lib/investigacao";
+import { investigacaoParaCaso } from "../../../lib/adaptadores";
+import { filtrarInvestigacoes, type CategoriaInvestigacao } from "../../../lib/investigacao";
+import { investigacoesDaListagem } from "../../../server/leitura/investigacoes";
+import { LIMITE_LISTA } from "../../../server/leitura/usuarios";
 
-type SearchParams = Promise<{ categoria?: string; simular?: string }>;
+// Listagem de investigações reais (API, via serviço no processo; ADR-029 e ADR-031).
+export const dynamic = "force-dynamic";
 
-// Reads the category from the URL slug. Unknown values fall back to "Todas".
+type SearchParams = Promise<{ categoria?: string }>;
+
+// Lê a categoria do slug da URL. Valores desconhecidos caem em "Todas".
 function lerCategoria(slug?: string): CategoriaInvestigacao | undefined {
   return FILTROS_INVESTIGACOES.find((filtro) => filtro.slug === slug)?.value;
 }
 
-function lerSimulacao(valor?: string): Simulacao | undefined {
-  return SIMULACOES.find((estado) => estado === valor);
-}
-
-export default async function InvestigacoesPage({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
+export default async function InvestigacoesPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const categoria = lerCategoria(params.categoria);
-  const simular = lerSimulacao(params.simular);
 
-  const [casos, topicos, atualizacoes] = await Promise.all([
-    getInvestigacoes({ simular }),
-    getTopicosForum(),
-    getAtualizacoes(),
-  ]);
+  const { itens, haMais } = await investigacoesDaListagem();
+  const casos = itens.map(investigacaoParaCaso);
 
-  // Keeps every record in "Todas", including community and classified.
+  // "Todas" mantém todos os registros, inclusive comunidade e classificadas. A categoria é aplicada sobre a página carregada.
   const visiveis = filtrarInvestigacoes(casos, categoria);
 
   const abas = FILTROS_INVESTIGACOES.map((filtro) => ({
@@ -62,6 +47,7 @@ export default async function InvestigacoesPage({
           <PageHeader
             titulo="Investigações"
             descricao="Investigações organizadas em torno de evidências, conexões e discussão."
+            acao={<LinkDeAcao href={ROUTES.criarInvestigacao}>Criar investigação</LinkDeAcao>}
           />
 
           <FilterTabs label="Filtrar investigações por categoria" tabs={abas} />
@@ -83,10 +69,16 @@ export default async function InvestigacoesPage({
                 ))}
               </CardList>
             )}
+            {haMais ? (
+              <NotaLista>
+                {categoria
+                  ? `Filtrando entre as ${LIMITE_LISTA} investigações mais recentes.`
+                  : `Mostrando as ${LIMITE_LISTA} investigações mais recentes.`}
+              </NotaLista>
+            ) : null}
           </PageBody>
         </>
       }
-      sidebar={<Sidebar topicos={topicos} atualizacoes={atualizacoes} />}
     />
   );
 }

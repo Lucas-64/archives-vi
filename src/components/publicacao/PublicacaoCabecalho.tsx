@@ -2,19 +2,18 @@
 
 import styled from "styled-components";
 
-import Link from "next/link";
-
-import { ROUTES } from "../../constants/routes";
 import { formatarData, formatarNumero } from "../../lib/formatacao";
 import type { Criador } from "../../types/Criador";
 import type { Publicacao } from "../../types/Publicacao";
 import { Badge } from "../ui/Badge";
-import { Button } from "../ui/Button";
+import { BotaoCurtir } from "./BotaoCurtir";
 import { TagTematica } from "../tags/TagTematica";
 
 export interface PublicacaoCabecalhoProps {
   publicacao: Publicacao;
   autor: Criador | undefined;
+  curtidas: number;
+  euCurti: boolean;
 }
 
 const ROTULO_TIPO = {
@@ -22,7 +21,7 @@ const ROTULO_TIPO = {
   investigacao: { texto: "Investigação", variant: "info" },
 } as const;
 
-export function PublicacaoCabecalho({ publicacao, autor }: PublicacaoCabecalhoProps) {
+export function PublicacaoCabecalho({ publicacao, autor, curtidas, euCurti }: PublicacaoCabecalhoProps) {
   const tipo = ROTULO_TIPO[publicacao.tipo];
 
   return (
@@ -34,21 +33,11 @@ export function PublicacaoCabecalho({ publicacao, autor }: PublicacaoCabecalhoPr
       <Meta>
         <span>{autor ? `@${autor.usuario}` : "Autor desconhecido"}</span>
         <time dateTime={publicacao.data}>{formatarData(publicacao.data)}</time>
-        <span>{formatarNumero(publicacao.comentarios)} comentários</span>
+        <span>{formatarNumero(publicacao.comentarios)} {publicacao.comentarios === 1 ? "comentário" : "comentários"}</span>
       </Meta>
-      <Resumo>{publicacao.resumo}</Resumo>
-      {/* Curtir e favoritar exigem conta (ADR-010): desabilitados, sem contagem nem persistência. */}
-      <Acoes>
-        <Button variant="outline" size="small" disabled>
-          Curtir
-        </Button>
-        <Button variant="outline" size="small" disabled>
-          Favoritar
-        </Button>
-        <Mensagem>
-          Curtir e favoritar exigem conta. <Link href={ROUTES.entrar}>Entre para continuar</Link>
-        </Mensagem>
-      </Acoes>
+      {/* O texto completo vem da API. O resumo só aparece para dados que não o têm. */}
+      <Texto>{publicacao.corpo ?? publicacao.resumo}</Texto>
+      <BotaoCurtir slug={publicacao.slug} curtidas={curtidas} euCurti={euCurti} />
       {publicacao.tags.length > 0 ? (
         <Tags aria-label="Temas">
           {publicacao.tags.map((tag) => (
@@ -89,28 +78,12 @@ const Titulo = styled.h1`
   }
 `;
 
-const Resumo = styled.p`
+const Texto = styled.p`
   font-size: 17px;
   line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   color: ${({ theme }) => theme.colors.textSecondary};
-`;
-
-const Acoes = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
-`;
-
-const Mensagem = styled.p`
-  width: 100%;
-  font-size: 12px;
-  color: ${({ theme }) => theme.colors.textSecondary};
-
-  a {
-    font-weight: 600;
-    color: ${({ theme }) => theme.colors.pink};
-  }
 `;
 
 const Tags = styled.ul`

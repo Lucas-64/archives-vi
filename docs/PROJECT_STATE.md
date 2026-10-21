@@ -12,6 +12,32 @@ As sete rotas da fase 2 estão implementadas e verificadas, e a fase 2.1 (acabam
 
 **Decisões confirmadas**: isolamento B (paralelo no checkout atual, com escopos disjuntos); demonstrações de `/criar`, `/entrar` e `/criar-conta` como simulações rotuladas, sem persistência nem sessão (ADR-010, "Exceções aprovadas"); `/investigacoes` com todos os status em "Todas", incluindo `community` e `classified`.
 
+## Backend
+
+Iniciado antes da validação do front por decisão registrada no ADR-022, sem alterar o ADR-015; a stack está no ADR-023. O trabalho é feito por tarefas pequenas, cada uma revisada antes da seguinte. Documentação: `docs/backend/README.md`, `docs/backend/DECISOES.md` e `docs/API.md`. Nada foi commitado nem publicado.
+
+**Fechamento da Etapa I (2026-10-21, aguardando revisão):** contraste dos botões primários corrigido e favicon adicionado (ADR-035).
+
+**Fatia 6, revisão integrada (2026-10-21, aguardando revisão):** ADR-034. Fatias 1 a 6 entregues; ver `/mnt/project-files/back/RELATORIO_ETAPA_I_FATIA_6.md`.
+
+**Fatia 5 (2026-10-21, aguardando revisão):** Home, `/explorar` e `/buscar` com dados reais (ADR-033); busca de publicações e investigações é parcial (50 mais recentes). Fatia 6 não iniciada.
+
+**Fatia 4, criação de investigações (2026-10-21, aguardando revisão):** `/criar/investigacao` integrada a `POST /api/v1/investigacoes` (ADR-032). Fatia 5 não iniciada.
+
+**Feito e testado (Tarefas 1 a 8)**: ambiente local (PostgreSQL, Drizzle, Zod, Vitest); fundação HTTP (erros padronizados, validação, paginação por cursor); autenticação (cadastro, entrar, sair, eu; senha com scrypt, sessões no banco, cookie seguro, CSRF e limite de tentativas); publicações (`GET /api/v1/publicacoes`, `GET /api/v1/publicacoes/{slug}`, `GET /api/v1/publicacoes/{slug}/relacionadas` e `POST /api/v1/publicacoes` para criar teoria, com limite de 10 por minuto por membro). Comentários (`GET`/`POST /api/v1/comentarios`, só em publicações) e curtidas (`PUT`/`DELETE /api/v1/publicacoes/{slug}/curtida`), com `comentarios`, `curtidas` e `euCurti` calculados nas publicações. Investigações (`/api/v1/investigacoes`: listar, detalhe, histórico, criar por membro com até 3 abertas, editar, mudar `estado` e encerrar; `status` não é alterado pela API; ADR-024). Evidências e sugestões (Tarefa 7: `GET`/`POST /api/v1/investigacoes/{slug}/evidencias`, fila `GET …/sugestoes`, `…/sugestoes/{id}/aceitar` e `…/recusar`, `GET /api/v1/me/sugestoes`; o responsável cria evidência já aceita, o membro cria sugestão pendente; decisão final, sem imagens, avaliações nem comentários em evidências). Moderação mínima (Tarefa 7): `PATCH /api/v1/mod/investigacoes/{slug}/status`, `PATCH /api/v1/admin/usuarios/{usuario}/papel` (só `membro` ↔ `moderador`) e `GET /api/v1/mod/auditoria` (só administrador), com tabela `auditoria` somente de inserção e gravação na mesma transação. Primeiro administrador só pelo script `npm run admin:criar` (sem rota HTTP). ADR-025. Perfis e criadores (Tarefa 8, ADR-026): `GET /api/v1/criadores`, `GET /api/v1/usuarios/{usuario}` (indicadores reais de conteúdo público), `…/publicacoes`, `…/investigacoes` e `PATCH /api/v1/me/perfil` (nome e bio), sem migração e sem seed. Migrações `0000` a `0005`. Testes de concorrência no PostgreSQL real cobrem os limites de login, criação, comentário e investigações abertas, as curtidas simultâneas e o encerramento repetido.
+
+**Não existe ainda**: imagens e upload de evidências, avaliações e comentários em evidências, denúncias, ocultação e exclusão, notificações, seed dos mocks (a lista de investigações começa vazia), busca, perfis, edição ou exclusão de publicação, edição, exclusão e respostas de comentários, e-mail. **O front não usa o backend** (continua com mocks e simulações do ADR-010); nenhuma integração foi feita.
+
+**Pendências do backend (documentadas, não resolvidas)**: origem confiável do IP (proxy), agendamento da limpeza de sessões e de `limites_taxa`, janela fixa do limite de tentativas (permite rajada na virada). `docker-compose.yml` não foi testado (sem Docker no ambiente); o PostgreSQL usado foi o 16 nativo.
+
+**Pendências registradas (Tarefa 8)**: `tsx` só em `devDependencies` (implantação do `admin:criar` indefinida); `atualizado_em` da investigação não muda com status/aceitação de evidência (avaliar à parte); sem seed de desenvolvimento (a propor se o Lucas quiser); `patente`/`conquistas`/`investigacaoEmDestaque` e participações não existem na API.
+
+**Limites provisórios a revisar antes da produção** (inclui 10 edições de perfil por minuto por membro): 20 comentários, 60 curtidas e 20 mutações de investigação por minuto por membro; 3 investigações abertas por membro; tamanhos de texto das investigações; 10 sugestões por minuto por membro, 10 pendentes por membro e investigação, 30 ações de decisão/moderação por minuto (Tarefa 7).
+
+**Etapa I, integração do front com a API (aprovada em 2026-10-21)**: front descongelado só para integrar o que já existe. Sequência: 1 sessão, cabeçalho, `/entrar`, `/criar-conta`; 2 criadores, perfil, edição do perfil; 3 publicações, `/criar`, comentários, curtidas; 4 investigações, evidências, sugestões; 5 Home, Explorar, Buscar; 6 revisão integrada de `/meu-perfil`, navegação e permissões. **Fatia 1 concluída** (ADR-027), aguardando revisão: sessão lida por `GET /auth/eu` no cliente (`SessaoProvider`), cabeçalho por sessão, formulários reais, sem mocks nesses fluxos. **Fatia 2 concluída** (ADR-028, ADR-029), aguardando revisão: `/criadores`, `/perfil/[usuario]` e edição do perfil usam a API real, em grupo de rotas `(detalhe)` sem `loading.tsx` (404 e 307 reais); `/meu-perfil` mostra só a conta da sessão (visão geral, evidências, atividade, patente e conquistas removidas até a Fatia 6). Lacunas entre fatias: cartões do perfil apontam para `/publicacao/[slug]` e `/investigacoes/[slug]`, ainda estáticos com mocks (slug real dá 404 até as Fatias 3 e 4); páginas mock linkam perfis fictícios que dão 404 com banco real; listas truncam em 50; sem seed; Seguir oculto para autenticados. **Fatia 3 concluída** (ADR-030), aguardando revisão: publicações, `/criar`, comentários e curtidas reais; `/publicacao/[slug]` no grupo `(detalhe)`. Home, Explorar e Buscar ainda linkam publicações dos mocks (404 com banco real) até a Fatia 5; a listagem de `/publicacoes` não mostra investigações até a Fatia 4. **Fatia 4 concluída** (ADR-031), aguardando revisão: investigações, evidências, sugestões e decisões pela API real, nos grupos `(detalhe)` e `(site)`. Sem tela para criar, editar, mudar estado ou encerrar investigação (endpoints existem). Home, Explorar e Buscar ainda usam mocks e linkam conteúdo que dá 404 com banco real (Fatia 5). A Tarefa 9 (destaques, em-alta) **não está autorizada**; D19 adiado. Sem seed; busca global sem `unaccent`.
+
+**Próximo passo do backend**: aguardar a revisão das Tarefas 7 e 8 e das Fatias 1 a 4 da Etapa I. Nenhuma tarefa seguinte (imagens, avaliações, denúncias, notificações, integração com o front) começa sem aprovação explícita. Nenhum administrador real foi criado em nenhum banco compartilhado ou de desenvolvimento; `npm run admin:criar` deve ser executado por quem administra o ambiente.
+
 ## Estado confirmado
 
 **Stack**: Next.js 16.4.0 (App Router), React 19.2.9, TypeScript strict, styled-components 6.6, ESLint 9 com `eslint-config-next`. Node 20.9 ou superior.
@@ -21,23 +47,23 @@ As sete rotas da fase 2 estão implementadas e verificadas, e a fase 2.1 (acabam
 **Rotas implementadas** (grupo `(site)`):
 
 - `/`: Home (Hero em destaque, Explorar, Mistérios em alta, sidebar).
-- `/publicacoes`: listagem com filtros por tipo, lista vertical e sidebar.
-- `/publicacoes/investigacao/[slug]`: área comunitária de uma investigação (teoria, evidências com sugestões, discussão, localização, histórico e síntese). Slug inexistente responde 404 real. A página editorial do mistério continua em `/investigacoes/[slug]` (ADR-020). `/publicacoes?investigacao=slug` redireciona para ela (307).
-- `/publicacao/[slug]`: detalhe de publicação, com comentários apenas estruturais.
-- `/investigacoes`: listagem de investigações (todas, em andamento, resolvidas e sem fontes), em lista vertical, com sidebar. Filtros pela URL (`?categoria=`).
-- `/investigacoes/[slug]`: detalhe de investigação, com seções Teoria, Evidências, Discussão, Localização das evidências e Histórico/Síntese. Evidências com imagens abrem em visualização ampliada, com carrossel de até cinco imagens. Evidências do criador têm a tag "Evidência do criador". Sugestões da comunidade seguem o fluxo de aprovação demonstrativo (área do investigador, só na sessão). Dados demonstrativos.
-- `/criar`: formulário de teoria com prévia ao vivo e envio simulado, rotulado como simulação. Nada é salvo.
-- `/entrar` e `/criar-conta`: formulários demonstrativos. Informam que nenhuma sessão ou conta é criada.
+- `/publicacoes`: listagem real de publicações (Etapa I, Fatia 3), com filtros por tipo e tema, sem sidebar; sem o grupo de investigações até a Fatia 4.
+- `/publicacoes/investigacao/[slug]` (grupo `(detalhe)`, dinâmica): área da comunidade com teoria, evidências aceitas, envio e acompanhamento de sugestões, fila de análise (responsável e moderação) e histórico, tudo real. Sem discussão, localização e síntese (sem API). 404 real. A página editorial continua em `/investigacoes/[slug]` (ADR-020).
+- `/publicacao/[slug]` (grupo `(detalhe)`, dinâmica): texto completo, curtir e comentários reais, autor e relacionadas. 404 real; abre publicações criadas depois do build.
+- `/investigacoes`: listagem real (Etapa I, Fatia 4), com abas Todas, Em andamento e Resolvidas (aplicadas sobre as 50 mais recentes), sem sidebar.
+- `/investigacoes/[slug]` (grupo `(detalhe)`, dinâmica): página editorial do mistério com dados reais (teoria, vídeo, estado, autor); sem capa, fotografias nem Acompanhar. 404 real.
+- `/criar`: publica de verdade por `POST /api/v1/publicacoes` e leva à publicação criada; visitante vê pedido de entrada (ADR-030).
+- `/entrar` e `/criar-conta`: formulários reais (Etapa I, Fatia 1, ADR-027): chamam `POST /api/v1/auth/entrar` e `/auth/cadastro`, abrem a sessão e levam ao início. Quem já tem sessão é redirecionado ao início.
 - `/buscar`: busca em publicações, investigações e criadores, com abas e consulta na URL (`?q=`, `?tipo=`).
-- `/criadores`: lista dos criadores dos mocks, com links para o perfil. Sem contagens.
-- `/perfil/[usuario]`: perfil público, com identidade, indicadores, abas (Visão geral, Investigações, Teorias e publicações, Conquistas), investigação em destaque e contribuições recentes na Visão geral. Sem sidebar, porque ainda não há conteúdo próprio para ela. Usuário inexistente responde HTTP 404 real.
-- `/meu-perfil`: área pessoal demonstrativa (ADR-021), com identidade, edição local, cinco abas (Atividade reúne solicitações, respostas e notificações) e estado de demonstração rotulado. Sem login e sem persistência.
+- `/criadores`: lista real de criadores (API, dinâmica), com estado vazio e aviso quando há mais de 50 (Etapa I, Fatia 2). Perfil em `/perfil/[usuario]` (grupo `(detalhe)`): dados e indicadores reais, 404 real.
+- `/perfil/[usuario]`: perfil público real (Etapa I, Fatia 2), no grupo `(detalhe)`: identidade, quatro indicadores reais, abas Visão geral, Investigações, Teorias e publicações e Conquistas (vazia, sem dado real). Sem destaque, contribuições recentes nem sidebar. Usuário inexistente ou inválido responde HTTP 404 real.
+- `/meu-perfil` (grupo `(detalhe)`, dinâmica): a conta da sessão, com edição real de nome e bio (`PATCH /api/v1/me/perfil`) e abas Teorias e publicações e Investigações com dados reais. Sem sessão, HTTP 307 para `/entrar`. O restante da área (visão geral, evidências, atividade, patente) foi retirado até a Fatia 6; os componentes e mocks correspondentes seguem no código sem uso.
 - `/explorar`: hub de descoberta com as quatro tiles e "Mistérios em alta". Está na navegação principal desde o lote 1 (ADR-012).
 
 **Entradas de navegação das rotas novas (verificado no código)**:
 
 - Navegação principal: `/explorar`, depois de "Teorias" (ADR-012).
-- Cabeçalho desktop: `/buscar`, `/criadores`, `/criar` (texto "Criar teoria"), `/entrar`, `/criar-conta` (ADR-012). `/criadores` e `/criar` ficam ocultos abaixo de 768 px.
+- Cabeçalho desktop: `/buscar`, `/criadores`, `/criar` (texto "Criar teoria"), e, conforme a sessão (ADR-027), `/entrar` e `/criar-conta` (visitante) ou `/meu-perfil` e Sair (autenticado) (ADR-012). `/criadores` e `/criar` ficam ocultos abaixo de 768 px.
 - Barra mobile: `/criar`, `/buscar`. `/criadores` ainda não tem entrada na barra mobile.
 
 **Itens de navegação sem rota** (visuais, com `href: null`): Mapa, Galeria e Fórum.

@@ -4,7 +4,7 @@ import { CriarTeoria } from "../../../components/criar/CriarTeoria";
 
 export const metadata: Metadata = {
   title: "Criar teoria | ARCHIVES VI",
-  description: "Demonstração de criação de teoria. Nada é publicado nem salvo.",
+  description: "Escreva e publique uma teoria na comunidade.",
 };
 
 export default function CriarPage() {

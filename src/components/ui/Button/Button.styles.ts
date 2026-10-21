@@ -36,8 +36,8 @@ const variantStyles = {
     border-color: transparent;
     background: linear-gradient(
       135deg,
-      ${({ theme }) => theme.colors.pink},
-      ${({ theme }) => theme.colors.purple}
+      ${({ theme }) => theme.colors.gradientStart},
+      ${({ theme }) => theme.colors.gradientEnd}
     );
     color: ${({ theme }) => theme.colors.white};
     box-shadow: ${({ theme }) => theme.shadows.glowPink};

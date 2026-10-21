@@ -11,11 +11,8 @@ export const ID_CRIADOR_DEMONSTRATIVO = "analista-vb";
 // na URL (ADR-017 vale aqui também). "Atividade" reúne notificações, solicitações e conexões e respostas.
 // Conquistas ficam no cabeçalho e a patente em cartão próprio (ADR-021).
 export const ABAS_MEU_PERFIL = [
-  { chave: "visao-geral", rotulo: "Visão geral" },
-  { chave: "teorias-publicacoes", rotulo: "Teorias e publicações", parametro: "teorias-publicacoes" },
+  { chave: "teorias-publicacoes", rotulo: "Teorias e publicações" },
   { chave: "investigacoes", rotulo: "Investigações", parametro: "investigacoes" },
-  { chave: "evidencias", rotulo: "Evidências", parametro: "evidencias" },
-  { chave: "atividade", rotulo: "Atividade", parametro: "atividade" },
 ] as const;
 
 export const LIMITE_NOME_PERFIL = 60;

@@ -13,12 +13,12 @@ export interface FiltroCategoriaInvestigacao {
   slug: string | undefined;
 }
 
-// Filtros de /investigacoes, aplicados pela URL (?categoria=...). Mesmos rótulos de CATEGORIAS_INVESTIGACAO.
+// Filtros de /investigacoes, aplicados pela URL (?categoria=...). "Sem fontes" saiu na Etapa I (Fatia 4): a API não
+// tem esse conceito, então a aba nunca mostraria resultado válido.
 export const FILTROS_INVESTIGACOES: readonly FiltroCategoriaInvestigacao[] = [
   { label: "Todas", value: undefined, slug: undefined },
   { label: "Em andamento", value: "Em andamento", slug: "em-andamento" },
   { label: "Resolvidas", value: "Resolvidas", slug: "resolvidas" },
-  { label: "Sem fontes", value: "Sem fontes", slug: "sem-fontes" },
 ];
 
 // Filtros de /publicacoes, aplicados pela URL (?tipo=...).

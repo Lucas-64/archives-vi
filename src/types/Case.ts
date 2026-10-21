@@ -13,6 +13,10 @@ export type CaseCategory =
   | "phenomenon"
   | "community-discovery";
 
+// Investigação como o card a mostra. Investigações vindas da API não têm imagem (sem upload), e as imagens de
+// seção nunca entram em conteúdo de usuário: sem `image`, o card mostra um bloco neutro.
+export type CasoDeCard = Omit<Case, "image"> & { image?: Case["image"] };
+
 export interface Case {
   id: string;
   title: string;

@@ -5,18 +5,18 @@ import styled from "styled-components";
 import { CaseCard } from "../cards/CaseCard";
 import { CardList } from "../page/CardList";
 import { EmptyState } from "../states/EmptyState";
-import type { Case } from "../../types/Case";
+import type { CasoDeCard } from "../../types/Case";
 
 export interface InvestigacoesPerfilProps {
-  // Investigações com detalhe publicado em que o membro é o autor, e as em que ele participa.
-  // Ambas vêm de investigacoesDoMembro (src/lib/perfil.ts) e são Cases reais dos mocks.
-  criadas: Case[];
-  participacoes: Case[];
+  // Investigações de que o membro é o responsável.
+  criadas: CasoDeCard[];
+  // Investigações em que apenas participa. Sem esta lista (a API ainda não tem participantes), a seção
+  // não é mostrada, em vez de afirmar que não há participações.
+  participacoes?: CasoDeCard[];
 }
 
-// Aba "Investigações" do perfil. Separa o que o membro criou do que ele apenas participa.
-// Os cards são os da listagem (CaseCard, na horizontal). Os estados vazios dizem o motivo real:
-// só investigações com detalhe publicado têm autoria, então é esse o recorte exibido.
+// Aba "Investigações" do perfil. Separa o que o membro criou do que ele apenas participa (quando houver
+// dados de participação). Os cards são os da listagem (CaseCard, na horizontal).
 export function InvestigacoesPerfil({ criadas, participacoes }: InvestigacoesPerfilProps) {
   return (
     <Area>
@@ -25,7 +25,7 @@ export function InvestigacoesPerfil({ criadas, participacoes }: InvestigacoesPer
         {criadas.length === 0 ? (
           <EmptyState
             titulo="Nenhuma investigação criada aqui"
-            descricao="Este membro não é autor de nenhuma investigação com detalhe publicado."
+            descricao="Quando este membro abrir uma investigação, ela aparece aqui."
           />
         ) : (
           <CardList>
@@ -36,21 +36,23 @@ export function InvestigacoesPerfil({ criadas, participacoes }: InvestigacoesPer
         )}
       </Secao>
 
-      <Secao aria-labelledby="perfil-investigacoes-participacoes">
-        <Titulo id="perfil-investigacoes-participacoes">Em que participa</Titulo>
-        {participacoes.length === 0 ? (
-          <EmptyState
-            titulo="Nenhuma participação aqui"
-            descricao="Este membro não aparece como participante de nenhuma investigação com detalhe publicado."
-          />
-        ) : (
-          <CardList>
-            {participacoes.map((caso) => (
-              <CaseCard key={caso.id} caso={caso} orientacao="horizontal" />
-            ))}
-          </CardList>
-        )}
-      </Secao>
+      {participacoes ? (
+        <Secao aria-labelledby="perfil-investigacoes-participacoes">
+          <Titulo id="perfil-investigacoes-participacoes">Em que participa</Titulo>
+          {participacoes.length === 0 ? (
+            <EmptyState
+              titulo="Nenhuma participação aqui"
+              descricao="Este membro não aparece como participante de nenhuma investigação com detalhe publicado."
+            />
+          ) : (
+            <CardList>
+              {participacoes.map((caso) => (
+                <CaseCard key={caso.id} caso={caso} orientacao="horizontal" />
+              ))}
+            </CardList>
+          )}
+        </Secao>
+      ) : null}
     </Area>
   );
 }

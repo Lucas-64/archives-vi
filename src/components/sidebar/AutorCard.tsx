@@ -14,7 +14,7 @@ export function AutorCard({ autor }: AutorCardProps) {
     <SidebarBox titulo="Sobre o autor">
       <Nome>{autor.nome}</Nome>
       <Usuario>@{autor.usuario}</Usuario>
-      <Bio>{autor.bio}</Bio>
+      {autor.bio ? <Bio>{autor.bio}</Bio> : null}
     </SidebarBox>
   );
 }

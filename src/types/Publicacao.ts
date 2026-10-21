@@ -7,6 +7,8 @@ export interface Publicacao {
   slug: string;
   titulo: string;
   resumo: string;
+  // Texto completo. Presente quando vem da API; os dados antigos só têm o resumo.
+  corpo?: string;
   tipo: TipoPublicacao;
   autorId: string;
   data: string;

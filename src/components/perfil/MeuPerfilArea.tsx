@@ -1,86 +1,57 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useId, useState, type FormEvent, type ReactNode } from "react";
 import styled from "styled-components";
 
 import { ROUTES } from "../../constants/routes";
+import { editarPerfilNaApi, type PerfilEditado } from "../../lib/perfilApi";
 import {
   ABAS_MEU_PERFIL,
   LIMITE_BIO_PERFIL,
   LIMITE_NOME_PERFIL,
   validarEdicaoPerfil,
-  type DadosEdicaoPerfil,
   type ErrosEdicaoPerfil,
 } from "../../lib/meuPerfil";
-import type { Case } from "../../types/Case";
-import type { Conquista } from "../../types/Conquista";
 import type { Criador } from "../../types/Criador";
-import type { Publicacao } from "../../types/Publicacao";
-import type { EvidenciaMeu, Notificacao, Solicitacao } from "../../types/MeuPerfil";
-import type { PatentesDoMembro } from "../../types/Patente";
 import { Avatar } from "../ui/Avatar";
-import { Badge, type BadgeVariant } from "../ui/Badge";
+import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 import { FormField } from "../ui/FormField";
 import { Input } from "../ui/Input";
 import { Textarea } from "../ui/Textarea";
-import { AcaoRestrita } from "../acoes/AcaoRestrita";
 import { AbasPerfil } from "./AbasPerfil";
-import { MeuPerfilAtividade } from "./MeuPerfilAtividade";
-import { MeuPerfilPatente } from "./MeuPerfilPatente";
-import { MeuPerfilVisaoGeral } from "./MeuPerfilVisaoGeral";
-import type { TitulosInvestigacao } from "./MeuPerfilListas";
 
 export interface MeuPerfilAreaProps {
+  // A pessoa da sessão, com os dados gravados no servidor. Nunca um criador fixo.
   criador: Criador;
-  patentes?: PatentesDoMembro;
-  conquistas: Conquista[];
-  notificacoes: Notificacao[];
-  solicitacoes: Solicitacao[];
-  evidencias: EvidenciaMeu[];
-  titulos: TitulosInvestigacao;
-  publicacoes: Publicacao[];
-  investigacoes: Case[];
-  // Conteúdo servidor das abas: "teorias-publicacoes", "investigacoes", "evidencias" e "atividade" (solicitações e respostas).
+  // Conteúdo servidor das abas: "teorias-publicacoes" e "investigacoes".
   paineis: Record<string, ReactNode>;
 }
 
-// Rótulos das conquistas no cabeçalho. A ordem das variantes segue a referência visual (azul, verde, dourado).
-const VARIANTES_CONQUISTA: readonly BadgeVariant[] = ["info", "success", "warning", "primary", "secondary"];
-
-const AVISO_NAO_SALVO =
-  "Alterações aplicadas somente nesta página. Elas não são salvas: ao recarregar, o perfil volta ao original.";
-
-// Área Meu Perfil (ADR-021), no layout da referência visual. Não há login, backend nem persistência:
-// edição e leitura de notificações mudam só o estado desta página, e a interface avisa isso.
-export function MeuPerfilArea({
-  criador,
-  patentes,
-  conquistas,
-  notificacoes,
-  solicitacoes,
-  evidencias,
-  titulos,
-  publicacoes,
-  investigacoes,
-  paineis,
-}: MeuPerfilAreaProps) {
+// Área Meu Perfil (ADR-021) com dados reais. A edição de nome e bio chama PATCH /api/v1/me/perfil e só
+// mostra sucesso quando o servidor confirma. Visão geral, evidências, atividade, patente e conquistas
+// voltam na Fatia 6 da Etapa I, quando houver dados reais para elas (não há mais dados demonstrativos aqui).
+export function MeuPerfilArea({ criador, paineis }: MeuPerfilAreaProps) {
+  const router = useRouter();
   const idBase = useId();
   const formId = `${idBase}-edicao`;
 
-  // Dados exibidos. Começam no criador e mudam só quando a edição é salva nesta página.
-  const [perfil, setPerfil] = useState<DadosEdicaoPerfil>({ nome: criador.nome, bio: criador.bio });
-  const [rascunho, setRascunho] = useState<DadosEdicaoPerfil>(perfil);
+  // Dados exibidos: os do servidor, atualizados pela resposta da API quando a edição é confirmada.
+  const [perfil, setPerfil] = useState<PerfilEditado>({ nome: criador.nome, bio: criador.bio });
+  const [rascunho, setRascunho] = useState<PerfilEditado>(perfil);
   const [editando, setEditando] = useState(false);
+  const [salvando, setSalvando] = useState(false);
   const [erros, setErros] = useState<ErrosEdicaoPerfil>({});
+  const [erroGeral, setErroGeral] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
-  const [lidas, setLidas] = useState<ReadonlySet<string>>(() => new Set());
 
   function abrirEdicao() {
     setRascunho(perfil);
     setErros({});
+    setErroGeral(null);
     setAviso(null);
     setEditando(true);
   }
@@ -88,29 +59,37 @@ export function MeuPerfilArea({
   function cancelarEdicao() {
     setRascunho(perfil);
     setErros({});
+    setErroGeral(null);
     setEditando(false);
   }
 
-  function salvarEdicao(evento: FormEvent<HTMLFormElement>) {
+  async function salvarEdicao(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
+    if (salvando) return;
+
     const proximosErros = validarEdicaoPerfil(rascunho);
     setErros(proximosErros);
+    setErroGeral(null);
     if (Object.keys(proximosErros).length > 0) return;
 
-    setPerfil({ nome: rascunho.nome.trim(), bio: rascunho.bio.trim() });
-    setEditando(false);
-    setAviso(AVISO_NAO_SALVO);
-  }
+    setSalvando(true);
+    const resultado = await editarPerfilNaApi({ nome: rascunho.nome.trim(), bio: rascunho.bio.trim() });
+    setSalvando(false);
 
-  function marcarLida(id: string) {
-    setLidas((atual) => new Set(atual).add(id));
+    if (resultado.ok) {
+      setPerfil(resultado.perfil);
+      setEditando(false);
+      setAviso("Perfil atualizado.");
+      router.refresh();
+      return;
+    }
+    if (resultado.semSessao) {
+      // Sessão expirada ou revogada: o servidor decide a página (redireciona para /entrar).
+      router.refresh();
+    }
+    setErros({ nome: resultado.campos.nome, bio: resultado.campos.bio });
+    setErroGeral(resultado.erroGeral ?? null);
   }
-
-  function marcarTodasLidas() {
-    setLidas(new Set(notificacoes.map((item) => item.id)));
-  }
-
-  const naoLidas = notificacoes.filter((item) => !item.lida && !lidas.has(item.id)).length;
 
   return (
     <Area>
@@ -124,7 +103,7 @@ export function MeuPerfilArea({
             </Textos>
           </Cabecalho>
 
-          <Bio>{perfil.bio}</Bio>
+          {perfil.bio ? <Bio>{perfil.bio}</Bio> : null}
 
           <Badge size="small" variant="primary" uppercase>
             Seu perfil
@@ -143,26 +122,11 @@ export function MeuPerfilArea({
             <LinkContorno href={ROUTES.perfil(criador.usuario)}>Ver perfil público</LinkContorno>
           </Acoes>
 
-          {conquistas.length > 0 ? (
-            <Conquistas aria-label="Conquistas">
-              {conquistas.map((conquista, indice) => (
-                <li key={conquista.id}>
-                  <Badge size="small" variant={VARIANTES_CONQUISTA[indice % VARIANTES_CONQUISTA.length]} uppercase>
-                    {conquista.nome}
-                  </Badge>
-                </li>
-              ))}
-            </Conquistas>
-          ) : null}
-
           {aviso ? <Aviso role="status">{aviso}</Aviso> : null}
 
           {editando ? (
             <Formulario id={formId} onSubmit={salvarEdicao} noValidate aria-labelledby={`${idBase}-titulo-edicao`}>
               <SubtituloForm id={`${idBase}-titulo-edicao`}>Editar perfil</SubtituloForm>
-              <Aviso>
-                Demonstração: as alterações não são salvas. Elas valem só nesta página até você recarregá-la.
-              </Aviso>
 
               <FormField label="Nome" required error={erros.nome} hint={`Até ${LIMITE_NOME_PERFIL} caracteres.`}>
                 <Input
@@ -188,19 +152,19 @@ export function MeuPerfilArea({
                 />
               </FormField>
 
+              {erroGeral ? <ErroGeral role="alert">{erroGeral}</ErroGeral> : null}
+
               <Acoes>
-                <Button type="submit" variant="primary" size="small">
+                <Button type="submit" variant="primary" size="small" loading={salvando} loadingLabel="Salvando">
                   Salvar alterações
                 </Button>
-                <Button type="button" variant="ghost" size="small" onClick={cancelarEdicao}>
+                <Button type="button" variant="ghost" size="small" onClick={cancelarEdicao} disabled={salvando}>
                   Cancelar
                 </Button>
               </Acoes>
             </Formulario>
           ) : null}
         </Identidade>
-
-        <MeuPerfilPatente patentes={patentes} />
       </Topo>
 
       <AbasPerfil
@@ -208,50 +172,14 @@ export function MeuPerfilArea({
         rotuloLista="Seções do meu perfil"
         variante="caixa"
         acoes={
-          <>
+          <Acoes>
             <LinkPrimario href={ROUTES.criar}>+ Criar teoria</LinkPrimario>
-            <AcaoRestrita rotulo="Abrir investigação" mensagem="Abrir investigação exige conta." />
-          </>
+            <LinkContorno href={ROUTES.criarInvestigacao}>+ Criar investigação</LinkContorno>
+          </Acoes>
         }
         paineis={{
-          "visao-geral": (
-            <MeuPerfilVisaoGeral
-              solicitacoes={solicitacoes}
-              evidencias={evidencias}
-              notificacoes={notificacoes}
-              lidas={lidas}
-              onMarcar={marcarLida}
-              publicacoes={publicacoes}
-              investigacoes={investigacoes}
-              titulos={titulos}
-            />
-          ),
           "teorias-publicacoes": paineis["teorias-publicacoes"],
           investigacoes: paineis.investigacoes,
-          evidencias: paineis.evidencias,
-          atividade: (
-            <>
-              <CabecalhoAtividade>
-                <Grupo>
-                  <TituloAtividade id={`${idBase}-notificacoes`}>Notificações</TituloAtividade>
-                  <Badge size="small" variant={naoLidas > 0 ? "primary" : "default"}>
-                    {naoLidas === 1 ? "1 não lida" : `${naoLidas} não lidas`}
-                  </Badge>
-                </Grupo>
-                {naoLidas > 0 ? (
-                  <Button variant="outline" size="small" onClick={marcarTodasLidas}>
-                    Marcar todas como lidas
-                  </Button>
-                ) : null}
-              </CabecalhoAtividade>
-              <Aviso>
-                Notificações demonstrativas: nenhum evento real foi recebido. Marcar como lida não é salvo; ao
-                recarregar a página, o estado volta ao original.
-              </Aviso>
-              <MeuPerfilAtividade itens={notificacoes} lidas={lidas} onMarcar={marcarLida} />
-              {paineis.atividade}
-            </>
-          ),
         }}
       />
     </Area>
@@ -265,17 +193,12 @@ const Area = styled.div`
   min-width: 0;
 `;
 
-// Topo: identidade à esquerda e patente à direita em desktop; empilhado em telas menores.
+// Topo: identidade. A patente (cartão à direita) volta quando houver dados reais (Fatia 6).
 const Topo = styled.div`
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   min-width: 0;
-
-  @media (min-width: 1024px) {
-    grid-template-columns: minmax(0, 1fr) 380px;
-    align-items: stretch;
-  }
 `;
 
 const Identidade = styled(Card)`
@@ -364,7 +287,7 @@ const LinkPrimario = styled(Link)`
   font-size: 14px;
   font-weight: 600;
   color: ${({ theme }) => theme.colors.white};
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.pink}, ${({ theme }) => theme.colors.purple});
+  background: linear-gradient(135deg, ${({ theme }) => theme.colors.gradientStart}, ${({ theme }) => theme.colors.gradientEnd});
 
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.colors.pink};
@@ -372,14 +295,6 @@ const LinkPrimario = styled(Link)`
   }
 `;
 
-const Conquistas = styled.ul`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-`;
 
 const Aviso = styled.p`
   padding: 12px 16px;
@@ -407,24 +322,12 @@ const SubtituloForm = styled.h2`
   text-transform: uppercase;
 `;
 
-const CabecalhoAtividade = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-`;
-
-const Grupo = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
-`;
-
-const TituloAtividade = styled.h2`
-  font-family: ${({ theme }) => theme.fonts.display};
-  font-size: 17px;
-  font-weight: 800;
-  text-transform: uppercase;
+const ErroGeral = styled.p`
+  padding: 12px 16px;
+  border: 1px solid ${({ theme }) => theme.colors.debunked};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  background: ${({ theme }) => theme.colors.backgroundSecondary};
+  font-size: 13px;
+  line-height: 1.5;
+  color: ${({ theme }) => theme.colors.text};
 `;

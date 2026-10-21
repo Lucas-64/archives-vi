@@ -237,8 +237,8 @@ const botaoBase = `
 
 const BotaoPrimario = styled(Link)`
   ${botaoBase}
-  background: ${({ theme }) => theme.colors.pink};
-  color: #fff;
+  background: ${({ theme }) => theme.colors.gradientStart};
+  color: ${({ theme }) => theme.colors.white};
 `;
 
 const BotaoSecundario = styled(Link)`

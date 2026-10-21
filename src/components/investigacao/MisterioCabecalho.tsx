@@ -3,7 +3,6 @@
 import Image from "next/image";
 import styled from "styled-components";
 
-import { AcaoRestrita } from "../acoes/AcaoRestrita";
 import { Breadcrumb } from "../navigation/Breadcrumb";
 import { ROUTES } from "../../constants/routes";
 import { formatarData } from "../../lib/formatacao";
@@ -12,15 +11,15 @@ import {
   ESTADO_INVESTIGACAO,
   ROTULO_CATEGORIA,
 } from "../../lib/investigacaoEstado";
-import type { Case } from "../../types/Case";
-import type { InvestigacaoDetalhe } from "../../types/InvestigacaoDetalhe";
+import type { DetalheReal } from "../../lib/adaptadores";
+import type { CasoDeCard } from "../../types/Case";
 import { Avatar } from "../ui/Avatar";
 import { Badge } from "../ui/Badge";
 import { CopyLinkButton } from "./CopyLinkButton";
 
 export interface MisterioCabecalhoProps {
-  caso: Case;
-  detalhe: InvestigacaoDetalhe;
+  caso: CasoDeCard;
+  detalhe: Pick<DetalheReal, "estado" | "encerradaPeloAutor" | "autor" | "criadoEm" | "atualizadoEm">;
 }
 
 // Apresentação editorial do mistério (página /investigacoes/[slug]). Mantém o cabeçalho, a largura e
@@ -69,10 +68,10 @@ export function MisterioCabecalho({ caso, detalhe }: MisterioCabecalhoProps) {
       </Autoria>
 
       <Acoes>
-        <AcaoRestrita rotulo="Acompanhar" mensagem="Acompanhar exige autenticação." />
         <CopyLinkButton />
       </Acoes>
 
+      {caso.image ? (
       <Capa>
         <Image
           src={caso.image}
@@ -83,6 +82,7 @@ export function MisterioCabecalho({ caso, detalhe }: MisterioCabecalhoProps) {
           priority
         />
       </Capa>
+      ) : null}
     </Wrapper>
   );
 }

@@ -7,13 +7,12 @@ import { FiSearch } from "react-icons/fi";
 
 import { MAIN_NAV, ROUTES } from "../../constants/routes";
 import { isRotaAtiva } from "../../lib/navegacao";
+import { useSessao } from "../auth/SessaoProvider";
+import { BotaoSair } from "./BotaoSair";
 import { Navigation } from "./Navigation";
 
-export interface HeaderProps {
-  investigadoresOnline: number;
-}
-
-export function Header({ investigadoresOnline }: HeaderProps) {
+export function Header() {
+  const { estado } = useSessao();
   const pathname = usePathname() ?? "";
   const ativo = (href: string) => isRotaAtiva(pathname, href);
 
@@ -51,25 +50,36 @@ export function Header({ investigadoresOnline }: HeaderProps) {
           >
             Criar teoria
           </DesktopActionLink>
-          <DesktopActionLink
-            href={ROUTES.meuPerfil}
-            aria-current={ativo(ROUTES.meuPerfil) ? "page" : undefined}
-            $active={ativo(ROUTES.meuPerfil)}
-          >
-            Meu perfil
-          </DesktopActionLink>
-          <ActionLink
-            href={ROUTES.entrar}
-            aria-current={ativo(ROUTES.entrar) ? "page" : undefined}
-            $active={ativo(ROUTES.entrar)}
-          >
-            Entrar
-          </ActionLink>
-          <PrimaryLink href={ROUTES.criarConta}>Criar conta</PrimaryLink>
+          {estado === "autenticado" ? (
+            <>
+              <ActionLink
+                href={ROUTES.meuPerfil}
+                aria-current={ativo(ROUTES.meuPerfil) ? "page" : undefined}
+                $active={ativo(ROUTES.meuPerfil)}
+              >
+                Meu perfil
+              </ActionLink>
+              <BotaoSair />
+            </>
+          ) : estado === "carregando" ? (
+            // Até a sessão ser conhecida, não se mostra nenhuma opção dependente dela; o espaço é reservado.
+            <ReservaSessao aria-hidden="true" />
+          ) : (
+            <>
+              <ActionLink
+                href={ROUTES.entrar}
+                aria-current={ativo(ROUTES.entrar) ? "page" : undefined}
+                $active={ativo(ROUTES.entrar)}
+              >
+                Entrar
+              </ActionLink>
+              <PrimaryLink href={ROUTES.criarConta}>Criar conta</PrimaryLink>
+            </>
+          )}
         </Actions>
       </TopRow>
 
-      <Navigation items={MAIN_NAV} investigadoresOnline={investigadoresOnline} />
+      <Navigation items={MAIN_NAV} />
     </HeaderContainer>
   );
 }
@@ -168,6 +178,17 @@ const DesktopActionLink = styled(ActionLink)`
   }
 `;
 
+// Ocupa o lugar dos botões de sessão enquanto ela é consultada, para o cabeçalho não "pular".
+const ReservaSessao = styled.span`
+  display: inline-block;
+  width: 168px;
+  height: 40px;
+
+  @media (max-width: 767px) {
+    width: 72px;
+  }
+`;
+
 const PrimaryLink = styled(Link)`
   display: inline-flex;
   align-items: center;
@@ -179,8 +200,8 @@ const PrimaryLink = styled(Link)`
   color: ${({ theme }) => theme.colors.white};
   background: linear-gradient(
     135deg,
-    ${({ theme }) => theme.colors.pink},
-    ${({ theme }) => theme.colors.purple}
+    ${({ theme }) => theme.colors.gradientStart},
+    ${({ theme }) => theme.colors.gradientEnd}
   );
   box-shadow: ${({ theme }) => theme.shadows.glowPink};
 

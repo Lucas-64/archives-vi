@@ -1,49 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import styled from "styled-components";
 
+import heroImage from "../../assets/images/hero.jpg";
 import { ROUTES } from "../../constants/routes";
-import type { Destaque } from "../../types/Destaque";
 
-export interface HeroProps {
-  destaques: Destaque[];
-}
-
-// Featured carousel from the approved prototype: text on the left, image on the right, dots below.
-export function Hero({ destaques }: HeroProps) {
-  const [indice, setIndice] = useState(0);
-
-  if (destaques.length === 0) return null;
-
-  const destaque = destaques[indice] ?? destaques[0];
-
+// Banner de abertura da Home. Texto institucional fixo e imagem do site (não é conteúdo de usuário).
+// O antigo carrossel "Em destaque" dependia de destaques demonstrativos; não há fonte real de curadoria
+// (Tarefa 9, não autorizada), então ele não volta enquanto não existir.
+export function Hero() {
   return (
-    <Section aria-roledescription="carrossel" aria-label="Em destaque">
-      <Slide
-        style={{ backgroundImage: `url("${destaque.image.src}")` }}
-        aria-live="polite"
-      >
+    <Section aria-label="Apresentação">
+      <Slide style={{ backgroundImage: `url("${heroImage.src}")` }}>
         <Content>
-          <Tag>Em destaque</Tag>
-          <Titulo>{destaque.titulo}</Titulo>
-          <Descricao>{destaque.descricao}</Descricao>
-          <Acao href={ROUTES.investigacoes}>Ver mais</Acao>
+          <Tag>Archives VI</Tag>
+          <Titulo>A verdade está escondida em Leonida</Titulo>
+          <Descricao>
+            Investigações, evidências e teorias da comunidade de GTA VI, reunidas em um só lugar.
+          </Descricao>
+          <Acoes>
+            <Acao href={ROUTES.investigacoes}>Ver investigações</Acao>
+            <Acao href={ROUTES.teorias}>Ler teorias</Acao>
+          </Acoes>
         </Content>
-
-        <Dots role="group" aria-label="Escolher destaque">
-          {destaques.map((item, i) => (
-            <Dot
-              key={item.id}
-              type="button"
-              aria-label={`Destaque ${i + 1}`}
-              aria-pressed={i === indice}
-              $active={i === indice}
-              onClick={() => setIndice(i)}
-            />
-          ))}
-        </Dots>
       </Slide>
     </Section>
   );
@@ -58,7 +38,7 @@ const Slide = styled.div`
   min-height: 360px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-end;
   border-radius: ${({ theme }) => theme.borderRadius.xl};
   overflow: hidden;
   border: 1px solid ${({ theme }) => theme.colors.border};
@@ -95,13 +75,13 @@ const Slide = styled.div`
 const Content = styled.div`
   position: relative;
   max-width: 520px;
-  padding: 40px 40px 0;
+  padding: 40px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 
   @media (max-width: 767px) {
-    padding: 24px 20px 0;
+    padding: 24px 20px;
   }
 `;
 
@@ -131,38 +111,18 @@ const Descricao = styled.p`
   color: ${({ theme }) => theme.colors.textSecondary};
 `;
 
+const Acoes = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 4px;
+`;
+
 const Acao = styled(Link)`
   width: fit-content;
-  margin-top: 4px;
   font-size: 14px;
   font-weight: 600;
   color: ${({ theme }) => theme.colors.pink};
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.colors.pink};
-    outline-offset: 3px;
-  }
-`;
-
-const Dots = styled.div`
-  position: relative;
-  display: flex;
-  gap: 8px;
-  padding: 0 40px 20px;
-
-  @media (max-width: 767px) {
-    padding: 0 20px 16px;
-  }
-`;
-
-const Dot = styled.button<{ $active: boolean }>`
-  width: ${({ $active }) => ($active ? "24px" : "8px")};
-  height: 8px;
-  padding: 0;
-  border-radius: 999px;
-  background: ${({ $active, theme }) =>
-    $active ? theme.colors.pink : theme.colors.border};
-  transition: width ${({ theme }) => theme.transitions.default};
 
   &:focus-visible {
     outline: 2px solid ${({ theme }) => theme.colors.pink};

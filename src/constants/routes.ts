@@ -9,11 +9,12 @@ export const ROUTES = {
   publicacoes: "/publicacoes",
   publicacao: (slug: string) => `/publicacao/${slug}`,
   criar: "/criar",
+  criarInvestigacao: "/criar/investigacao",
   explorar: "/explorar",
   criadores: "/criadores",
   buscar: "/buscar",
   perfil: (usuario: string) => `/perfil/${usuario}`,
-  // Área pessoal demonstrativa (ADR-021). Sem login: não há conta real por trás da página.
+  // Área pessoal (ADR-021). Exige sessão: visitante é redirecionado para /entrar.
   meuPerfil: "/meu-perfil",
   entrar: "/entrar",
   criarConta: "/criar-conta",
@@ -21,8 +22,7 @@ export const ROUTES = {
 
 export interface NavItem {
   label: string;
-  // null means the item is visual only: it is shown but has no functional link yet.
-  href: string | null;
+  href: string;
 }
 
 // Main navigation. The prototype items are kept; "Explorar" was added by an approved decision
@@ -32,13 +32,11 @@ export const MAIN_NAV: readonly NavItem[] = [
   { label: "Mistérios", href: ROUTES.misterios },
   { label: "Teorias e investigações", href: ROUTES.teorias },
   { label: "Explorar", href: ROUTES.explorar },
-  { label: "Mapa", href: null },
-  { label: "Galeria", href: null },
-  { label: "Fórum", href: null },
+  // Mapa, Galeria e Fórum ficam fora do menu até existirem rotas e dados reais.
 ];
 
 // Items for the mobile bottom bar. Only functional routes are included, so href is required.
-export const MOBILE_NAV: readonly (NavItem & { href: string })[] = [
+export const MOBILE_NAV: readonly NavItem[] = [
   { label: "Início", href: ROUTES.inicio },
   { label: "Mistérios", href: ROUTES.misterios },
   { label: "Teorias", href: ROUTES.teorias },

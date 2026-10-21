@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792508903186,
+      "tag": "0000_usuarios_sessoes",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792510734237,
+      "tag": "0001_limites_taxa",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792513490229,
+      "tag": "0002_publicacoes",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792514731247,
+      "tag": "0003_comentarios_curtidas",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792515961530,
+      "tag": "0004_investigacoes",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792524628504,
+      "tag": "0005_evidencias_moderacao",
+      "breakpoints": true
+    }
+  ]
+}

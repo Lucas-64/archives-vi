@@ -26,7 +26,7 @@ export function CreatorCard({ criador, nivelTitulo = 2 }: CreatorCardProps) {
           <Usuario>@{criador.usuario}</Usuario>
         </Identidade>
       </Cabecalho>
-      <Bio>{criador.bio}</Bio>
+      {criador.bio ? <Bio>{criador.bio}</Bio> : null}
     </Card>
   );
 }

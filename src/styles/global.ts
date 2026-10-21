@@ -43,7 +43,7 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   ::selection {
-    background: ${({ theme }) => theme.colors.pink};
+    background: ${({ theme }) => theme.colors.gradientStart};
     color: ${({ theme }) => theme.colors.white};
   }
 

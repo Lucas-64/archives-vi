@@ -4,7 +4,6 @@
 import { destaques, investigacoes } from "@/mocks/investigacoes";
 import { atualizacoes } from "@/mocks/atualizacoes";
 import { topicos } from "@/mocks/topicos";
-import { investigadoresOnline } from "@/mocks/atividade";
 import { publicacoes } from "@/mocks/publicacoes";
 import { investigacaoDetalhes } from "@/mocks/investigacaoDetalhe";
 import type { InvestigacaoDetalhe } from "@/types/InvestigacaoDetalhe";
@@ -122,8 +121,4 @@ export async function getTopicosForum(): Promise<Topico[]> {
 
 export async function getAtualizacoes(): Promise<Atualizacao[]> {
   return atualizacoes;
-}
-
-export async function getInvestigadoresOnline(): Promise<number> {
-  return investigadoresOnline;
 }

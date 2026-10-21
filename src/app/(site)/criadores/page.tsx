@@ -1,13 +1,20 @@
 import { CreatorCard } from "../../../components/cards/CreatorCard";
 import { CardList } from "../../../components/page/CardList";
+import { NotaLista } from "../../../components/page/NotaLista";
 import { PageBody } from "../../../components/page/PageBody";
 import { PageHeader } from "../../../components/page/PageHeader";
 import { EmptyState } from "../../../components/states/EmptyState";
-import { getCriadores } from "../../../lib/data";
+import { LIMITE_LISTA, criadoresDaPagina } from "../../../server/leitura/usuarios";
+import { perfilParaCriador } from "../../../lib/adaptadores";
 
-// Lista de criadores em coluna única, na ordem do mock. Sem sidebar e sem contagens.
+// Os dados vêm do banco a cada requisição (não há conteúdo fixo no build).
+export const dynamic = "force-dynamic";
+
+// Criadores reais: contas com ao menos uma publicação publicada ou uma investigação, em ordem alfabética
+// de usuário. Sem sidebar. Mostra as primeiras LIMITE_LISTA e avisa quando há mais (ainda não há "ver mais").
 export default async function CriadoresPage() {
-  const criadores = await getCriadores();
+  const { itens, haMais } = await criadoresDaPagina();
+  const criadores = itens.map(perfilParaCriador);
 
   return (
     <>
@@ -20,14 +27,17 @@ export default async function CriadoresPage() {
         {criadores.length === 0 ? (
           <EmptyState
             titulo="Nenhum criador por enquanto"
-            descricao="Assim que novos criadores forem publicados, eles aparecem aqui."
+            descricao="Os criadores aparecem aqui quando publicam uma teoria ou abrem uma investigação."
           />
         ) : (
-          <CardList>
-            {criadores.map((criador) => (
-              <CreatorCard key={criador.id} criador={criador} />
-            ))}
-          </CardList>
+          <>
+            <CardList>
+              {criadores.map((criador) => (
+                <CreatorCard key={criador.id} criador={criador} />
+              ))}
+            </CardList>
+            {haMais ? <NotaLista>Mostrando os primeiros {LIMITE_LISTA} criadores, em ordem alfabética.</NotaLista> : null}
+          </>
         )}
       </PageBody>
     </>

@@ -39,7 +39,7 @@ export function PublicationCard({ publicacao, autor, nivelTitulo = 2 }: Publicat
       <Meta>
         <span>{autor ? `@${autor.usuario}` : "Autor desconhecido"}</span>
         <time dateTime={publicacao.data}>{formatarData(publicacao.data)}</time>
-        <span>{formatarNumero(publicacao.comentarios)} comentários</span>
+        <span>{formatarNumero(publicacao.comentarios)} {publicacao.comentarios === 1 ? "comentário" : "comentários"}</span>
       </Meta>
     </Article>
   );

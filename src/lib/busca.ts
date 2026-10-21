@@ -3,7 +3,7 @@
 import { ROUTES } from "@/constants/routes";
 import { rotuloDaTag } from "@/lib/tags";
 import { normalizarParaBusca } from "@/lib/texto";
-import type { Case } from "@/types/Case";
+import type { CasoDeCard } from "@/types/Case";
 import type { Criador } from "@/types/Criador";
 import type { Publicacao } from "@/types/Publicacao";
 
@@ -13,13 +13,13 @@ export type AbaBusca = (typeof ABAS_BUSCA)[number];
 
 export interface DadosBusca {
   publicacoes: readonly Publicacao[];
-  investigacoes: readonly Case[];
+  investigacoes: readonly CasoDeCard[];
   criadores: readonly Criador[];
 }
 
 export interface ResultadoBusca {
   publicacoes: Publicacao[];
-  investigacoes: Case[];
+  investigacoes: CasoDeCard[];
   criadores: Criador[];
 }
 
@@ -54,7 +54,7 @@ function pesquisarPublicacoes(termo: string, publicacoes: readonly Publicacao[])
 
 // Investigações: título, descrição e localização. Ordenadas por updatedAt, mais recentes
 // primeiro. Registros sem updatedAt vêm depois, na ordem em que estão no mock.
-function pesquisarInvestigacoes(termo: string, investigacoes: readonly Case[]): Case[] {
+function pesquisarInvestigacoes(termo: string, investigacoes: readonly CasoDeCard[]): CasoDeCard[] {
   const encontrados = investigacoes.filter(
     (item) =>
       contem(item.title, termo) ||
@@ -63,7 +63,7 @@ function pesquisarInvestigacoes(termo: string, investigacoes: readonly Case[]): 
   );
 
   const comData = encontrados
-    .filter((item): item is Case & { updatedAt: string } => item.updatedAt !== undefined)
+    .filter((item): item is CasoDeCard & { updatedAt: string } => item.updatedAt !== undefined)
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   const semData = encontrados.filter((item) => item.updatedAt === undefined);
 

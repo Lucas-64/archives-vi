@@ -12,12 +12,6 @@ export default function SiteLoading() {
           <Skeleton height="260px" radius="lg" />
         </>
       }
-      sidebar={
-        <>
-          <Skeleton height="220px" radius="lg" />
-          <Skeleton height="220px" radius="lg" />
-        </>
-      }
     />
   );
 }

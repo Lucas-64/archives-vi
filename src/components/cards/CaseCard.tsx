@@ -7,11 +7,11 @@ import styled from "styled-components";
 import { ROUTES } from "../../constants/routes";
 import { categoriaDoStatus } from "../../lib/investigacao";
 import { formatarData } from "../../lib/formatacao";
-import type { Case } from "../../types/Case";
+import type { CasoDeCard } from "../../types/Case";
 import { StatusBadge } from "../ui/StatusBadge";
 
 export interface CaseCardProps {
-  caso: Case;
+  caso: CasoDeCard;
   // "vertical" (default, used in grids). "horizontal" puts the image beside the text
   // and is used in one-card-per-row lists.
   orientacao?: "vertical" | "horizontal";
@@ -26,13 +26,15 @@ export function CaseCard({ caso, orientacao = "vertical", href }: CaseCardProps)
   return (
     <Article $horizontal={orientacao === "horizontal"}>
       <Media $horizontal={orientacao === "horizontal"}>
-        <Image
-          src={caso.image}
-          alt=""
-          fill
-          sizes="(max-width: 767px) 100vw, (max-width: 1280px) 50vw, 33vw"
-          style={{ objectFit: "cover" }}
-        />
+        {caso.image ? (
+          <Image
+            src={caso.image}
+            alt=""
+            fill
+            sizes="(max-width: 767px) 100vw, (max-width: 1280px) 50vw, 33vw"
+            style={{ objectFit: "cover" }}
+          />
+        ) : null}
       </Media>
 
       <Body>

@@ -1,0 +1,648 @@
+{
+  "id": "0c459eb1-4cbd-4359-afc5-101bfa656fc9",
+  "prevId": "931d1ec7-d6fa-4821-895b-3786d41d1ec4",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.usuarios": {
+      "name": "usuarios",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "usuario": {
+          "name": "usuario",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "senha_hash": {
+          "name": "senha_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bio": {
+          "name": "bio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "papel": {
+          "name": "papel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'membro'"
+        },
+        "email_verificado_em": {
+          "name": "email_verificado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "demonstrativo": {
+          "name": "demonstrativo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "usuarios_usuario_unique": {
+          "name": "usuarios_usuario_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "usuario"
+          ]
+        },
+        "usuarios_email_unique": {
+          "name": "usuarios_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "usuarios_usuario_formato": {
+          "name": "usuarios_usuario_formato",
+          "value": "\"usuarios\".\"usuario\" ~ '^[a-z0-9_]{3,30}$'"
+        },
+        "usuarios_email_formato": {
+          "name": "usuarios_email_formato",
+          "value": "\"usuarios\".\"email\" = lower(\"usuarios\".\"email\") and \"usuarios\".\"email\" ~ '^[^[:space:]@]+@[^[:space:]@]+\\.[^[:space:]@]+$' and char_length(\"usuarios\".\"email\") <= 254"
+        },
+        "usuarios_nome_tamanho": {
+          "name": "usuarios_nome_tamanho",
+          "value": "char_length(\"usuarios\".\"nome\") between 1 and 60"
+        },
+        "usuarios_bio_tamanho": {
+          "name": "usuarios_bio_tamanho",
+          "value": "char_length(\"usuarios\".\"bio\") <= 240"
+        },
+        "usuarios_papel_valido": {
+          "name": "usuarios_papel_valido",
+          "value": "\"usuarios\".\"papel\" in ('membro', 'moderador', 'admin')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.sessoes": {
+      "name": "sessoes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "usuario_id": {
+          "name": "usuario_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "ultimo_uso_em": {
+          "name": "ultimo_uso_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "expira_em": {
+          "name": "expira_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expira_absoluta_em": {
+          "name": "expira_absoluta_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "revogada_em": {
+          "name": "revogada_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ip_hash": {
+          "name": "ip_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "agente": {
+          "name": "agente",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "sessoes_usuario_idx": {
+          "name": "sessoes_usuario_idx",
+          "columns": [
+            {
+              "expression": "usuario_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sessoes_expira_idx": {
+          "name": "sessoes_expira_idx",
+          "columns": [
+            {
+              "expression": "expira_em",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sessoes_usuario_id_usuarios_id_fk": {
+          "name": "sessoes_usuario_id_usuarios_id_fk",
+          "tableFrom": "sessoes",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "usuario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "sessoes_token_hash_unique": {
+          "name": "sessoes_token_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "token_hash"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.limites_taxa": {
+      "name": "limites_taxa",
+      "schema": "",
+      "columns": {
+        "chave": {
+          "name": "chave",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "janela_inicio": {
+          "name": "janela_inicio",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contagem": {
+          "name": "contagem",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tags": {
+      "name": "tags",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "rotulo": {
+          "name": "rotulo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.publicacao_tags": {
+      "name": "publicacao_tags",
+      "schema": "",
+      "columns": {
+        "publicacao_id": {
+          "name": "publicacao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tag_id": {
+          "name": "tag_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "publicacao_tags_tag_idx": {
+          "name": "publicacao_tags_tag_idx",
+          "columns": [
+            {
+              "expression": "tag_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "publicacao_tags_publicacao_id_publicacoes_id_fk": {
+          "name": "publicacao_tags_publicacao_id_publicacoes_id_fk",
+          "tableFrom": "publicacao_tags",
+          "tableTo": "publicacoes",
+          "columnsFrom": [
+            "publicacao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "publicacao_tags_tag_id_tags_id_fk": {
+          "name": "publicacao_tags_tag_id_tags_id_fk",
+          "tableFrom": "publicacao_tags",
+          "tableTo": "tags",
+          "columnsFrom": [
+            "tag_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "publicacao_tags_publicacao_id_tag_id_pk": {
+          "name": "publicacao_tags_publicacao_id_tag_id_pk",
+          "columns": [
+            "publicacao_id",
+            "tag_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.publicacao_termos": {
+      "name": "publicacao_termos",
+      "schema": "",
+      "columns": {
+        "publicacao_id": {
+          "name": "publicacao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ordem": {
+          "name": "ordem",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "termo": {
+          "name": "termo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "publicacao_termos_publicacao_id_publicacoes_id_fk": {
+          "name": "publicacao_termos_publicacao_id_publicacoes_id_fk",
+          "tableFrom": "publicacao_termos",
+          "tableTo": "publicacoes",
+          "columnsFrom": [
+            "publicacao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "publicacao_termos_publicacao_id_ordem_pk": {
+          "name": "publicacao_termos_publicacao_id_ordem_pk",
+          "columns": [
+            "publicacao_id",
+            "ordem"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "publicacao_termos_tamanho": {
+          "name": "publicacao_termos_tamanho",
+          "value": "char_length(\"publicacao_termos\".\"termo\") between 1 and 60"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.publicacoes": {
+      "name": "publicacoes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "titulo": {
+          "name": "titulo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "resumo": {
+          "name": "resumo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "corpo": {
+          "name": "corpo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "autor_id": {
+          "name": "autor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "(timezone('America/Sao_Paulo', now()))::date"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'publicado'"
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "publicacoes_ordem_idx": {
+          "name": "publicacoes_ordem_idx",
+          "columns": [
+            {
+              "expression": "data",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            },
+            {
+              "expression": "criado_em",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "publicacoes_autor_idx": {
+          "name": "publicacoes_autor_idx",
+          "columns": [
+            {
+              "expression": "autor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "publicacoes_tipo_idx": {
+          "name": "publicacoes_tipo_idx",
+          "columns": [
+            {
+              "expression": "tipo",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "publicacoes_autor_id_usuarios_id_fk": {
+          "name": "publicacoes_autor_id_usuarios_id_fk",
+          "tableFrom": "publicacoes",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "autor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "publicacoes_slug_unique": {
+          "name": "publicacoes_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "publicacoes_slug_formato": {
+          "name": "publicacoes_slug_formato",
+          "value": "\"publicacoes\".\"slug\" ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length(\"publicacoes\".\"slug\") <= 80"
+        },
+        "publicacoes_titulo_tamanho": {
+          "name": "publicacoes_titulo_tamanho",
+          "value": "char_length(\"publicacoes\".\"titulo\") between 3 and 120"
+        },
+        "publicacoes_resumo_tamanho": {
+          "name": "publicacoes_resumo_tamanho",
+          "value": "char_length(\"publicacoes\".\"resumo\") between 1 and 200"
+        },
+        "publicacoes_corpo_tamanho": {
+          "name": "publicacoes_corpo_tamanho",
+          "value": "\"publicacoes\".\"corpo\" is null or char_length(\"publicacoes\".\"corpo\") <= 2000"
+        },
+        "publicacoes_tipo_valido": {
+          "name": "publicacoes_tipo_valido",
+          "value": "\"publicacoes\".\"tipo\" in ('teoria', 'investigacao')"
+        },
+        "publicacoes_status_valido": {
+          "name": "publicacoes_status_valido",
+          "value": "\"publicacoes\".\"status\" in ('publicado', 'oculto')"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

@@ -12,12 +12,20 @@ export function ExploreCards() {
   return (
     <section aria-labelledby="explorar-titulo">
       <Titulo id="explorar-titulo">Explorar</Titulo>
-      <Grid>
-        {EXPLORAR_ITENS.map((item) => (
-          <ExploreTile key={item.titulo} item={item} />
-        ))}
-      </Grid>
+      <ExploreGrid />
     </section>
+  );
+}
+
+// Grade de atalhos. Fica aqui (Client Component) porque os itens trazem componentes de ícone, que não
+// atravessam a fronteira Server -> Client como props.
+export function ExploreGrid() {
+  return (
+    <Grid>
+      {EXPLORAR_ITENS.map((item) => (
+        <ExploreTile key={item.titulo} item={item} />
+      ))}
+    </Grid>
   );
 }
 
@@ -73,12 +81,8 @@ const Titulo = styled.h2`
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
-
-  @media (max-width: 1023px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 
   @media (max-width: 767px) {
     grid-template-columns: minmax(0, 1fr);

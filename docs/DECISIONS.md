@@ -372,3 +372,136 @@ Status: Accepted, com as pendências acima registradas. Aguardando a revisão do
 Ajuste visual (2026-10-17, após comparação com a referência aprovada): a área passou a usar cinco abas visíveis, como na referência: Visão geral, Teorias e publicações, Investigações, Evidências e Atividade. Solicitações e conexões, respostas e discussões e notificações ficaram na aba Atividade. A aba Conquistas saiu: as conquistas aparecem como rótulos no cabeçalho, e a patente tem cartão próprio, somente leitura. O parâmetro de URL passou a ser `?aba=atividade` (e os valores antigos `respostas`, `solicitacoes`, `notificacoes` e `conquistas` caem na aba padrão). A mudança de oito para cinco abas é uma mudança de decisão e precisa de confirmação do produto. Também saíram do Meu Perfil o indicador de contribuições, a investigação em destaque e as contribuições recentes, que continuam no perfil público.
 
 Esclarecimento (2026-10-17, auditoria final da etapa): a aba Atividade mostra o número de notificações não lidas e atualiza esse contador junto com a lista. Um valor de `?aba=` desconhecido cai na aba Visão geral, como em ADR-017 para o perfil público. A ação "Abrir investigação" usa o mesmo padrão de ação restrita do projeto (desabilitada, com link para `/entrar`), porque não há rota de criação de investigação.
+
+## ADR-022: Início antecipado do backend, sem integração com o front
+
+Decisão (solicitada pelo Lucas em 2026-10-19 e confirmada em 2026-10-20): o backend começa a ser construído antes de o front estar "concluído e validado", sob estas condições:
+
+- O escopo é exclusivamente backend: `src/server/**`, `src/app/api/**`, `drizzle/**`, `docs/backend/**` e arquivos de apoio (`drizzle.config.ts`, `vitest.config.ts`, `.env.example`, `docker-compose.yml`).
+- O frontend, `src/lib/data.ts`, os mocks e os tipos compartilhados permanecem intactos. Não há integração nem troca de mocks por chamadas de API.
+- Nenhum serviço pago, conta externa, período de teste ou deploy. Desenvolvimento e testes são locais (PostgreSQL local).
+- A integração com o front só começa por autorização expressa do Lucas e é gradual, por funcionalidade.
+
+Relação com outros ADRs: **não altera o ADR-015**. A restrição do ADR-015 ("backend, banco e autenticação reais ficam fora do escopo até que o frontend esteja concluído e validado") é **excepcionada** por esta decisão apenas quanto ao início do desenvolvimento do backend; o ADR-015 continua valendo para a interface de gerenciamento dentro da investigação (visível só ao responsável autenticado) e para a integração. O ADR-010 continua valendo para o front enquanto não houver integração.
+
+Por que: validar contratos de dados e regras de autorização antes da integração reduz retrabalho; manter o front intacto preserva o MVP em revisão.
+
+Status: Accepted (aprovado pelo Lucas em 2026-10-20 e incorporado a este arquivo).
+
+## ADR-023: Stack do backend
+
+Decisão (Lucas, 2026-10-20): Next.js Route Handlers com TypeScript; PostgreSQL 16 (local no desenvolvimento); Drizzle ORM com migrações SQL versionadas em `drizzle/`; Zod para validação (variáveis de ambiente, entradas e contratos); sessões persistidas no banco com cookie opaco `HttpOnly`; mesma origem entre front e API.
+
+Por que: uma única base e um único deploy futuro, sem CORS, camada `src/server/` desacoplada de React e portável para um serviço separado se for preciso. Relacional se ajusta ao domínio (autoria, estados, contagens).
+
+Consequências: Node 22.12+ para as ferramentas de teste (Vitest 5), enquanto o Next aceita 20.9+. Hospedagem, banco gerenciado, e-mail e armazenamento de arquivos de produção **não estão decididos nem contratados**; o código fala com interfaces (`DATABASE_URL`, futuramente `Armazenamento` e `EnviadorEmail`) para que a escolha seja reversível. `generateStaticParams` com `dynamicParams = false` (ADR-014) não acomoda conteúdo criado depois do build: será revisitado só na integração, em ADR próprio.
+
+Status: Accepted (decisão do Lucas em 2026-10-20).
+
+## ADR-024: Criação de investigações por membros autenticados
+
+Decisão (Lucas, 2026-10-20): qualquer membro autenticado pode criar investigações pela API, com no máximo 3 investigações abertas (não encerradas) por membro. Isto **substitui** a regra anterior do plano do backend (seção 0A.5, item 2, e D22), que previa "ninguém cria por API no MVP-A; moderador/admin no MVP-B". A exigência de e-mail verificado (D12) fica adiada, pois não há verificação de e-mail.
+
+Complementos aprovados na mesma data: `status` (eixo da listagem, ADR-009) nasce `investigating` e **não** é alterado pelas rotas de gerenciamento; alterações de `status` ficam para a moderação (Tarefa 7). `estado` (eixo do detalhe) é alterado só pelo responsável, com qualquer transição entre os quatro valores e histórico gravado pelo servidor. `encerrar` apenas marca `encerradaPeloAutor` (não altera `status` nem `estado`, não reabre e é idempotente), em linha com o ADR-009. Campos que dependem de tabelas ainda inexistentes (contagens de evidências, comentários e participantes, síntese) são omitidos, e `imagem` é sempre `null`. Limites de tamanho, de investigações abertas e de mutações por minuto são provisórios, a revisar antes da produção. A regra de quem cria fica em um único predicado no servidor, para ser restringida de novo (por exemplo à moderação) sem mudar contratos.
+
+Relação com outros ADRs: não altera o ADR-015 nem o ADR-009. A interface de gerenciamento no front continua dependente do ADR-015 e da integração, que não foi feita.
+
+Status: Accepted (aprovado pelo Lucas em 2026-10-20).
+
+## ADR-025: Evidências, moderação mínima e primeiro administrador
+
+Decisão (Lucas, 2026-10-20, Tarefa 7): sugestão e evidência são o mesmo registro, com decisão final de `pendente` para `aceita` ou `recusada`, tomada pelo responsável da investigação ou pela moderação (nunca pelo próprio remetente). O responsável cria evidência já aceita; membros criam sugestões pendentes. Só as aceitas são públicas e contam em totais e no histórico público; a autoria original é preservada. Não há imagens, avaliações nem comentários em evidências nesta etapa.
+
+A moderação mínima permite: moderador ou admin mudar o `status` de uma investigação (qualquer transição entre os 5 valores reais, com motivo, nunca na própria investigação); o administrador trocar papéis apenas entre `membro` e `moderador`; o administrador ler a auditoria. O responsável não ganha poder sobre `status`. Os papéis são sempre lidos do banco. Toda mudança efetiva de status, decisão de evidência da moderação, troca de papel e criação do primeiro administrador grava um registro em uma tabela de auditoria somente de inserção (gatilhos do PostgreSQL), na mesma transação da operação: se a auditoria falhar, a operação é desfeita.
+
+O primeiro administrador é criado apenas pelo script `npm run admin:criar`, sem rota HTTP: senha fora da linha de comando, recusa quando já existe administrador, execução serializada por bloqueio consultivo. Nenhum caminho HTTP concede `admin`.
+
+Relação com outros ADRs: não altera ADR-009 (o `status` continua sendo o eixo da listagem; a moderação passa a ser quem o altera), ADR-015, ADR-022, ADR-023 nem ADR-024. Substitui, para a API, o item "moderação mínima" do plano como proposta. O front permanece sem integração.
+
+Limites provisórios (a revisar antes da produção): 10 sugestões por minuto por membro, 10 pendentes por membro e investigação, 30 ações de decisão e moderação por minuto por pessoa.
+
+Status: Accepted (aprovado pelo Lucas em 2026-10-20).
+
+## ADR-026: Perfis públicos, criadores e edição do próprio perfil
+
+Decisão (Lucas, 2026-10-20, Tarefa 8): a API expõe perfil público de qualquer conta, lista de criadores, listas de publicações e investigações de um usuário e a edição de `nome` e `bio` da própria conta. Os indicadores (publicações, investigações, evidências aceitas e comentários) são contagens reais de conteúdo público, sem valores inventados. Criador é quem tem ao menos uma publicação publicada ou uma investigação. A busca por nome ignora acentos e maiúsculas, normalizada na aplicação e com função nativa do PostgreSQL, sem extensão. Nenhum dado fictício existe em produção: o front deve tratar estado vazio; um seed apenas de desenvolvimento só pode ser proposto à parte.
+
+Fora de escopo e inalterado: patentes e conquistas, seguir, busca global, destaques, upload e avatar. Não altera ADR-018 nem ADR-019. O front continua sem integração.
+
+Status: Accepted (aprovado pelo Lucas em 2026-10-20).
+
+## ADR-027: Etapa I, sessão na interface e fim da simulação de entrada e cadastro
+
+Decisão (Lucas, 2026-10-21, Fatia 1 da Etapa I): `/entrar` e `/criar-conta` passam a usar a API real (`POST /api/v1/auth/entrar` e `POST /api/v1/auth/cadastro`), sem simulação nem aviso de demonstração. Isto encerra, para essas duas rotas, a exceção aprovada no ADR-010; o ADR-010 segue valendo para `/criar` até a Fatia 3. O texto do ADR-010 não foi alterado.
+
+**Leitura da sessão no cliente.** O cookie é `HttpOnly`, então a interface descobre a sessão por `GET /api/v1/auth/eu`, em um `SessaoProvider` no `Providers` raiz (estados `carregando`, `visitante`, `autenticado`, `erro`; relida ao voltar para a aba). A preferência por ler no servidor foi avaliada e **não adotada**: ler o cookie no shell torna todas as páginas dinâmicas e, com `(site)/loading.tsx`, as rotas de detalhe passam a responder HTTP 200 com a página "não encontrado" (soft 404) e os redirecionamentos viram redirecionamentos no cliente, o que desfaz o ADR-014 (verificado com `next start`; o mesmo efeito já estava registrado na etapa 4 do perfil social). Com a leitura no cliente, as rotas continuam estáticas e o 404 real é mantido.
+
+**Navegação.** Visitante vê Entrar e Criar conta e não vê Meu perfil nem Sair. Autenticado vê Meu perfil e Sair e não vê Entrar nem Criar conta. Enquanto a sessão é consultada, nenhuma das duas opções aparece (espaço reservado). Não há opções por papel, porque ainda não existe tela de moderação ou administração. `/meu-perfil` redireciona o visitante a `/entrar` e `/entrar` e `/criar-conta` redirecionam quem já tem sessão ao início, ambos no navegador. Isto é conveniência de navegação: a autorização continua no servidor, que valida sessão e papel lidos do banco em cada operação.
+
+**Limitações aceitas.** Há um instante inicial sem opções de sessão no cabeçalho; os redirecionamentos de navegação não são HTTP 307; a sessão mostrada pode ficar desatualizada até a próxima leitura (troca de aba ou recarga), sem efeito sobre a segurança. Pendente para a Etapa I: as quatro rotas de detalhe ainda usam `dynamicParams = false` e não acolhem conteúdo criado depois do build (tratado nas Fatias 2 a 4, com a decisão sobre 404 real em rotas dinâmicas).
+
+Status: Accepted (aprovado pelo Lucas em 2026-10-21).
+
+## ADR-028: Rotas de detalhe com conteúdo criado depois do build e 404 real
+
+Decisão (Lucas, 2026-10-21, Etapa I): preservar HTTP 404 real para slugs ou usuários inexistentes e permitir acesso ao conteúdo legítimo criado depois do build, sem recompilar e **sem tornar todas as páginas dinâmicas**. HTTP 200 para conteúdo inexistente (soft 404) não é aceito como solução definitiva. A verificação de existência acontece no servidor, antes de qualquer streaming.
+
+**Estratégia.** A rota de detalhe com dados reais é dinâmica (`force-dynamic`, sem `generateStaticParams`) e fica em um grupo de rotas próprio, `src/app/(detalhe)/`, **sem `loading.tsx`**. O grupo tem `layout.tsx` com o mesmo `SiteShell` do grupo `(site)` e `not-found.tsx` sem shell (o layout já o aplica). A página consulta o serviço no processo (ADR-029) e chama `notFound()` antes de qualquer `Suspense`; as listas pesadas ficam em `Suspense` dentro da página, depois da verificação, e dão o estado de carregamento. As demais rotas não mudam.
+
+**Por que um grupo novo.** `loading.tsx` cria uma fronteira de Suspense acima da página: o streaming começa antes de a página rodar e `notFound()` e `redirect()` viram resposta 200 com tratamento no cliente (verificado na Fatia 1 e de novo na Fatia 2). Sem `loading.tsx` acima da página, o Next ainda não enviou o cabeçalho HTTP quando `notFound()` é chamado e responde 404 ou 307 reais.
+
+**Verificado com requisições reais** (`next start`, banco descartável, Next 16.4.0): `/perfil/{existente}` 200; `/perfil/naoexiste`, `/perfil/ab` e `/perfil/%00` 404; `/meu-perfil` sem sessão 307 para `/entrar`; um só cabeçalho e um só rodapé na página 404; perfil criado depois do build abre sem recompilar. `/publicacao/[slug]` migrou para este modelo na Fatia 3 (publicação criada depois do build abre sem recompilar; slug inexistente 404). `/investigacoes/[slug]` e `/publicacoes/investigacao/[slug]` migraram na Fatia 4. Não resta rota de detalhe estática com mocks.
+
+Limitações: o shell é aplicado por dois layouts irmãos (`(site)` e `(detalhe)`), então uma mudança no shell não pode ser feita só em um deles; páginas dinâmicas não são pré-renderizadas.
+
+Status: Accepted (decisão do Lucas em 2026-10-21; verificação da estratégia na Fatia 2).
+
+## ADR-029: Páginas leem o banco pelos serviços, no processo; sessão no servidor só em /meu-perfil
+
+Decisão (Etapa I, Fatia 2): Server Components chamam os mesmos serviços das rotas `/api/v1/*` diretamente (`src/server/leitura/`), sem requisição HTTP para a própria aplicação, que o Next desaconselha e que falha durante o build. As regras de visibilidade ficam nos serviços; nada é duplicado. O navegador continua usando as rotas HTTP para mutações (cabeçalho `X-Requested-With: archives-vi` e `Origin` do mesmo site). Páginas que leem o banco usam `export const dynamic = "force-dynamic"` (não há banco no build).
+
+**Sessão.** O ADR-027 mantém a sessão do shell no cliente. Exceção: `/meu-perfil` lê o cookie no servidor (`usuarioDaSessao`), porque precisa dos dados da pessoa antes de renderizar e deve responder HTTP 307 real a visitantes. A página fica dinâmica e as demais rotas não são afetadas. Isto complementa o ADR-027, que descrevia o redirecionamento de `/meu-perfil` como feito no navegador: agora é HTTP 307. `usuarioDaSessao` devolve só `id`, `usuario`, `nome`, `bio` e `criadoEm`, nunca e-mail, papel ou hash.
+
+**Dados na interface.** Adaptadores na borda (`src/lib/adaptadores.ts`) convertem os tipos da API para os do front. Nada é inventado: patente, conquistas, destaque, participações e atividade recente ficam ocultos ou como estado vazio honesto até existir dado real (Fatia 6). O perfil público mostra os quatro indicadores reais da API; listas truncam em 50 itens com aviso (ainda não há "ver mais"). "Seguir" aparece como ação restrita só para visitante, porque não há API de seguir.
+
+Status: Accepted (Etapa I, Fatia 2; a aprovar na revisão da fatia).
+
+## ADR-030: Publicações, criação, comentários e curtidas pela API real
+
+Decisão (Etapa I, Fatia 3, escopo aprovado pelo Lucas em 2026-10-21): `/publicacoes`, `/publicacao/[slug]`, `/criar`, os comentários e as curtidas usam os serviços e endpoints reais (`GET /api/v1/publicacoes`, `GET /api/v1/publicacoes/{slug}`, `…/relacionadas`, `POST /api/v1/publicacoes`, `GET`/`POST /api/v1/comentarios`, `PUT`/`DELETE …/curtida`). Isto encerra a exceção do ADR-010 para `/criar`: o envio simulado e o aviso de demonstração foram removidos. O texto do ADR-010 não foi alterado.
+
+- **Leitura e 404:** páginas leem pelos serviços no processo (ADR-029). `/publicacao/[slug]` está no grupo `(detalhe)` (ADR-028), dinâmica; 404 real para slug inexistente, fora do formato ou oculto. O cookie é lido nessa página só para `euCurti`; o cabeçalho continua com sessão no cliente (ADR-027).
+- **Escrita:** o navegador chama as rotas HTTP com `X-Requested-With`. Nenhum estado otimista: curtida, comentário e publicação só aparecem depois da resposta do servidor; em falha, o estado anterior e o texto digitado são mantidos e a mensagem do servidor (ou "Não foi possível concluir agora…") é exibida. 401 mostra "sessão expirou"; 422 aparece no campo.
+- **Visitante:** `/criar` mostra pedido de entrada (sem formulário); curtir e comentar ficam desabilitados com link para `/entrar`. A autorização continua no servidor.
+- **Conteúdo exibido:** a página da publicação mostra o `corpo` completo (o resumo só para dados sem corpo). Comentários: 20 por página, em ordem cronológica, com "Ver mais comentários" pelo cursor da API. Listagem: 50 itens com aviso (sem "ver mais").
+- **Retiradas por falta de API/dado real (não são regressões de backend):** botão "Favoritar" (sem endpoint); sidebar de tópicos do fórum e atualizações em `/publicacoes` (só havia mocks); o grupo "Investigações" de `/publicacoes` (só havia mocks; volta na Fatia 4, vindo da API); `?simular=` em `/publicacoes`.
+- **Lacunas entre fatias:** Home, Explorar e Buscar ainda linkam publicações dos mocks, que agora dão 404 com banco real (Fatia 5); `DiscussaoSection` de investigações ainda usa `ComposerBloqueado` (Fatia 4).
+
+Status: Accepted (Etapa I, Fatia 3; a aprovar na revisão da fatia).
+
+## ADR-031: Investigações, evidências e sugestões pela API real
+
+Decisão (Etapa I, Fatia 4, escopo aprovado pelo Lucas em 2026-10-21): `/investigacoes`, `/investigacoes/[slug]`, `/publicacoes/investigacao/[slug]` e o grupo Investigações de `/publicacoes` usam os serviços e endpoints reais de investigações e evidências (`GET /api/v1/investigacoes`, `…/{slug}`, `…/historico`, `GET`/`POST …/evidencias`, `GET …/sugestoes`, `POST …/sugestoes/{id}/aceitar` e `/recusar`, `GET /api/v1/me/sugestoes`). Os detalhes ficam no grupo `(detalhe)` (ADR-028): 404 real e investigações criadas depois do build abrem sem recompilar. Leitura no processo (ADR-029); o cookie é lido nas páginas de detalhe só para permissões e para as sugestões da própria pessoa (`usuarioDaSessao` passa a trazer o `papel`, que nunca vai a componentes de cliente).
+
+- **Evidências:** a lista pública traz só as aceitas (a API filtra). Quem não é o responsável cria sugestão pendente; o responsável publica direto. O envio não aceita imagens (a API rejeita o campo): o formulário oferece só as origens textuais (`referencia_textual`, `origem_nao_verificada`) e avisa que imagens não estão disponíveis. O remetente vê as próprias sugestões (pendente, aceita, recusada e o motivo, que a API entrega só a ele, ao responsável e à moderação). O responsável e a moderação veem a fila de pendentes e aceitam ou recusam (motivo opcional); o resultado só aparece após a confirmação do servidor. A autorização é sempre da API.
+- **Retirado por não haver API ou dado real:** discussão (geral e por evidência), localização das evidências (mapa demonstrativo), síntese, participantes, atividade recente, avaliações, imagens e fotografias, capa da investigação, botão "Acompanhar", aba "Sem fontes" em `/investigacoes`, sidebar de fórum e atualizações. O local da investigação aparece como texto no resumo. `EvidenciasList` (aceitar e recusar simulados) foi removida.
+- **Filtros:** em `/investigacoes`, "Em andamento" e "Resolvidas" são aplicados sobre as 50 investigações carregadas (a API não filtra por `status`), com aviso. Em `/publicacoes`, "Investigações" mostra o grupo real; o filtro de tema vale para as duas listas.
+- **Fora desta fatia (sem tela existente):** editar (a criação ganhou tela depois, ADR-032), mudar `estado`, encerrar e a mudança de `status` pela moderação. Os endpoints existem e seguem sem interface.
+
+Status: Accepted (Etapa I, Fatia 4; a aprovar na revisão da fatia).
+
+## ADR-032: Tela de criação de investigações
+
+Decisão (Lucas, 2026-10-21): `/criar/investigacao` (grupo `(site)`, página estática; a sessão é lida no cliente por `useSessao`, como em `/criar`) cria investigações pelo endpoint existente `POST /api/v1/investigacoes`, sem alterar o contrato. Qualquer membro autenticado pode criar (ADR-024); o servidor decide o limite de 3 abertas, a taxa e a sessão. A rota fica sob `/criar` porque `/investigacoes/criar` colidiria com o slug `criar` de `/investigacoes/[slug]`. Visitante vê "Entre para criar uma investigação" com link para `/entrar`. O sucesso só existe depois do 201 com o `slug`; então a pessoa vai para `/investigacoes/{slug}`. Validação local espelha os limites do contrato (teste de igualdade com `LIMITES_INVESTIGACAO`); o link do YouTube é validado só pelo servidor. Erros aninhados chegam com chaves como `teoria.hipotese` e `teoria.fontes.2`. Links de entrada: `/investigacoes`, `/criar` e `/meu-perfil` (substitui a ação restrita citada no esclarecimento da ADR-021, que dizia não haver rota de criação). Fora do escopo: imagens, evidências na criação, edição, encerramento e demais funções.
+
+## ADR-033: Home, Explorar e Buscar com dados reais
+
+Decisão (Lucas, 2026-10-21, Etapa I, Fatia 5): as três páginas leem os serviços reais no processo (ADR-029) e ficam dinâmicas. **Home:** banner institucional fixo (texto e imagem do site, não conteúdo de usuário) no lugar do carrossel de destaques, que dependia de curadoria inexistente (Tarefa 9, não autorizada); "Mistérios em alta" vira "Investigações recentes" (3 mais recentes por `atualizadoEm`), sem sidebar de fórum e atualizações. **Explorar:** atalhos só para destinos que existem (Mistérios e Teorias); Mapa e Galeria foram removidos até haver rota e dados; mesma lista de investigações recentes. **Buscar:** criadores pela busca da API (`q`: nome sem acento ou usuário; a busca anterior também olhava a bio, o que a API não faz); publicações (título, resumo, palavras-chave, temas) e investigações (título, descrição, localização) são filtradas entre as 50 mais recentes de cada tipo, porque `GET /api/v1/publicacoes` e `/investigacoes` não têm `q`. Quando há mais de 50 registros do tipo, a página avisa que a busca é parcial. Busca completa exige um endpoint novo (busca global, D de busca adiada), que não foi criado. Não há contagem real de investigadores online: o número fixo no cabeçalho continua demonstrativo e fica para a Fatia 6.
+
+## ADR-034: Estabilização da Etapa I (Fatia 6)
+
+Decisão (Lucas, 2026-10-21): o contador "investigadores online" e os itens de menu sem destino (Mapa, Galeria, Fórum) saem do cabeçalho até existirem fonte real e rotas. Não há presença em tempo real na API, então nenhuma contagem substitui o número fixo. `/meu-perfil` usa `key` só com o usuário (antes incluía nome e bio e remontava após salvar, apagando o aviso de sucesso). Sem criação de endpoints, mudança de contrato, redesign ou páginas novas. Pendências registradas, não corrigidas por exigirem decisão de produto ou design: contraste do texto branco sobre o degradê rosa/roxo dos botões primários (3,04:1 no rosa e 4,27:1 no roxo, abaixo de 4,5:1 para texto pequeno); ausência de favicon (`/favicon.ico` responde 404); 14 componentes e 9 mocks sem uso (candidatos a remoção).
+
+## ADR-035: Contraste dos botões primários e favicon
+
+Decisão (Lucas, 2026-10-21): os tokens `gradientStart` e `gradientEnd` do tema (antes iguais a `pink` e `purple`) passam a `#E5006E` e `#9743FF`, e os botões primários, o link primário do cabeçalho, `LinkDeAcao`, o link primário de Meu Perfil, o botão de `MisterioArtigo` e a seleção de texto usam esses tokens, sem exceções locais. Contraste do texto branco medido com a mesma fórmula do WCAG: 4,61:1 no início, 5,13:1 no meio e 4,60:1 no fim (antes 3,04, 3,74 e 4,27). `pink` e `purple` ficam como cores de destaque sobre fundo escuro. Desabilitado e carregando usam opacidade 0,55 (componente inativo, isento do critério): o contraste efetivo cai para cerca de 3,1 a 3,3:1. Favicon: `src/app/icon.svg` e `src/app/favicon.ico` (32x32, PNG dentro de ICO, 733 bytes), servidos pelo Next com `<link rel="icon">`; usam as cores da marca, não o texto do logotipo.

@@ -9,8 +9,10 @@ export const theme = {
     // Primary colors
     pink: "#FF4FA3",
     purple: "#9C4DFF",
-    gradientStart: "#FF4FA3",
-    gradientEnd: "#9C4DFF",
+    // Degradê dos botões primários e do avatar: tons mais escuros que pink/purple para o texto branco ter
+    // contraste mínimo de 4,5:1 (WCAG AA) em toda a extensão. pink e purple seguem como cores de destaque.
+    gradientStart: "#E5006E",
+    gradientEnd: "#9743FF",
 
     // Text
     text: "#F4F4F4",

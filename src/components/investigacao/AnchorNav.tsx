@@ -6,8 +6,6 @@ import styled from "styled-components";
 const ITENS = [
   { id: "teoria", rotulo: "Teoria" },
   { id: "evidencias", rotulo: "Evidências" },
-  { id: "discussao", rotulo: "Discussão" },
-  { id: "localizacao", rotulo: "Localização" },
   { id: "historico", rotulo: "Histórico" },
 ];
 

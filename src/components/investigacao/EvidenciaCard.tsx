@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import styled from "styled-components";
 
 import { formatarData } from "../../lib/formatacao";
@@ -8,9 +7,6 @@ import { ROTULO_ORIGEM } from "../../lib/investigacaoEstado";
 import type { Evidencia, OrigemEvidencia } from "../../types/InvestigacaoDetalhe";
 import { Avatar } from "../ui/Avatar";
 import { Badge } from "../ui/Badge";
-import { AvaliacoesContagem } from "./AvaliacoesContagem";
-import { GaleriaEvidencia } from "./GaleriaEvidencia";
-import { MidiaPlaceholder } from "./MidiaPlaceholder";
 
 export interface EvidenciaCardProps {
   evidencia: Evidencia;
@@ -19,25 +15,18 @@ export interface EvidenciaCardProps {
   ehDoCriador: boolean;
 }
 
-// Evidence card. Origin, contradictions and support have the same visual weight: no ranking,
-// no percentage, no score.
+// Evidência aceita, como a API a entrega: sem imagens, avaliações nem discussão (não existem na API).
+// Nenhuma pontuação, porcentagem ou ranking.
 export function EvidenciaCard({ evidencia, ehDoCriador }: EvidenciaCardProps) {
-  const { id, origem, titulo, descricao, autor, data, fonte, comentarios, avaliacoes } = evidencia;
+  const { id, origem, titulo, descricao, autor, data, fonte } = evidencia;
   const tituloId = `evidencia-${id}-titulo`;
-  const temImagens = (evidencia.imagens?.length ?? 0) > 0;
 
   return (
     <Card id={`evidencia-${id}`} aria-labelledby={tituloId}>
-      {temImagens ? (
-        <GaleriaEvidencia imagens={evidencia.imagens ?? []} identificador={`#${id}`} />
-      ) : (
-        <MidiaPlaceholder origem={origem} />
-      )}
-
       <Corpo>
         <Topo>
           <Identificadores>
-            <Identificador>EVIDÊNCIA #{id}</Identificador>
+            <Identificador>EVIDÊNCIA</Identificador>
             {ehDoCriador ? (
               <Badge size="small" variant="secondary">
                 Evidência do criador
@@ -58,7 +47,6 @@ export function EvidenciaCard({ evidencia, ehDoCriador }: EvidenciaCardProps) {
             {autor.nome} <Usuario>@{autor.usuario}</Usuario>
           </span>
           <time dateTime={data}>{formatarData(data)}</time>
-          {comentarios !== undefined ? <span>{comentarios} comentários</span> : null}
         </Meta>
 
         {evidencia.origemComunidade ? (
@@ -67,7 +55,7 @@ export function EvidenciaCard({ evidencia, ehDoCriador }: EvidenciaCardProps) {
               Evidência enviada por <Usuario>@{evidencia.origemComunidade.enviadaPor.usuario}</Usuario>
             </span>
             <span>
-              Status: Aceita pelo investigador <Usuario>@{evidencia.origemComunidade.aceitaPor.usuario}</Usuario>
+              Aceita por <Usuario>@{evidencia.origemComunidade.aceitaPor.usuario}</Usuario>
             </span>
           </Procedencia>
         ) : null}
@@ -76,21 +64,11 @@ export function EvidenciaCard({ evidencia, ehDoCriador }: EvidenciaCardProps) {
           {fonte ? `Fonte: ${fonte}` : "Fonte pendente de verificação."}
         </Fonte>
 
-        {avaliacoes ? <AvaliacoesContagem avaliacoes={avaliacoes} /> : null}
-
-        <Acoes>
-          {evidencia.temDiscussao ? (
-            <a href="#discussao">Ver discussão da evidência</a>
-          ) : (
-            <Desabilitado>Sem discussão publicada</Desabilitado>
-          )}
-          {evidencia.relacionadaA ? (
-            <a href={`#evidencia-${evidencia.relacionadaA}`}>
-              Relacionada à evidência #{evidencia.relacionadaA}
-            </a>
-          ) : null}
-          <Link href="/entrar">Entre para avaliar</Link>
-        </Acoes>
+        {evidencia.relacionadaA ? (
+          <Acoes>
+            <a href={`#evidencia-${evidencia.relacionadaA}`}>Relacionada a outra evidência desta investigação</a>
+          </Acoes>
+        ) : null}
       </Corpo>
     </Card>
   );
@@ -199,8 +177,4 @@ const Acoes = styled.div`
     outline: 2px solid ${({ theme }) => theme.colors.pink};
     outline-offset: 2px;
   }
-`;
-
-const Desabilitado = styled.span`
-  color: ${({ theme }) => theme.colors.textSecondary};
 `;

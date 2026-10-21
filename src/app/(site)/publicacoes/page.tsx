@@ -6,30 +6,27 @@ import { FilterTabs } from "../../../components/filters/FilterTabs";
 import { ContentGrid } from "../../../components/layout/ContentGrid";
 import { Subtitulo } from "../../../components/investigacao/Secao";
 import { CardList } from "../../../components/page/CardList";
+import { NotaLista } from "../../../components/page/NotaLista";
 import { PageBody } from "../../../components/page/PageBody";
 import { PageHeader } from "../../../components/page/PageHeader";
-import { Sidebar } from "../../../components/home/Sidebar";
 import { FiltroTemas } from "../../../components/tags/FiltroTemas";
 import { EmptyState } from "../../../components/states/EmptyState";
 import { FILTROS_PUBLICACOES } from "../../../constants/filtros";
 import { ROUTES } from "../../../constants/routes";
 import { TAGS_TEMATICAS, type TagTematica } from "../../../constants/tagsTematicas";
-import {
-  getAtualizacoes,
-  getCriadores,
-  getInvestigacoes,
-  getPublicacoes,
-  getTopicosForum,
-  SIMULACOES,
-  type Simulacao,
-} from "../../../lib/data";
+import { investigacaoParaCaso, perfilParaCriador, publicacaoParaFront } from "../../../lib/adaptadores";
 import { lerTagTematica } from "../../../lib/tags";
+import { investigacoesDaListagem } from "../../../server/leitura/investigacoes";
+import { publicacoesDaListagem } from "../../../server/leitura/publicacoes";
+import { LIMITE_LISTA } from "../../../server/leitura/usuarios";
 import type { TipoPublicacao } from "../../../types/Publicacao";
 
-// Área comunitária unificada de Teorias e Investigações (ADR-020). Lista as investigações estruturadas e
-// as publicações, em grupos separados, sem criar vínculos entre elas. A discussão de cada investigação
-// tem rota própria: /publicacoes/investigacao/[slug].
-type SearchParams = Promise<{ tipo?: string; tag?: string; simular?: string }>;
+// Publicações e investigações reais (API, via serviço no processo; ADR-029 e ADR-031), em grupos separados, sem
+// criar vínculos entre elas (ADR-013). A área de cada investigação tem rota própria: /publicacoes/investigacao/[slug].
+// Sem sidebar: tópicos do fórum e atualizações não têm endpoint e não voltam como mocks.
+export const dynamic = "force-dynamic";
+
+type SearchParams = Promise<{ tipo?: string; tag?: string }>;
 
 const TIPOS_VALIDOS: readonly TipoPublicacao[] = ["teoria", "investigacao"];
 
@@ -47,10 +44,6 @@ function hrefPublicacoes({ tipo, tag }: { tipo?: TipoPublicacao; tag?: TagTemati
   return texto ? `${ROUTES.publicacoes}?${texto}` : ROUTES.publicacoes;
 }
 
-function lerSimulacao(valor?: string): Simulacao | undefined {
-  return SIMULACOES.find((estado) => estado === valor);
-}
-
 export default async function PublicacoesPage({
   searchParams,
 }: {
@@ -60,19 +53,19 @@ export default async function PublicacoesPage({
 
   const tipo = lerTipo(params.tipo);
   const tag = lerTagTematica(params.tag);
-  const simular = lerSimulacao(params.simular);
 
-  // Investigações só têm tags se o registro tiver. Com um tema ativo, a lista de investigações fica fora.
-  const mostrarInvestigacoes = tag === undefined && (tipo === undefined || tipo === "investigacao");
+  // O filtro de tema vale para as duas listas (a API filtra investigações por tema). "Teorias" mostra só publicações.
+  const mostrarInvestigacoes = tipo === undefined || tipo === "investigacao";
 
-  const [publicacoes, investigacoes, criadores, topicos, atualizacoes] = await Promise.all([
-    getPublicacoes({ tipo, tag, simular }),
-    mostrarInvestigacoes ? getInvestigacoes({ simular }) : Promise.resolve([]),
-    getCriadores(),
-    getTopicosForum(),
-    getAtualizacoes(),
+  const [{ itens, haMais }, investigacoesLista] = await Promise.all([
+    publicacoesDaListagem(tipo, tag),
+    mostrarInvestigacoes ? investigacoesDaListagem(tag) : Promise.resolve({ itens: [], haMais: false }),
   ]);
-  const autores = new Map(criadores.map((criador) => [criador.id, criador]));
+  const investigacoes = investigacoesLista.itens.map(investigacaoParaCaso);
+  const publicacoes = itens.map((item) => ({
+    publicacao: publicacaoParaFront(item),
+    autor: perfilParaCriador({ usuario: item.autor.usuario, nome: item.autor.nome, bio: "" }),
+  }));
 
   const abas = FILTROS_PUBLICACOES.map((filtro) => ({
     label: filtro.label,
@@ -119,7 +112,8 @@ export default async function PublicacoesPage({
               ) : (
                 <EmptyState
                   titulo="Nada por aqui ainda"
-                  descricao="Ainda não há teorias ou investigações neste filtro. Tente outra categoria."
+                  descricao="Ainda não há teorias ou investigações neste filtro. Tente outra categoria ou publique a primeira teoria."
+                  acao={<Link href={ROUTES.criar}>Criar teoria</Link>}
                 />
               )
             ) : null}
@@ -137,6 +131,7 @@ export default async function PublicacoesPage({
                     />
                   ))}
                 </CardList>
+                {investigacoesLista.haMais ? <NotaLista>Mostrando as {LIMITE_LISTA} investigações mais recentes.</NotaLista> : null}
               </section>
             ) : null}
 
@@ -144,20 +139,16 @@ export default async function PublicacoesPage({
               <section aria-label={rotuloPublicacoes}>
                 <Subtitulo>{rotuloPublicacoes}</Subtitulo>
                 <CardList>
-                  {publicacoes.map((publicacao) => (
-                    <PublicationCard
-                      key={publicacao.id}
-                      publicacao={publicacao}
-                      autor={autores.get(publicacao.autorId)}
-                    />
+                  {publicacoes.map(({ publicacao, autor }) => (
+                    <PublicationCard key={publicacao.id} publicacao={publicacao} autor={autor} />
                   ))}
                 </CardList>
+                {haMais ? <NotaLista>Mostrando as {LIMITE_LISTA} publicações mais recentes.</NotaLista> : null}
               </section>
             ) : null}
           </PageBody>
         </>
       }
-      sidebar={<Sidebar topicos={topicos} atualizacoes={atualizacoes} />}
     />
   );
 }

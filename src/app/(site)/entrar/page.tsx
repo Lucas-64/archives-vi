@@ -3,21 +3,25 @@ import Link from "next/link";
 
 import { AuthCard } from "../../../components/auth/AuthCard";
 import { FormularioEntrar } from "../../../components/auth/FormularioEntrar";
+import { RedirecionaSeAutenticado } from "../../../components/auth/GuardaSessao";
 import { ROUTES } from "../../../constants/routes";
 
 export const metadata: Metadata = {
   title: "Entrar | ARCHIVES VI",
 };
 
-// Demonstrative sign-in page. It does not authenticate anyone (ADR-010, approved exception).
+// Página de entrada. Quem já tem sessão é levado ao início (RedirecionaSeAutenticado).
 export default function EntrarPage() {
   return (
-    <AuthCard
-      titulo="Entrar"
-      contexto="Entre para seguir investigações, comentar e enviar pistas. Esta versão ainda não tem autenticação."
-      rodape={<Link href={ROUTES.criarConta}>Criar conta</Link>}
-    >
-      <FormularioEntrar />
-    </AuthCard>
+    <>
+      <RedirecionaSeAutenticado />
+      <AuthCard
+        titulo="Entrar"
+        contexto="Entre com seu e-mail e sua senha para acessar sua conta."
+        rodape={<Link href={ROUTES.criarConta}>Criar conta</Link>}
+      >
+        <FormularioEntrar />
+      </AuthCard>
+    </>
   );
 }

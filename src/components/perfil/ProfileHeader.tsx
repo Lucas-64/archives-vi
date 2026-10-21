@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { AcaoRestrita } from "../acoes/AcaoRestrita";
 import type { Criador } from "../../types/Criador";
 import { Avatar } from "../ui/Avatar";
+import { useSessao } from "../auth/SessaoProvider";
 import { Card } from "../ui/Card";
 import { MenuAcoesPerfil } from "./MenuAcoesPerfil";
 
@@ -16,6 +17,7 @@ export interface ProfileHeaderProps {
 // Data de entrada, jogos e interesses não existem em Criador: não são exibidos, sem texto de
 // substituição. Seguir exige conta (ADR-010): a ação fica desabilitada, com link para /entrar.
 export function ProfileHeader({ criador }: ProfileHeaderProps) {
+  const { estado } = useSessao();
   return (
     <Card padding="large">
       <Cabecalho>
@@ -25,9 +27,10 @@ export function ProfileHeader({ criador }: ProfileHeaderProps) {
           <Usuario>@{criador.usuario}</Usuario>
         </Identidade>
       </Cabecalho>
-      <Bio>{criador.bio}</Bio>
+      {criador.bio ? <Bio>{criador.bio}</Bio> : null}
       <Acoes>
-        <AcaoRestrita rotulo="Seguir" mensagem="Seguir exige conta." />
+        {/* Seguir ainda não existe no backend. Quem tem conta não vê a ação (a mensagem "exige conta" não valeria). */}
+        {estado === "visitante" ? <AcaoRestrita rotulo="Seguir" mensagem="Seguir exige conta." /> : null}
         <MenuAcoesPerfil />
       </Acoes>
     </Card>

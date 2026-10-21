@@ -1,4 +1,4 @@
-// Client-side validation only. Nothing is sent or stored; there is no backend yet.
+// Validação básica no navegador, só para feedback imediato. O servidor valida de novo e decide.
 
 export const MINIMO_CARACTERES_SENHA = 8;
 
