@@ -1,4 +1,4 @@
-import { FiFileText, FiSearch } from "react-icons/fi";
+import { FiCamera, FiFileText, FiMapPin, FiSearch } from "react-icons/fi";
 import type { IconType } from "react-icons";
 
 import type { SecaoImagem } from "./imagensSecoes";
@@ -29,5 +29,19 @@ export const EXPLORAR_ITENS: readonly ExplorarItem[] = [
     icon: FiFileText,
     href: ROUTES.teorias,
   },
-  // Mapa interativo e Galeria ficam de fora até existirem rotas e dados reais (sem destino, não há o que explorar).
+  // Mapa e Galeria não têm rota: aparecem como "em breve", sem link (ADR-036).
+  {
+    titulo: "Mapa",
+    secao: "mapa",
+    descricao: "Marque e confira locais suspeitos em Leonida.",
+    icon: FiMapPin,
+    href: null,
+  },
+  {
+    titulo: "Galeria",
+    secao: "galeria",
+    descricao: "Screenshots e vídeos enviados pela comunidade.",
+    icon: FiCamera,
+    href: null,
+  },
 ];

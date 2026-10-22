@@ -498,10 +498,30 @@ Decisão (Lucas, 2026-10-21): `/criar/investigacao` (grupo `(site)`, página est
 
 Decisão (Lucas, 2026-10-21, Etapa I, Fatia 5): as três páginas leem os serviços reais no processo (ADR-029) e ficam dinâmicas. **Home:** banner institucional fixo (texto e imagem do site, não conteúdo de usuário) no lugar do carrossel de destaques, que dependia de curadoria inexistente (Tarefa 9, não autorizada); "Mistérios em alta" vira "Investigações recentes" (3 mais recentes por `atualizadoEm`), sem sidebar de fórum e atualizações. **Explorar:** atalhos só para destinos que existem (Mistérios e Teorias); Mapa e Galeria foram removidos até haver rota e dados; mesma lista de investigações recentes. **Buscar:** criadores pela busca da API (`q`: nome sem acento ou usuário; a busca anterior também olhava a bio, o que a API não faz); publicações (título, resumo, palavras-chave, temas) e investigações (título, descrição, localização) são filtradas entre as 50 mais recentes de cada tipo, porque `GET /api/v1/publicacoes` e `/investigacoes` não têm `q`. Quando há mais de 50 registros do tipo, a página avisa que a busca é parcial. Busca completa exige um endpoint novo (busca global, D de busca adiada), que não foi criado. Não há contagem real de investigadores online: o número fixo no cabeçalho continua demonstrativo e fica para a Fatia 6.
 
+Status: parcialmente revertido pelo ADR-036 (Mapa e Galeria em Explorar; sidebars da Home).
+
 ## ADR-034: Estabilização da Etapa I (Fatia 6)
 
 Decisão (Lucas, 2026-10-21): o contador "investigadores online" e os itens de menu sem destino (Mapa, Galeria, Fórum) saem do cabeçalho até existirem fonte real e rotas. Não há presença em tempo real na API, então nenhuma contagem substitui o número fixo. `/meu-perfil` usa `key` só com o usuário (antes incluía nome e bio e remontava após salvar, apagando o aviso de sucesso). Sem criação de endpoints, mudança de contrato, redesign ou páginas novas. Pendências registradas, não corrigidas por exigirem decisão de produto ou design: contraste do texto branco sobre o degradê rosa/roxo dos botões primários (3,04:1 no rosa e 4,27:1 no roxo, abaixo de 4,5:1 para texto pequeno); ausência de favicon (`/favicon.ico` responde 404); 14 componentes e 9 mocks sem uso (candidatos a remoção).
 
+Status: parcialmente revertido pelo ADR-036 (contador "investigadores online" e itens Mapa, Galeria e Fórum no menu).
+
 ## ADR-035: Contraste dos botões primários e favicon
 
 Decisão (Lucas, 2026-10-21): os tokens `gradientStart` e `gradientEnd` do tema (antes iguais a `pink` e `purple`) passam a `#E5006E` e `#9743FF`, e os botões primários, o link primário do cabeçalho, `LinkDeAcao`, o link primário de Meu Perfil, o botão de `MisterioArtigo` e a seleção de texto usam esses tokens, sem exceções locais. Contraste do texto branco medido com a mesma fórmula do WCAG: 4,61:1 no início, 5,13:1 no meio e 4,60:1 no fim (antes 3,04, 3,74 e 4,27). `pink` e `purple` ficam como cores de destaque sobre fundo escuro. Desabilitado e carregando usam opacidade 0,55 (componente inativo, isento do critério): o contraste efetivo cai para cerca de 3,1 a 3,3:1. Favicon: `src/app/icon.svg` e `src/app/favicon.ico` (32x32, PNG dentro de ICO, 733 bytes), servidos pelo Next com `<link rel="icon">`; usam as cores da marca, não o texto do logotipo.
+
+## ADR-036: Lote de restauração de itens ocultados (revê parte dos ADR-033 e ADR-034)
+
+Decisão (Lucas, 2026-10-22): itens ocultados de propósito no commit `a8cf9a91` voltam à interface, sem funcionalidade nova, identificados como "em breve" ou "demonstração".
+
+- **Menu:** Mapa, Galeria e Fórum voltam ao final de `MAIN_NAV`, nessa ordem, com `href: null`. Aparecem esmaecidos, com o selo "em breve", sem link e sem navegar. Não se criam as rotas `/mapa`, `/galeria` e `/forum`. `MOBILE_NAV` não muda (só rotas funcionais).
+- **"Investigadores online":** volta ao canto direito do menu como demonstração rotulada. Não há presença em tempo real na API (ADR-033), então o número é a constante `INVESTIGADORES_ONLINE_DEMO` em `src/constants/demonstracao.ts` (3, coerente com os poucos usuários de exemplo, e não os 312 antigos). O selo "demonstração" aparece junto do valor.
+- **Explorar:** os cards Mapa e Galeria voltam em `EXPLORAR_ITENS`, o que vale para a Início e para `/explorar`, que compartilham a lista. Sem rota, mostram "Em breve" no lugar do link, com `aria-disabled`.
+- **Sidebars:** "Atualizações recentes" e "Últimos tópicos do fórum" voltam com um item de exemplo de cada, vindo de `src/mocks/` e rotulado "Demonstração" (`SidebarDemonstrativa`). Não há tabela, API nem rota de fórum ou de atualizações.
+- **Classificação de Mistérios e filtros (pedidos pelo Lucas nesta mesma data):** a redução das classificações de Mistérios a quatro (Em andamento, Resolvido, Easter egg, Curiosidade), a remoção do filtro por tipo em Teorias e investigações e o botão de mostrar/ocultar filtros foram pedidos por ele. A classificação vale só na interface, derivada do `status` atual; o **campo persistente de classificação de mistério fica para uma etapa futura**. Investigações mantêm seus status. O detalhe de cada mudança é registrado pelas threads responsáveis.
+
+Efeito sobre decisões anteriores: o ADR-033 deixou de valer para Mapa e Galeria em Explorar e para a ausência de sidebar na Home; o ADR-034, para o contador de online e para os itens de menu sem destino. O restante de ambos continua em vigor. Os textos originais não foram reescritos.
+
+A `SidebarDemonstrativa` é usada na Início, em `/investigacoes` e em `/publicacoes` (ligada em 2026-10-22, quando essas páginas não tinham alterações pendentes).
+
+Status: Accepted (decisão do Lucas em 2026-10-22).

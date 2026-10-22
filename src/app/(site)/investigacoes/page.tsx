@@ -1,6 +1,7 @@
 import { CaseCard } from "../../../components/cards/CaseCard";
 import { FilterTabs } from "../../../components/filters/FilterTabs";
 import { FiltrosRecolhiveis } from "../../../components/filters/FiltrosRecolhiveis";
+import { SidebarDemonstrativa } from "../../../components/home/Sidebar";
 import { ContentGrid } from "../../../components/layout/ContentGrid";
 import { CardList } from "../../../components/page/CardList";
 import { LinkDeAcao } from "../../../components/page/LinkDeAcao";
@@ -80,6 +81,7 @@ export default async function InvestigacoesPage({ searchParams }: { searchParams
           </PageBody>
         </>
       }
+      sidebar={<SidebarDemonstrativa />}
     />
   );
 }

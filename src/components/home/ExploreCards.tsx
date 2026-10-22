@@ -61,9 +61,7 @@ export function ExploreTile({ item }: { item: ExplorarItem }) {
               Explorar <FiArrowRight aria-hidden="true" />
             </TileLink>
           ) : (
-            <TileDisabled aria-disabled="true">
-              Explorar <FiArrowRight aria-hidden="true" />
-            </TileDisabled>
+            <TileDisabled aria-disabled="true">Em breve</TileDisabled>
           )}
         </Texto>
       </Conteudo>

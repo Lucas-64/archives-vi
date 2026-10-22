@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styled from "styled-components";
 
+import { INVESTIGADORES_ONLINE_DEMO } from "../../constants/demonstracao";
 import type { NavItem } from "../../constants/routes";
 import { isRotaAtiva } from "../../lib/navegacao";
 
@@ -18,6 +19,18 @@ export function Navigation({ items }: NavigationProps) {
     <NavBar aria-label="Navegação principal">
       <List>
         {items.map((item) => {
+          // Itens sem href são visuais ("em breve"): sem link e sem navegação falsa.
+          if (item.href === null) {
+            return (
+              <li key={item.label}>
+                <Disabled aria-disabled="true">
+                  {item.label}
+                  <EmBreve>em breve</EmBreve>
+                </Disabled>
+              </li>
+            );
+          }
+
           const isActive = isRotaAtiva(pathname, item.href);
 
           return (
@@ -33,6 +46,13 @@ export function Navigation({ items }: NavigationProps) {
           );
         })}
       </List>
+
+      {/* Valor de demonstração (ADR-036): não existe presença em tempo real. */}
+      <Online>
+        <OnlineDot aria-hidden="true" />
+        <strong>{INVESTIGADORES_ONLINE_DEMO}</strong> investigadores online
+        <Demo>demonstração</Demo>
+      </Online>
     </NavBar>
   );
 }
@@ -105,4 +125,47 @@ const NavLink = styled(Link)<{ $active: boolean }>`
     outline-offset: 2px;
     border-radius: 4px;
   }
+`;
+
+const Disabled = styled.span`
+  ${linkBase}
+  gap: 6px;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  opacity: 0.6;
+  cursor: default;
+`;
+
+const EmBreve = styled.small`
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+`;
+
+const Online = styled.p`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  white-space: nowrap;
+
+  strong {
+    color: ${({ theme }) => theme.colors.confirmed};
+    font-weight: 700;
+  }
+`;
+
+const OnlineDot = styled.span`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: ${({ theme }) => theme.colors.confirmed};
+`;
+
+const Demo = styled.small`
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.7;
 `;

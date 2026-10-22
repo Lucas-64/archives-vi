@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CaseCard } from "../../../components/cards/CaseCard";
 import { PublicationCard } from "../../../components/cards/PublicationCard";
 import { FilterTabs } from "../../../components/filters/FilterTabs";
+import { SidebarDemonstrativa } from "../../../components/home/Sidebar";
 import { ContentGrid } from "../../../components/layout/ContentGrid";
 import { Subtitulo } from "../../../components/investigacao/Secao";
 import { CardList } from "../../../components/page/CardList";
@@ -23,7 +24,7 @@ import type { TipoPublicacao } from "../../../types/Publicacao";
 
 // Publicações e investigações reais (API, via serviço no processo; ADR-029 e ADR-031), em grupos separados, sem
 // criar vínculos entre elas (ADR-013). A área de cada investigação tem rota própria: /publicacoes/investigacao/[slug].
-// Sem sidebar: tópicos do fórum e atualizações não têm endpoint e não voltam como mocks.
+// Sidebar demonstrativa (ADR-036): tópicos do fórum e atualizações não têm endpoint e aparecem rotulados como exemplo.
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<{ tipo?: string; tag?: string }>;
@@ -149,6 +150,7 @@ export default async function PublicacoesPage({
           </PageBody>
         </>
       }
+      sidebar={<SidebarDemonstrativa />}
     />
   );
 }

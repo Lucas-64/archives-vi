@@ -8,6 +8,8 @@ import { Badge } from "../ui/Badge";
 
 export interface UpdateListProps {
   atualizacoes: Atualizacao[];
+  // Rotula o bloco como conteúdo de demonstração (não há feed de atualizações; ADR-036).
+  demonstracao?: boolean;
 }
 
 const ROTULO_TIPO = {
@@ -15,10 +17,11 @@ const ROTULO_TIPO = {
   atualizado: { texto: "Atualizado", variant: "secondary" },
 } as const;
 
-export function UpdateList({ atualizacoes }: UpdateListProps) {
+export function UpdateList({ atualizacoes, demonstracao = false }: UpdateListProps) {
   return (
     <Section aria-labelledby="atualizacoes-titulo">
       <Titulo id="atualizacoes-titulo">Atualizações recentes</Titulo>
+      {demonstracao ? <Badge size="small" uppercase>Demonstração</Badge> : null}
       <List>
         {atualizacoes.map((item) => {
           const rotulo = ROTULO_TIPO[item.tipo];

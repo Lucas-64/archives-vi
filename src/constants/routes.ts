@@ -22,7 +22,8 @@ export const ROUTES = {
 
 export interface NavItem {
   label: string;
-  href: string;
+  // null means the item is visual only ("em breve"): it is shown but has no functional link yet.
+  href: string | null;
 }
 
 // Main navigation. The prototype items are kept; "Explorar" was added by an approved decision
@@ -32,11 +33,14 @@ export const MAIN_NAV: readonly NavItem[] = [
   { label: "Mistérios", href: ROUTES.misterios },
   { label: "Teorias e investigações", href: ROUTES.teorias },
   { label: "Explorar", href: ROUTES.explorar },
-  // Mapa, Galeria e Fórum ficam fora do menu até existirem rotas e dados reais.
+  // Mapa, Galeria e Fórum não têm rota: aparecem esmaecidos, como "em breve", sem navegar (ADR-036).
+  { label: "Mapa", href: null },
+  { label: "Galeria", href: null },
+  { label: "Fórum", href: null },
 ];
 
 // Items for the mobile bottom bar. Only functional routes are included, so href is required.
-export const MOBILE_NAV: readonly NavItem[] = [
+export const MOBILE_NAV: readonly (NavItem & { href: string })[] = [
   { label: "Início", href: ROUTES.inicio },
   { label: "Mistérios", href: ROUTES.misterios },
   { label: "Teorias", href: ROUTES.teorias },

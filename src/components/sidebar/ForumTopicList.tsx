@@ -4,15 +4,19 @@ import styled from "styled-components";
 
 import type { Topico } from "../../types/Topico";
 import { formatarNumero } from "../../lib/formatacao";
+import { Badge } from "../ui/Badge";
 
 export interface ForumTopicListProps {
   topicos: Topico[];
+  // Rotula o bloco como conteúdo de demonstração (o fórum ainda não existe; ADR-036).
+  demonstracao?: boolean;
 }
 
-export function ForumTopicList({ topicos }: ForumTopicListProps) {
+export function ForumTopicList({ topicos, demonstracao = false }: ForumTopicListProps) {
   return (
     <Section aria-labelledby="topicos-titulo">
       <Titulo id="topicos-titulo">Últimos tópicos do fórum</Titulo>
+      {demonstracao ? <Badge size="small" uppercase>Demonstração</Badge> : null}
       <List>
         {topicos.map((topico) => (
           <Item key={topico.id}>
