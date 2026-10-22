@@ -6,6 +6,7 @@ import styled from "styled-components";
 import { Breadcrumb } from "../navigation/Breadcrumb";
 import { ROUTES } from "../../constants/routes";
 import { formatarData } from "../../lib/formatacao";
+import { classificacaoDoCaso } from "../../lib/investigacao";
 import {
   ENCERRADA_PELO_AUTOR,
   ESTADO_INVESTIGACAO,
@@ -15,6 +16,7 @@ import type { DetalheReal } from "../../lib/adaptadores";
 import type { CasoDeCard } from "../../types/Case";
 import { Avatar } from "../ui/Avatar";
 import { Badge } from "../ui/Badge";
+import { ClassificacaoBadge } from "../ui/ClassificacaoBadge";
 import { CopyLinkButton } from "./CopyLinkButton";
 
 export interface MisterioCabecalhoProps {
@@ -39,6 +41,7 @@ export function MisterioCabecalho({ caso, detalhe }: MisterioCabecalhoProps) {
       />
 
       <Etiquetas>
+        <ClassificacaoBadge classificacao={classificacaoDoCaso(caso)} />
         <Badge size="small" variant={estado.variant} uppercase>
           {estado.rotulo}
         </Badge>

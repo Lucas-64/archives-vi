@@ -1,36 +1,34 @@
-import type { CaseStatus } from "@/types/Case";
+import {
+  CLASSIFICACAO_PADRAO,
+  CLASSIFICACAO_POR_SLUG,
+  CLASSIFICACAO_POR_STATUS,
+  CLASSIFICACOES_MISTERIO,
+  type ClassificacaoMisterio,
+  type ClassificacaoMisterioId,
+} from "../constants/classificacoesMisterio";
+import type { CaseStatus } from "../types/Case";
 
-// Categorias visíveis na interface (aprovadas pelo projeto).
-export type CategoriaInvestigacao = "Em andamento" | "Resolvidas" | "Sem fontes";
-
-export const CATEGORIAS_INVESTIGACAO: readonly CategoriaInvestigacao[] = [
-  "Em andamento",
-  "Resolvidas",
-  "Sem fontes",
-];
-
-// Mapeamento explícito entre os estados internos e as categorias visíveis.
-// `null` significa que o estado ainda não foi validado: o registro mantém o rótulo
-// original e não aparece nas abas de categoria.
-// Pendente de validação: `community` e `classified` (ver docs/DESIGN_SYSTEM.md).
-export const CATEGORIA_POR_STATUS: Record<CaseStatus, CategoriaInvestigacao | null> = {
-  investigating: "Em andamento",
-  confirmed: "Resolvidas",
-  debunked: "Resolvidas",
-  community: null,
-  classified: null,
-};
-
-export function categoriaDoStatus(status: CaseStatus): CategoriaInvestigacao | null {
-  return CATEGORIA_POR_STATUS[status];
+export function classificacaoPorId(id: ClassificacaoMisterioId): ClassificacaoMisterio {
+  return CLASSIFICACOES_MISTERIO.find((item) => item.id === id) ?? CLASSIFICACOES_MISTERIO[0];
 }
 
-// "Todas" (categoria undefined) returns every record, including unmapped statuses.
-// Any category returns only the records mapped to it.
-export function filtrarInvestigacoes<T extends { status: CaseStatus }>(
+// A exceção por slug (provisória) vence o status; sem mapeamento, vale a classificação padrão.
+export function classificacaoDoCaso(caso: { id: string; status: CaseStatus }): ClassificacaoMisterio {
+  return classificacaoPorId(
+    CLASSIFICACAO_POR_SLUG[caso.id] ?? CLASSIFICACAO_POR_STATUS[caso.status] ?? CLASSIFICACAO_PADRAO,
+  );
+}
+
+// Lê a classificação do valor da URL. Valor desconhecido ou ausente vira undefined ("Todas").
+export function lerClassificacao(valor?: string): ClassificacaoMisterio | undefined {
+  return CLASSIFICACOES_MISTERIO.find((item) => item.id === valor);
+}
+
+// Sem classificação, devolve todos os registros. Com classificação, só os registros dela.
+export function filtrarInvestigacoes<T extends { id: string; status: CaseStatus }>(
   casos: readonly T[],
-  categoria?: CategoriaInvestigacao,
+  classificacao?: ClassificacaoMisterio,
 ): T[] {
-  if (!categoria) return [...casos];
-  return casos.filter((caso) => categoriaDoStatus(caso.status) === categoria);
+  if (!classificacao) return [...casos];
+  return casos.filter((caso) => classificacaoDoCaso(caso).id === classificacao.id);
 }

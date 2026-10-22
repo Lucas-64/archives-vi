@@ -1,5 +1,6 @@
 import { CaseCard } from "../../../components/cards/CaseCard";
 import { FilterTabs } from "../../../components/filters/FilterTabs";
+import { FiltrosRecolhiveis } from "../../../components/filters/FiltrosRecolhiveis";
 import { ContentGrid } from "../../../components/layout/ContentGrid";
 import { CardList } from "../../../components/page/CardList";
 import { LinkDeAcao } from "../../../components/page/LinkDeAcao";
@@ -7,38 +8,36 @@ import { NotaLista } from "../../../components/page/NotaLista";
 import { PageBody } from "../../../components/page/PageBody";
 import { PageHeader } from "../../../components/page/PageHeader";
 import { EmptyState } from "../../../components/states/EmptyState";
-import { FILTROS_INVESTIGACOES } from "../../../constants/filtros";
+import { CLASSIFICACOES_MISTERIO } from "../../../constants/classificacoesMisterio";
 import { ROUTES } from "../../../constants/routes";
 import { investigacaoParaCaso } from "../../../lib/adaptadores";
-import { filtrarInvestigacoes, type CategoriaInvestigacao } from "../../../lib/investigacao";
+import { filtrarInvestigacoes, lerClassificacao } from "../../../lib/investigacao";
 import { investigacoesDaListagem } from "../../../server/leitura/investigacoes";
 import { LIMITE_LISTA } from "../../../server/leitura/usuarios";
 
 // Listagem de investigações reais (API, via serviço no processo; ADR-029 e ADR-031).
 export const dynamic = "force-dynamic";
 
-type SearchParams = Promise<{ categoria?: string }>;
-
-// Lê a categoria do slug da URL. Valores desconhecidos caem em "Todas".
-function lerCategoria(slug?: string): CategoriaInvestigacao | undefined {
-  return FILTROS_INVESTIGACOES.find((filtro) => filtro.slug === slug)?.value;
-}
+type SearchParams = Promise<{ classificacao?: string }>;
 
 export default async function InvestigacoesPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
-  const categoria = lerCategoria(params.categoria);
+  const classificacao = lerClassificacao(params.classificacao);
 
   const { itens, haMais } = await investigacoesDaListagem();
   const casos = itens.map(investigacaoParaCaso);
 
-  // "Todas" mantém todos os registros, inclusive comunidade e classificadas. A categoria é aplicada sobre a página carregada.
-  const visiveis = filtrarInvestigacoes(casos, categoria);
+  // "Todas" mantém todos os registros. A classificação é aplicada sobre a página carregada.
+  const visiveis = filtrarInvestigacoes(casos, classificacao);
 
-  const abas = FILTROS_INVESTIGACOES.map((filtro) => ({
-    label: filtro.label,
-    href: filtro.slug ? `${ROUTES.investigacoes}?categoria=${filtro.slug}` : ROUTES.investigacoes,
-    active: filtro.value === categoria,
-  }));
+  const abas = [
+    { label: "Todas", href: ROUTES.investigacoes, active: !classificacao },
+    ...CLASSIFICACOES_MISTERIO.map((item) => ({
+      label: item.rotulo,
+      href: `${ROUTES.investigacoes}?classificacao=${item.id}`,
+      active: item.id === classificacao?.id,
+    })),
+  ];
 
   return (
     <ContentGrid
@@ -50,15 +49,17 @@ export default async function InvestigacoesPage({ searchParams }: { searchParams
             acao={<LinkDeAcao href={ROUTES.criarInvestigacao}>Criar investigação</LinkDeAcao>}
           />
 
-          <FilterTabs label="Filtrar investigações por categoria" tabs={abas} />
+          <FiltrosRecolhiveis resumoAtivo={classificacao ? `Classificação: ${classificacao.rotulo}` : undefined}>
+            <FilterTabs label="Filtrar mistérios por classificação" tabs={abas} />
+          </FiltrosRecolhiveis>
 
           <PageBody>
             {visiveis.length === 0 ? (
               <EmptyState
-                titulo={categoria ? "Nenhuma investigação nesta categoria" : "Nenhuma investigação por enquanto"}
+                titulo={classificacao ? "Nenhuma investigação nesta classificação" : "Nenhuma investigação por enquanto"}
                 descricao={
-                  categoria
-                    ? `Não há investigações em "${categoria}" no momento. Tente outra categoria.`
+                  classificacao
+                    ? `Não há investigações em "${classificacao.rotulo}" no momento. Tente outra classificação.`
                     : "Assim que novas investigações forem publicadas, elas aparecem aqui."
                 }
               />
@@ -71,7 +72,7 @@ export default async function InvestigacoesPage({ searchParams }: { searchParams
             )}
             {haMais ? (
               <NotaLista>
-                {categoria
+                {classificacao
                   ? `Filtrando entre as ${LIMITE_LISTA} investigações mais recentes.`
                   : `Mostrando as ${LIMITE_LISTA} investigações mais recentes.`}
               </NotaLista>

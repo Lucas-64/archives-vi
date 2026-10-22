@@ -5,10 +5,10 @@ import Link from "next/link";
 import styled from "styled-components";
 
 import { ROUTES } from "../../constants/routes";
-import { categoriaDoStatus } from "../../lib/investigacao";
+import { classificacaoDoCaso } from "../../lib/investigacao";
 import { formatarData } from "../../lib/formatacao";
 import type { CasoDeCard } from "../../types/Case";
-import { StatusBadge } from "../ui/StatusBadge";
+import { ClassificacaoBadge } from "../ui/ClassificacaoBadge";
 
 export interface CaseCardProps {
   caso: CasoDeCard;
@@ -19,9 +19,9 @@ export interface CaseCardProps {
   href?: string;
 }
 
-// Investigation card. The status text is the visible category; color follows the internal status.
+// Investigation card. O selo mostra a classificação do mistério (fonte única em constants/classificacoesMisterio).
 export function CaseCard({ caso, orientacao = "vertical", href }: CaseCardProps) {
-  const categoria = categoriaDoStatus(caso.status);
+  const classificacao = classificacaoDoCaso(caso);
 
   return (
     <Article $horizontal={orientacao === "horizontal"}>
@@ -38,12 +38,7 @@ export function CaseCard({ caso, orientacao = "vertical", href }: CaseCardProps)
       </Media>
 
       <Body>
-        <StatusBadge
-          status={caso.status}
-          label={categoria ?? undefined}
-          size="small"
-          uppercase
-        />
+        <ClassificacaoBadge classificacao={classificacao} />
         <Titulo>
           <Link href={href ?? ROUTES.investigacao(caso.id)}>{caso.title}</Link>
         </Titulo>
