@@ -31,7 +31,7 @@ export const EXPLORAR_ITENS: readonly ExplorarItem[] = [
   },
   // Mapa e Galeria não têm rota: aparecem como "em breve", sem link (ADR-036).
   {
-    titulo: "Mapa",
+    titulo: "Mapa interativo",
     secao: "mapa",
     descricao: "Marque e confira locais suspeitos em Leonida.",
     icon: FiMapPin,
