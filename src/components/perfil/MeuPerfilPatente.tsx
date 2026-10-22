@@ -22,7 +22,7 @@ export function MeuPerfilPatente({ patentes }: MeuPerfilPatenteProps) {
           <>
             <Atual>
               <MedalhaPatente
-                variante={patentes.atual.medalha}
+                patenteId={patentes.atual.id}
                 tamanho="destaque"
                 titulo={`Patente atual: ${patentes.atual.nome}`}
               />
@@ -40,7 +40,7 @@ export function MeuPerfilPatente({ patentes }: MeuPerfilPatenteProps) {
                     .filter((item) => item.id !== patentes.atual.id)
                     .map((item) => (
                       <li key={item.id}>
-                        <MedalhaPatente variante={item.medalha} tamanho="compacta" titulo={`Patente anterior: ${item.nome}`} />
+                        <MedalhaPatente patenteId={item.id} tamanho="compacta" titulo={`Patente anterior: ${item.nome}`} />
                       </li>
                     ))}
                 </Fileira>

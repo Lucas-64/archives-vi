@@ -5,22 +5,22 @@ import type { PatentesDoMembro } from "@/types/Patente";
 // Chave: id do criador (Criador.id). Criador sem entrada aqui mostra o estado vazio.
 export const patentesPorCriador: Partial<Record<string, PatentesDoMembro>> = {
   "analista-vb": {
-    atual: { id: "investigador", nome: "Investigador", medalha: "investigador" },
+    atual: { id: "investigador", nome: "Investigador" },
     anteriores: [
-      { id: "observador", nome: "Observador", medalha: "inicial" },
-      { id: "analista-de-campo", nome: "Analista de Campo", medalha: "intermediaria" },
+      { id: "observador", nome: "Observador" },
+      { id: "analista-de-campo", nome: "Analista de Campo" },
     ],
   },
   "noturno-leonida": {
-    atual: { id: "analista-de-campo", nome: "Analista de Campo", medalha: "intermediaria" },
-    anteriores: [{ id: "observador", nome: "Observador", medalha: "inicial" }],
+    atual: { id: "analista-de-campo", nome: "Analista de Campo" },
+    anteriores: [{ id: "observador", nome: "Observador" }],
   },
   "arquivista-99": {
-    atual: { id: "investigador-senior", nome: "Investigador Sênior", medalha: "destaque" },
+    atual: { id: "investigador-senior", nome: "Investigador Sênior" },
     anteriores: [
-      { id: "observador", nome: "Observador", medalha: "inicial" },
-      { id: "analista-de-campo", nome: "Analista de Campo", medalha: "intermediaria" },
-      { id: "investigador", nome: "Investigador", medalha: "investigador" },
+      { id: "observador", nome: "Observador" },
+      { id: "analista-de-campo", nome: "Analista de Campo" },
+      { id: "investigador", nome: "Investigador" },
     ],
   },
 };

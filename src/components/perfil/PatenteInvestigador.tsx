@@ -22,7 +22,7 @@ export function PatenteInvestigador({ patentes }: PatenteInvestigadorProps) {
         {patentes ? (
           <>
             <Atual>
-              <MedalhaPatente variante={patentes.atual.medalha} tamanho="destaque" titulo={`Patente atual: ${patentes.atual.nome}`} />
+              <MedalhaPatente patenteId={patentes.atual.id} tamanho="destaque" titulo={`Patente atual: ${patentes.atual.nome}`} />
               <Identidade>
                 <NomePatente>{patentes.atual.nome}</NomePatente>
                 {patentes.atual.descricao ? <Descricao>{patentes.atual.descricao}</Descricao> : null}
@@ -38,7 +38,7 @@ export function PatenteInvestigador({ patentes }: PatenteInvestigadorProps) {
                     .filter((item) => item.id !== patentes.atual.id)
                     .map((item) => (
                       <li key={item.id}>
-                        <MedalhaPatente variante={item.medalha} tamanho="compacta" titulo={`Patente anterior: ${item.nome}`} />
+                        <MedalhaPatente patenteId={item.id} tamanho="compacta" titulo={`Patente anterior: ${item.nome}`} />
                       </li>
                     ))}
                 </Fileira>
