@@ -3,20 +3,28 @@
 import styled from "styled-components";
 
 import type { PatentesDoMembro } from "../../types/Patente";
+import { Badge } from "../ui/Badge";
 import { Card } from "../ui/Card";
 import { MedalhaPatente } from "./MedalhaPatente";
 
 export interface MeuPerfilPatenteProps {
   patentes?: PatentesDoMembro;
+  // Dados provisórios: mostra o selo "Demonstração".
+  demonstracao?: boolean;
 }
 
 // Cartão de patente no topo de Meu Perfil (ADR-021). Somente leitura, como manda ADR-019:
 // a patente é conquistada pela trajetória e não pode ser editada pelo membro.
-export function MeuPerfilPatente({ patentes }: MeuPerfilPatenteProps) {
+export function MeuPerfilPatente({ patentes, demonstracao = false }: MeuPerfilPatenteProps) {
   return (
     <Secao aria-labelledby="meu-perfil-patente">
       <Card padding="large">
         <Rotulo id="meu-perfil-patente">Patente do investigador</Rotulo>
+        {demonstracao ? (
+          <Badge size="small" variant="secondary" uppercase>
+            Demonstração
+          </Badge>
+        ) : null}
 
         {patentes ? (
           <>

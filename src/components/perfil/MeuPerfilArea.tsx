@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useId, useState, type FormEvent, type ReactNode } from "react";
 import styled from "styled-components";
 
+import type { DemonstracaoDoPerfil } from "../../constants/demonstracaoMamoa";
 import { ROUTES } from "../../constants/routes";
 import { editarPerfilNaApi, type PerfilEditado } from "../../lib/perfilApi";
 import {
@@ -29,6 +30,8 @@ import { MeuPerfilPatente } from "./MeuPerfilPatente";
 export interface MeuPerfilAreaProps {
   // A pessoa da sessão, com os dados gravados no servidor. Nunca um criador fixo.
   criador: Criador;
+  // Dados provisórios de demonstração (só para a conta de demonstração). Sem eles, tags e patente ficam vazias.
+  demonstracao?: DemonstracaoDoPerfil;
   // Conteúdo servidor das abas "visao-geral", "teorias-publicacoes" e "investigacoes". As demais são estados vazios.
   paineis: Record<string, ReactNode>;
 }
@@ -36,7 +39,7 @@ export interface MeuPerfilAreaProps {
 // Área Meu Perfil (ADR-021, revisto pelo ADR-037) com dados reais. A edição de nome e bio chama
 // PATCH /api/v1/me/perfil e só mostra sucesso quando o servidor confirma. Patente, especializações, evidências
 // e atividade não têm fonte real: aparecem como estado vazio rotulado, nunca com dados inventados.
-export function MeuPerfilArea({ criador, paineis }: MeuPerfilAreaProps) {
+export function MeuPerfilArea({ criador, demonstracao, paineis }: MeuPerfilAreaProps) {
   const router = useRouter();
   const idBase = useId();
   const formId = `${idBase}-edicao`;
@@ -113,7 +116,20 @@ export function MeuPerfilArea({ criador, paineis }: MeuPerfilAreaProps) {
 
           <Especializacoes>
             <RotuloLinha>Especializações</RotuloLinha>
-            <span>Informação ainda não disponível.</span>
+            {demonstracao ? (
+              <>
+                {demonstracao.tags.map((tag) => (
+                  <Badge key={tag} size="small" variant="info">
+                    {tag}
+                  </Badge>
+                ))}
+                <Badge size="small" variant="secondary" uppercase>
+                  Demonstração
+                </Badge>
+              </>
+            ) : (
+              <span>Informação ainda não disponível.</span>
+            )}
           </Especializacoes>
 
           <Acoes>
@@ -172,7 +188,7 @@ export function MeuPerfilArea({ criador, paineis }: MeuPerfilAreaProps) {
             </Formulario>
           ) : null}
         </Identidade>
-        <MeuPerfilPatente />
+        <MeuPerfilPatente patentes={demonstracao?.patentes} demonstracao={demonstracao !== undefined} />
       </Topo>
 
       <AbasPerfil

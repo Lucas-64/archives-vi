@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { ContentGrid } from "../../../components/layout/ContentGrid";
 import { MeuPerfilArea } from "../../../components/perfil/MeuPerfilArea";
+import { demonstracaoDoUsuario } from "../../../constants/demonstracaoMamoa";
 import { ROUTES } from "../../../constants/routes";
 import { usuarioDaSessao } from "../../../server/auth/sessaoServidor";
 import { InvestigacoesDoPerfil, PublicacoesDoPerfil, VisaoGeralDoPerfil } from "../perfil/[usuario]/dados";
@@ -32,6 +33,7 @@ export default async function MeuPerfilPage() {
           // e apagava o aviso "Perfil atualizado."; o estado já recebe os dados confirmados pela API.
           key={sessao.usuario}
           criador={criador}
+          demonstracao={demonstracaoDoUsuario(sessao.usuario)}
           paineis={{
             "visao-geral": <VisaoGeralDoPerfil usuario={sessao.usuario} />,
             "teorias-publicacoes": <PublicacoesDoPerfil criador={criador} abaCompleta />,
