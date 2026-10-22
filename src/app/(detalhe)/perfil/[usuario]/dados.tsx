@@ -5,6 +5,7 @@ import { PublicacoesSecao } from "../../../../components/perfil/PublicacoesSecao
 import { TeoriasPublicacoesPerfil } from "../../../../components/perfil/TeoriasPublicacoesPerfil";
 import { NotaLista } from "../../../../components/page/NotaLista";
 import { Skeleton } from "../../../../components/states/Skeleton";
+import { MeuPerfilVisaoGeral } from "../../../../components/perfil/MeuPerfilVisaoGeral";
 import { investigacaoParaCaso, publicacaoParaFront } from "../../../../lib/adaptadores";
 import { LIMITE_LISTA, investigacoesDoUsuario, publicacoesDoUsuario } from "../../../../server/leitura/usuarios";
 import type { Criador } from "../../../../types/Criador";
@@ -53,6 +54,28 @@ export function InvestigacoesDoPerfil({ usuario }: { usuario: string }) {
   return (
     <Suspense fallback={<Carregando altura="260px" />}>
       <Investigacoes usuario={usuario} />
+    </Suspense>
+  );
+}
+
+async function VisaoGeral({ usuario }: { usuario: string }) {
+  const [publicacoes, investigacoes] = await Promise.all([
+    publicacoesDoUsuario(usuario),
+    investigacoesDoUsuario(usuario),
+  ]);
+  return (
+    <MeuPerfilVisaoGeral
+      publicacoes={publicacoes.itens.map(publicacaoParaFront)}
+      investigacoes={investigacoes.itens.map(investigacaoParaCaso)}
+    />
+  );
+}
+
+// Resumo de Meu Perfil: as mesmas listas reais das abas, em versão curta.
+export function VisaoGeralDoPerfil({ usuario }: { usuario: string }) {
+  return (
+    <Suspense fallback={<Carregando altura="260px" />}>
+      <VisaoGeral usuario={usuario} />
     </Suspense>
   );
 }

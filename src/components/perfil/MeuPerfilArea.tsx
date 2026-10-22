@@ -19,21 +19,23 @@ import { Avatar } from "../ui/Avatar";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
+import { EmptyState } from "../states/EmptyState";
 import { FormField } from "../ui/FormField";
 import { Input } from "../ui/Input";
 import { Textarea } from "../ui/Textarea";
 import { AbasPerfil } from "./AbasPerfil";
+import { MeuPerfilPatente } from "./MeuPerfilPatente";
 
 export interface MeuPerfilAreaProps {
   // A pessoa da sessão, com os dados gravados no servidor. Nunca um criador fixo.
   criador: Criador;
-  // Conteúdo servidor das abas: "teorias-publicacoes" e "investigacoes".
+  // Conteúdo servidor das abas "visao-geral", "teorias-publicacoes" e "investigacoes". As demais são estados vazios.
   paineis: Record<string, ReactNode>;
 }
 
-// Área Meu Perfil (ADR-021) com dados reais. A edição de nome e bio chama PATCH /api/v1/me/perfil e só
-// mostra sucesso quando o servidor confirma. Visão geral, evidências, atividade, patente e conquistas
-// voltam na Fatia 6 da Etapa I, quando houver dados reais para elas (não há mais dados demonstrativos aqui).
+// Área Meu Perfil (ADR-021, revisto pelo ADR-037) com dados reais. A edição de nome e bio chama
+// PATCH /api/v1/me/perfil e só mostra sucesso quando o servidor confirma. Patente, especializações, evidências
+// e atividade não têm fonte real: aparecem como estado vazio rotulado, nunca com dados inventados.
 export function MeuPerfilArea({ criador, paineis }: MeuPerfilAreaProps) {
   const router = useRouter();
   const idBase = useId();
@@ -109,6 +111,11 @@ export function MeuPerfilArea({ criador, paineis }: MeuPerfilAreaProps) {
             Seu perfil
           </Badge>
 
+          <Especializacoes>
+            <RotuloLinha>Especializações</RotuloLinha>
+            <span>Informação ainda não disponível.</span>
+          </Especializacoes>
+
           <Acoes>
             <Button
               variant="primary"
@@ -165,6 +172,7 @@ export function MeuPerfilArea({ criador, paineis }: MeuPerfilAreaProps) {
             </Formulario>
           ) : null}
         </Identidade>
+        <MeuPerfilPatente />
       </Topo>
 
       <AbasPerfil
@@ -178,8 +186,21 @@ export function MeuPerfilArea({ criador, paineis }: MeuPerfilAreaProps) {
           </Acoes>
         }
         paineis={{
+          "visao-geral": paineis["visao-geral"],
           "teorias-publicacoes": paineis["teorias-publicacoes"],
           investigacoes: paineis.investigacoes,
+          evidencias: (
+            <EmptyState
+              titulo="Evidências"
+              descricao="Informação ainda não disponível. As evidências que você enviar aparecem aqui quando este recurso estiver pronto."
+            />
+          ),
+          atividade: (
+            <EmptyState
+              titulo="Atividade"
+              descricao="Informação ainda não disponível. Notificações, solicitações e respostas aparecem aqui quando este recurso estiver pronto."
+            />
+          ),
         }}
       />
     </Area>
@@ -193,12 +214,32 @@ const Area = styled.div`
   min-width: 0;
 `;
 
-// Topo: identidade. A patente (cartão à direita) volta quando houver dados reais (Fatia 6).
+// Topo: identidade à esquerda e cartão de patente à direita (uma coluna no celular).
 const Topo = styled.div`
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   min-width: 0;
+
+  @media (min-width: 1024px) {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  }
+`;
+
+const Especializacoes = styled.p`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font-size: 13px;
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const RotuloLinha = styled.strong`
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 `;
 
 const Identidade = styled(Card)`

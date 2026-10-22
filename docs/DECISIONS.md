@@ -525,3 +525,9 @@ Efeito sobre decisões anteriores: o ADR-033 deixou de valer para Mapa e Galeria
 A `SidebarDemonstrativa` é usada na Início, em `/investigacoes` e em `/publicacoes` (ligada em 2026-10-22, quando essas páginas não tinham alterações pendentes).
 
 Status: Accepted (decisão do Lucas em 2026-10-22).
+
+## ADR-037: Meu perfil completo, com estados vazios onde não há dado real (revê parte do ADR-028)
+
+Decisão (Lucas, 2026-10-22, lote de restauração, item 04): `/meu-perfil` volta à estrutura completa do ADR-021, com dados reais onde a API tem dado e estado vazio rotulado nos demais blocos. Nada de dado inventado: patente, especializações, pendências, atividade e evidências aparecem como "Informação ainda não disponível". O projeto não define patente inicial, então o cartão de patente fica vazio. Não há tabela, API nem rota demonstrativa novas. Abas, nessa ordem: Visão geral (padrão), Teorias e publicações, Investigações, Evidências e Atividade. Visão geral: "Aguardando sua ação" e "Atividade recente" (vazios rotulados) e, na lateral, "Minhas teorias" e "Minhas investigações" com dados reais e mensagem de vazio. A página continua lendo a sessão real (ADR-029) e redirecionando visitantes para `/entrar`. Os componentes antigos que dependiam de mocks de perfil (`MeuPerfilAtividade`, `MeuPerfilListas`) seguem sem uso, e as regras de patente e de tags não aparecem na interface.
+
+Status: Accepted (decisão do Lucas em 2026-10-22).

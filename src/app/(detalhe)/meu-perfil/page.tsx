@@ -5,11 +5,11 @@ import { ContentGrid } from "../../../components/layout/ContentGrid";
 import { MeuPerfilArea } from "../../../components/perfil/MeuPerfilArea";
 import { ROUTES } from "../../../constants/routes";
 import { usuarioDaSessao } from "../../../server/auth/sessaoServidor";
-import { InvestigacoesDoPerfil, PublicacoesDoPerfil } from "../perfil/[usuario]/dados";
+import { InvestigacoesDoPerfil, PublicacoesDoPerfil, VisaoGeralDoPerfil } from "../perfil/[usuario]/dados";
 
 // Área pessoal (ADR-021) com dados reais da sessão (ADR-029). A página lê o cookie no servidor, então é
 // dinâmica; as demais rotas do site continuam estáticas. Sem sessão, redireciona para /entrar.
-// Visão geral, evidências, atividade, patente e conquistas voltam na Fatia 6 da Etapa I.
+// Patente, especializações, evidências e atividade não têm fonte real e aparecem como estado vazio (ADR-037).
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
@@ -33,6 +33,7 @@ export default async function MeuPerfilPage() {
           key={sessao.usuario}
           criador={criador}
           paineis={{
+            "visao-geral": <VisaoGeralDoPerfil usuario={sessao.usuario} />,
             "teorias-publicacoes": <PublicacoesDoPerfil criador={criador} abaCompleta />,
             investigacoes: <InvestigacoesDoPerfil usuario={sessao.usuario} />,
           }}

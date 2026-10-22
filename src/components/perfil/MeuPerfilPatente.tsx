@@ -48,7 +48,12 @@ export function MeuPerfilPatente({ patentes }: MeuPerfilPatenteProps) {
             ) : null}
           </>
         ) : (
-          <Nota>Patente ainda não definida para este membro.</Nota>
+          <Atual>
+            <Identidade>
+              <NomePatente>Ainda não disponível</NomePatente>
+              <Nota>Informação ainda não disponível. Patente conquistada pela trajetória. Não é editável.</Nota>
+            </Identidade>
+          </Atual>
         )}
       </Card>
     </Secao>

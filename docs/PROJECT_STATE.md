@@ -57,7 +57,7 @@ Iniciado antes da validação do front por decisão registrada no ADR-022, sem a
 - `/buscar`: busca em publicações, investigações e criadores, com abas e consulta na URL (`?q=`, `?tipo=`).
 - `/criadores`: lista real de criadores (API, dinâmica), com estado vazio e aviso quando há mais de 50 (Etapa I, Fatia 2). Perfil em `/perfil/[usuario]` (grupo `(detalhe)`): dados e indicadores reais, 404 real.
 - `/perfil/[usuario]`: perfil público real (Etapa I, Fatia 2), no grupo `(detalhe)`: identidade, quatro indicadores reais, abas Visão geral, Investigações, Teorias e publicações e Conquistas (vazia, sem dado real). Sem destaque, contribuições recentes nem sidebar. Usuário inexistente ou inválido responde HTTP 404 real.
-- `/meu-perfil` (grupo `(detalhe)`, dinâmica): a conta da sessão, com edição real de nome e bio (`PATCH /api/v1/me/perfil`) e abas Teorias e publicações e Investigações com dados reais. Sem sessão, HTTP 307 para `/entrar`. O restante da área (visão geral, evidências, atividade, patente) foi retirado até a Fatia 6; os componentes e mocks correspondentes seguem no código sem uso.
+- `/meu-perfil` (grupo `(detalhe)`, dinâmica): a conta da sessão, com edição real de nome e bio (`PATCH /api/v1/me/perfil`) e cinco abas (Visão geral, Teorias e publicações, Investigações, Evidências, Atividade). Listas de teorias e investigações com dados reais; patente, especializações, pendências, atividade e evidências como estado vazio rotulado (ADR-037). Sem sessão, HTTP 307 para `/entrar`.
 - `/explorar`: hub de descoberta com as quatro tiles e "Mistérios em alta". Está na navegação principal desde o lote 1 (ADR-012).
 
 **Entradas de navegação das rotas novas (verificado no código)**:
