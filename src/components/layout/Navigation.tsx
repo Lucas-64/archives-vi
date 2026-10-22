@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useId, useState } from "react";
 import styled from "styled-components";
 
 import { INVESTIGADORES_ONLINE_DEMO } from "../../constants/demonstracao";
@@ -14,10 +15,22 @@ export interface NavigationProps {
 
 export function Navigation({ items }: NavigationProps) {
   const pathname = usePathname() ?? "";
+  const idLista = useId();
+  // Abaixo de 1280px os sete itens não cabem em uma linha: a lista recolhe atrás do botão "Menu".
+  const [aberto, setAberto] = useState(false);
 
   return (
     <NavBar aria-label="Navegação principal">
-      <List>
+      <Alternar
+        type="button"
+        aria-expanded={aberto}
+        aria-controls={idLista}
+        onClick={() => setAberto((valor) => !valor)}
+      >
+        {aberto ? "Fechar menu" : "Menu"}
+      </Alternar>
+
+      <List id={idLista} $aberto={aberto}>
         {items.map((item) => {
           // Itens sem href são visuais ("em breve"): sem link e sem navegação falsa.
           if (item.href === null) {
@@ -74,16 +87,48 @@ const NavBar = styled.nav`
   }
 `;
 
-const List = styled.ul`
+const List = styled.ul<{ $aberto: boolean }>`
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 28px;
+  gap: 20px;
   list-style: none;
   min-width: 0;
 
   @media (max-width: 1279px) {
-    gap: 20px;
+    display: ${({ $aberto }) => ($aberto ? "flex" : "none")};
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    order: 3;
+    flex-basis: 100%;
+    padding-bottom: 8px;
+  }
+`;
+
+const Alternar = styled.button`
+  display: none;
+  align-items: center;
+  min-height: 52px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: ${({ theme }) => theme.colors.text};
+  cursor: pointer;
+
+  @media (min-width: 768px) and (max-width: 1279px) {
+    display: inline-flex;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.pink};
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 `;
 
