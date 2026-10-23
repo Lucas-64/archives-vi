@@ -14,5 +14,9 @@ export default defineConfig([
     "node_modules/**",
     "next-env.d.ts",
     "src/app/components/**",
+    // Scripts avulsos de diagnóstico de migração (CommonJS, fora do app): não são código do produto.
+    "diagnostico-migracao.cjs",
+    "diagnostico-neon.cjs",
+    "verificar-migracoes.cjs",
   ]),
 ]);
