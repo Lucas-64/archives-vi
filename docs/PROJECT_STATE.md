@@ -40,7 +40,7 @@ Iniciado antes da validação do front por decisão registrada no ADR-022, sem a
 
 ## Estado confirmado
 
-**Stack**: Next.js 16.4.0 (App Router), React 19.2.9, TypeScript strict, styled-components 6.6, ESLint 9 com `eslint-config-next`. Node 20.9 ou superior.
+**Stack**: Next.js 16.4.2 (App Router; atualizado de 16.4.0 por avisos de segurança), React 19.2.9, TypeScript strict, styled-components 6.6, ESLint 9 com `eslint-config-next`. Node 20.9 ou superior.
 
 **Git**: branch `main`. O commit que publica o Meu Perfil e o trabalho pendente das fases anteriores (ADR-018 a ADR-021) está no topo do histórico (ver `git log`), sincronizado com `origin/main`. Antes dele, HEAD era `53acd0ad`. Os commits `86a4fc65`, `e29e2e96`, `a13c7305`, `b920c65f` (navegação, lote 1) e `53acd0ad` (perfil social, etapas 1 a 12, tags, correções 404 e `SiteShell`, e a documentação) já estão enviados. `53acd0ad` foi um commit único, sem separação por etapa. O working tree tem alterações em `node_modules/` (rastreado pelo Git, ver "Código e dados") e arquivos não rastreados de Máquinas de Turing e `Microsoft/` e `__pycache__/`, que não pertencem ao projeto (ver "Fora do projeto").
 
