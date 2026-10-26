@@ -12,6 +12,8 @@ As sete rotas da fase 2 estão implementadas e verificadas, e a fase 2.1 (acabam
 
 **Decisões confirmadas**: isolamento B (paralelo no checkout atual, com escopos disjuntos); demonstrações de `/criar`, `/entrar` e `/criar-conta` como simulações rotuladas, sem persistência nem sessão (ADR-010, "Exceções aprovadas"); `/investigacoes` com todos os status em "Todas", incluindo `community` e `classified`.
 
+**Ajustes de navegação e fluxos (2026-10-26, aguardando revisão, ADR-038):** itens 1 a 9 do pedido implementados no working tree (sem commit). Pendências: regra de patente, regra de quem é criador, carrossel sem curadoria.
+
 ## Backend
 
 Iniciado antes da validação do front por decisão registrada no ADR-022, sem alterar o ADR-015; a stack está no ADR-023. O trabalho é feito por tarefas pequenas, cada uma revisada antes da seguinte. Documentação: `docs/backend/README.md`, `docs/backend/DECISOES.md` e `docs/API.md`. Nada foi commitado nem publicado.

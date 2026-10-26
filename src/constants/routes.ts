@@ -9,7 +9,7 @@ export const ROUTES = {
   publicacoes: "/publicacoes",
   publicacao: (slug: string) => `/publicacao/${slug}`,
   criar: "/criar",
-  criarInvestigacao: "/criar/investigacao",
+  criarMisterio: "/criar/misterio",
   explorar: "/explorar",
   criadores: "/criadores",
   buscar: "/buscar",

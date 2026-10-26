@@ -198,7 +198,7 @@ export function MeuPerfilArea({ criador, demonstracao, paineis }: MeuPerfilAreaP
         acoes={
           <Acoes>
             <LinkPrimario href={ROUTES.criar}>+ Criar teoria</LinkPrimario>
-            <LinkContorno href={ROUTES.criarInvestigacao}>+ Criar investigação</LinkContorno>
+            <LinkContorno href={ROUTES.criarMisterio}>+ Criar mistério</LinkContorno>
           </Acoes>
         }
         paineis={{

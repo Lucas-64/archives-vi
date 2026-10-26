@@ -199,6 +199,24 @@ describe("GET /criadores", () => {
     expect(c.itens[0].indicadores.publicacoes).toBe(2);
     expect(JSON.stringify(c)).not.toContain(m.email);
   });
+
+  it("traz até 3 temas, os mais frequentes do conteúdo público (ocultas não contam)", async () => {
+    const m = await registrarMembro(auth);
+    const tema = async (slug: string, ...ids: string[]) => {
+      const id = await idPub(slug);
+      for (const t of ids) await banco.pool.query("insert into publicacao_tags (publicacao_id, tag_id) values ($1,$2)", [id, t]);
+    };
+    await tema(await publicar(m), "locais-mapas", "ovnis-extraterrestres");
+    await tema(await publicar(m), "locais-mapas", "criaturas-lendas", "teorias-conexoes");
+    await tema(await publicar(m, { status: "oculto" }), "crimes-acontecimentos");
+    const c = await corpoDe(await criadores(`?q=${m.usuario}`));
+    expect(c.itens[0].temas).toHaveLength(3);
+    expect(c.itens[0].temas[0]).toBe("locais-mapas");
+    expect(c.itens[0].temas).not.toContain("crimes-acontecimentos");
+    const sem = await registrarMembro(auth);
+    await publicar(sem);
+    expect((await corpoDe(await criadores(`?q=${sem.usuario}`))).itens[0].temas).toEqual([]);
+  });
 });
 
 describe("listas do usuário", () => {

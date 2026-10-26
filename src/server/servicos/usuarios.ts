@@ -1,10 +1,10 @@
 import { and, asc, eq, inArray, sql, type SQL } from "drizzle-orm";
 
 import { consumirLimite, LIMITES } from "../auth/limiteTaxa";
-import type { CursorCriadores, EntradaEditarPerfil, IndicadoresPerfil, PerfilPublico } from "../contracts/usuarios";
+import type { CursorCriadores, EntradaEditarPerfil, IndicadoresPerfil, PerfilCriador, PerfilPublico } from "../contracts/usuarios";
 import type { Banco } from "../db/cliente";
 import { codigoPg } from "../db/erros";
-import { comentarios, evidencias, investigacoes, publicacoes, usuarios } from "../db/esquema";
+import { comentarios, evidencias, investigacaoTags, investigacoes, publicacaoTags, publicacoes, usuarios } from "../db/esquema";
 import { ErroApi } from "../http/erros";
 import { fatiarPagina, type Pagina } from "../http/paginacao";
 import { paraUsuarioPrivado } from "./auth";
@@ -72,6 +72,41 @@ export async function indicadoresDe(db: Banco, ids: string[]): Promise<Map<strin
   return mapa;
 }
 
+export const TEMAS_POR_CRIADOR = 3;
+
+// Os temas mais frequentes do conteúdo público de cada autor: publicações publicadas e investigações.
+// Desempate pelo id do tema, para a resposta ser estável.
+export async function temasDeCriadores(db: Banco, ids: string[]): Promise<Map<string, string[]>> {
+  const mapa = new Map<string, string[]>();
+  for (const id of ids) mapa.set(id, []);
+  if (ids.length === 0) return mapa;
+
+  const linhas = await db
+    .select({ autor: sql<string>`u.autor_id`, tag: sql<string>`u.tag_id`, total: sql<number>`count(*)::int` })
+    .from(
+      sql`(
+        select ${publicacoes.autorId} as autor_id, ${publicacaoTags.tagId} as tag_id
+          from ${publicacaoTags}
+          join ${publicacoes} on ${publicacoes.id} = ${publicacaoTags.publicacaoId}
+         where ${publicacoes.status} = 'publicado' and ${inArray(publicacoes.autorId, ids)}
+        union all
+        select ${investigacoes.autorId}, ${investigacaoTags.tagId}
+          from ${investigacaoTags}
+          join ${investigacoes} on ${investigacoes.id} = ${investigacaoTags.investigacaoId}
+         where ${inArray(investigacoes.autorId, ids)}
+      ) as u`,
+    )
+    .groupBy(sql`u.autor_id`, sql`u.tag_id`);
+
+  const porAutor = new Map<string, { tag: string; total: number }[]>();
+  for (const l of linhas) porAutor.set(l.autor, [...(porAutor.get(l.autor) ?? []), { tag: l.tag, total: l.total }]);
+  for (const [autor, lista] of porAutor) {
+    lista.sort((a, b) => b.total - a.total || a.tag.localeCompare(b.tag));
+    mapa.set(autor, lista.slice(0, TEMAS_POR_CRIADOR).map((item) => item.tag));
+  }
+  return mapa;
+}
+
 type LinhaUsuario = { id: string; usuario: string; nome: string; bio: string; criadoEm: Date };
 const colunas = { id: usuarios.id, usuario: usuarios.usuario, nome: usuarios.nome, bio: usuarios.bio, criadoEm: usuarios.criadoEm };
 
@@ -100,7 +135,7 @@ export async function listarCriadores(
   db: Banco,
   filtros: { q?: string },
   paginacao: { limite: number; cursor?: CursorCriadores },
-): Promise<Pagina<PerfilPublico>> {
+): Promise<Pagina<PerfilCriador>> {
   const condicoes: SQL[] = [
     sql`(exists (select 1 from ${publicacoes} where ${publicacoes.autorId} = ${usuarios.id} and ${publicacoes.status} = 'publicado')
       or exists (select 1 from ${investigacoes} where ${investigacoes.autorId} = ${usuarios.id}))`,
@@ -125,8 +160,11 @@ export async function listarCriadores(
     throw erro;
   }
   const pagina = fatiarPagina(linhas, paginacao.limite, (ultima) => ({ usuario: ultima.usuario }));
-  const ind = await indicadoresDe(db, pagina.itens.map((l) => l.id));
-  return { itens: pagina.itens.map((l) => perfilDe(l, ind.get(l.id) as IndicadoresPerfil)), proximoCursor: pagina.proximoCursor };
+  const ids = pagina.itens.map((l) => l.id);
+  const [ind, temas] = await Promise.all([indicadoresDe(db, ids), temasDeCriadores(db, ids)]);
+  return {
+    itens: pagina.itens.map((l) => ({ ...perfilDe(l, ind.get(l.id) as IndicadoresPerfil), temas: temas.get(l.id) ?? [] })),
+    proximoCursor: pagina.proximoCursor };
 }
 
 // Edita só o perfil da própria sessão. Só grava o que mudou (reenviar os mesmos valores é no-op) e trava a

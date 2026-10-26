@@ -4,7 +4,7 @@
 // As rotas HTTP continuam sendo o contrato usado pelo navegador (por exemplo, a edição do perfil).
 import { cache } from "react";
 
-import { esquemaNomeUsuario, type PerfilPublico } from "../contracts/usuarios";
+import { esquemaNomeUsuario, type PerfilCriador, type PerfilPublico } from "../contracts/usuarios";
 import type { InvestigacaoResumo } from "../contracts/investigacoes";
 import type { PublicacaoPublica } from "../contracts/publicacoes";
 import { obterDb } from "../db/cliente";
@@ -28,7 +28,7 @@ function limitada<T>(pagina: Pagina<T>): ListaLimitada<T> {
   return { itens: pagina.itens, haMais: pagina.proximoCursor !== null };
 }
 
-export async function criadoresDaPagina(): Promise<ListaLimitada<PerfilPublico>> {
+export async function criadoresDaPagina(): Promise<ListaLimitada<PerfilCriador>> {
   return limitada(await listarCriadores(obterDb(), {}, { limite: LIMITE_LISTA }));
 }
 

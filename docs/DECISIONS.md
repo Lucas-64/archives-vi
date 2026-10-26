@@ -533,3 +533,10 @@ Decisão (Lucas, 2026-10-22, lote de restauração, item 04): `/meu-perfil` volt
 Status: Accepted (decisão do Lucas em 2026-10-22).
 
 Exceção provisória (Lucas, 2026-10-22): para ver o perfil preenchido sem backend, a conta `mamoa` recebe dados de demonstração em `src/constants/demonstracaoMamoa.ts` (tags e patentes, com o selo "Demonstração"). É provisório e deve ser removido quando houver dado real; outros usuários não são afetados. Medalhas: o mapa patente → arquivo está em `src/constants/medalhasPatente.ts` (Observador = 01, Analista de Campo = 03, Investigador = 06, Investigador Sênior = 09; as outras cinco, sem uso).
+
+## ADR-038: Ajustes de navegação e fluxos (menubar, rodapé, carrossel, criador, "mistério")
+
+Decisão (Lucas, 2026-10-26, aguardando revisão): (1) "Criar teoria" sai do cabeçalho; a criação fica em Meu perfil, no rodapé e na barra mobile. (2) Na interface, o fluxo de investigação chama-se "mistério": `/criar/misterio` (rota antiga redireciona), "Criar teoria" e "Criar mistério" em Meu perfil; a API e os tipos continuam "investigação". A tela reutiliza a estrutura da página do mistério (Breadcrumb, `ContentGrid` com sidebar, `Secao`, `AnchorNav` generalizado, Badge de estado). (3) Banner da Home em carrossel: slides de conteúdo são as investigações mais recentes (sem curadoria, ADR-033 mantido) e não usam a imagem do site. (4) `FiltrosRecolhiveis` inicia sempre oculto. (5) Cartão de criador: temas = os 3 temas mais frequentes das publicações publicadas e investigações (dado real, `temas` na lista de criadores); patente segue sem regra de produto (ADR-019/037): só a conta `mamoa` mostra a de demonstração, com selo; os demais mostram "Não definida". (6) Regra de quem é criador (ADR-026) inalterada: conta sem publicação publicada nem investigação não aparece em `/criadores`; mudar isso é decisão de produto pendente.
+
+Status: Proposed.
+

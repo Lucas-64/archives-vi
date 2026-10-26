@@ -3,7 +3,7 @@
 import Link from "next/link";
 import styled from "styled-components";
 
-// Link de ação no cabeçalho de uma página (por exemplo, "Criar investigação"). Mesmo gradiente do cabeçalho do site.
+// Link de ação no cabeçalho de uma página (por exemplo, "Criar mistério"). Mesmo gradiente do cabeçalho do site.
 export const LinkDeAcao = styled(Link)`
   display: inline-flex;
   align-items: center;

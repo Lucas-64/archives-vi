@@ -1,9 +1,7 @@
 "use client";
 
-import { useId, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import styled from "styled-components";
-
-import { theme } from "../../styles/theme";
 
 export interface FiltrosRecolhiveisProps {
   children: ReactNode;
@@ -11,25 +9,11 @@ export interface FiltrosRecolhiveisProps {
   resumoAtivo?: string;
 }
 
-const CONSULTA_DESKTOP = `(min-width: ${theme.breakpoints.tablet})`;
-
-function assinarTela(aoMudar: () => void) {
-  const consulta = window.matchMedia(CONSULTA_DESKTOP);
-  consulta.addEventListener("change", aoMudar);
-  return () => consulta.removeEventListener("change", aoMudar);
-}
-
 // Componente reutilizável de mostrar e ocultar filtros. Ocultar só esconde o painel: a seleção continua
-// aplicada (ela vive na URL ou no estado de quem usa o componente). Estado inicial: oculto no celular e
-// visível no desktop; depois do primeiro clique vale a escolha da pessoa. No servidor assume oculto.
+// aplicada (ela vive na URL ou no estado de quem usa o componente). Estado inicial: sempre oculto, no
+// celular e no desktop; o painel só aparece depois do clique no botão.
 export function FiltrosRecolhiveis({ children, resumoAtivo }: FiltrosRecolhiveisProps) {
-  const desktop = useSyncExternalStore(
-    assinarTela,
-    () => window.matchMedia(CONSULTA_DESKTOP).matches,
-    () => false,
-  );
-  const [escolha, setEscolha] = useState<boolean | null>(null);
-  const aberto = escolha ?? desktop;
+  const [aberto, setAberto] = useState(false);
   const idPainel = useId();
 
   return (
@@ -39,7 +23,7 @@ export function FiltrosRecolhiveis({ children, resumoAtivo }: FiltrosRecolhiveis
           type="button"
           aria-expanded={aberto}
           aria-controls={idPainel}
-          onClick={() => setEscolha(!aberto)}
+          onClick={() => setAberto((valor) => !valor)}
         >
           {aberto ? "Ocultar filtros" : "Mostrar filtros"}
         </Botao>

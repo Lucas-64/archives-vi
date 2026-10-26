@@ -16,7 +16,7 @@ import {
   normalizarConsulta,
   type AbaBusca,
 } from "../../../lib/busca";
-import { investigacaoParaCaso, perfilParaCriador, publicacaoParaFront } from "../../../lib/adaptadores";
+import { criadorListado, investigacaoParaCaso, perfilParaCriador, publicacaoParaFront } from "../../../lib/adaptadores";
 import { criadoresDaBusca } from "../../../server/leitura/busca";
 import { investigacoesDaListagem } from "../../../server/leitura/investigacoes";
 import { publicacoesDaListagem } from "../../../server/leitura/publicacoes";
@@ -78,7 +78,7 @@ export default async function BuscaPage({ searchParams }: { searchParams: Search
     criadores: [],
   });
   // Criadores já vêm filtrados pela API (nome sem acento ou usuário).
-  const resultado = { ...encontrados, criadores: listaCriadores.itens.map(perfilParaCriador) };
+  const resultado = { ...encontrados, criadores: listaCriadores.itens.map(criadorListado) };
 
   const avisos = avisosDeLimite({ publicacoes: listaPublicacoes, investigacoes: listaInvestigacoes, criadores: listaCriadores });
   const abas = ABAS_BUSCA.map((valor) => ({

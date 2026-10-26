@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
   // responda 404 real. A página /publicacoes nunca renderiza a listagem para esse parâmetro.
   async redirects() {
     return [
+      // Rota antiga de criação (antes de "investigação" virar "mistério" na interface).
+      { source: "/criar/investigacao", destination: "/criar/misterio", permanent: true },
       {
         source: "/publicacoes",
         has: [{ type: "query", key: "investigacao", value: "(?<slug>.+)" }],
