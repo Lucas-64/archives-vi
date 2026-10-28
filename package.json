@@ -14,7 +14,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:check": "drizzle-kit check",
     "admin:criar": "tsx src/server/cli/criarAdmin.ts",
-    "seed:demonstracao-misterios": "tsx src/server/cli/seedDemonstracaoMisterios.ts"
+    "seed:demonstracao-misterios": "tsx src/server/cli/seedDemonstracaoMisterios.ts",
+    "seed:perfis-teste": "tsx src/server/cli/seedPerfisTeste.ts"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
