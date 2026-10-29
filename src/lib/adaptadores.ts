@@ -4,9 +4,10 @@
 import type { EvidenciaPublica, Sugestao } from "../server/contracts/evidencias";
 import type { InvestigacaoDetalhePublico, InvestigacaoResumo, RegistroHistoricoPublico } from "../server/contracts/investigacoes";
 import type { PublicacaoPublica } from "../server/contracts/publicacoes";
-import type { PerfilPublico } from "../server/contracts/usuarios";
+import type { PerfilCriador, PerfilPublico } from "../server/contracts/usuarios";
+import { demonstracaoDoUsuario } from "../constants/demonstracaoMamoa";
 import type { CasoDeCard, CaseCategory, CaseStatus } from "../types/Case";
-import type { Criador } from "../types/Criador";
+import type { Criador, CriadorListado } from "../types/Criador";
 import type { Evidencia, InvestigacaoDetalhe, OrigemEvidencia, RegistroHistorico, StatusSugestao } from "../types/InvestigacaoDetalhe";
 import type { Publicacao } from "../types/Publicacao";
 import { lerTagTematica } from "./tags";
@@ -16,6 +17,16 @@ import type { TagTematica } from "../constants/tagsTematicas";
 // `Criador.id` é o `usuario`: a API não expõe identificador interno e `Publicacao.autorId` aponta para ele.
 export function perfilParaCriador(perfil: Pick<PerfilPublico, "usuario" | "nome" | "bio">): Criador {
   return { id: perfil.usuario, usuario: perfil.usuario, nome: perfil.nome, bio: perfil.bio };
+}
+
+// Item da lista de criadores: temas reais (no máximo 3, só ids do catálogo) e patente de demonstração quando houver.
+export function criadorListado(perfil: Pick<PerfilCriador, "usuario" | "nome" | "bio" | "temas">): CriadorListado {
+  const demonstracao = demonstracaoDoUsuario(perfil.usuario);
+  return {
+    ...perfilParaCriador(perfil),
+    temas: tagsDoCatalogo(perfil.temas).slice(0, 3),
+    ...(demonstracao ? { patente: demonstracao.patentes.atual, patenteDemonstracao: true } : {}),
+  };
 }
 
 function tagsDoCatalogo(valores: readonly string[]): TagTematica[] {

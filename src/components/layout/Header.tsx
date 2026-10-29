@@ -8,11 +8,12 @@ import { FiSearch } from "react-icons/fi";
 import { MAIN_NAV, ROUTES } from "../../constants/routes";
 import { isRotaAtiva } from "../../lib/navegacao";
 import { useSessao } from "../auth/SessaoProvider";
+import { Avatar } from "../ui/Avatar";
 import { BotaoSair } from "./BotaoSair";
 import { Navigation } from "./Navigation";
 
 export function Header() {
-  const { estado } = useSessao();
+  const { estado, usuario } = useSessao();
   const pathname = usePathname() ?? "";
   const ativo = (href: string) => isRotaAtiva(pathname, href);
 
@@ -43,21 +44,16 @@ export function Header() {
           >
             Criadores
           </DesktopActionLink>
-          <DesktopActionLink
-            href={ROUTES.criar}
-            aria-current={ativo(ROUTES.criar) ? "page" : undefined}
-            $active={ativo(ROUTES.criar)}
-          >
-            Criar teoria
-          </DesktopActionLink>
           {estado === "autenticado" ? (
             <>
               <ActionLink
                 href={ROUTES.meuPerfil}
+                aria-label={`Meu perfil (${usuario?.nome ?? "conta"})`}
                 aria-current={ativo(ROUTES.meuPerfil) ? "page" : undefined}
                 $active={ativo(ROUTES.meuPerfil)}
               >
-                Meu perfil
+                <Avatar nome={usuario?.nome ?? ""} size="small" />
+                <span>Meu perfil</span>
               </ActionLink>
               <BotaoSair />
             </>
@@ -164,8 +160,9 @@ const ActionLink = styled(Link)<{ $active?: boolean }>`
     border-radius: 4px;
   }
 
+  // No celular só o rótulo some; o avatar (aria-hidden) continua visível.
   @media (max-width: 767px) {
-    span {
+    span:not([aria-hidden="true"]) {
       display: none;
     }
   }

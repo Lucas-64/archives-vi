@@ -3,18 +3,25 @@
 import styled from "styled-components";
 
 // Stable ids of the investigation sections. Keep in sync with the Secao ids in the page.
-const ITENS = [
+const ITENS_PADRAO = [
   { id: "teoria", rotulo: "Teoria" },
   { id: "evidencias", rotulo: "Evidências" },
   { id: "historico", rotulo: "Histórico" },
 ];
 
 // Anchor navigation. Sticky on desktop, static on mobile. No scroll library.
-export function AnchorNav() {
+// `itens` e `rotulo` permitem reutilizar a navegação em outras telas com as mesmas seções (por exemplo, as
+// etapas de criar mistério). Sem props, o comportamento é o da página da comunidade.
+export interface AnchorNavProps {
+  itens?: readonly { id: string; rotulo: string }[];
+  rotulo?: string;
+}
+
+export function AnchorNav({ itens = ITENS_PADRAO, rotulo = "Seções da investigação" }: AnchorNavProps = {}) {
   return (
-    <Nav aria-label="Seções da investigação">
+    <Nav aria-label={rotulo}>
       <List>
-        {ITENS.map((item) => (
+        {itens.map((item) => (
           <li key={item.id}>
             <a href={`#${item.id}`}>{item.rotulo}</a>
           </li>

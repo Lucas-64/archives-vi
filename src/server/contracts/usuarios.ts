@@ -51,3 +51,10 @@ export interface PerfilPublico {
   criadoEm: string;
   indicadores: IndicadoresPerfil;
 }
+
+// Item da lista de criadores: o perfil público e os três temas mais frequentes do conteúdo público da pessoa
+// (ids do catálogo de temas, ADR-018), tirados das publicações publicadas e das investigações. Vazio quando
+// o conteúdo não tem tema. Patente não existe na API.
+export interface PerfilCriador extends PerfilPublico {
+  temas: string[];
+}

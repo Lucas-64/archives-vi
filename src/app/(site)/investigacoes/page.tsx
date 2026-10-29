@@ -47,7 +47,7 @@ export default async function InvestigacoesPage({ searchParams }: { searchParams
           <PageHeader
             titulo="Investigações"
             descricao="Investigações organizadas em torno de evidências, conexões e discussão."
-            acao={<LinkDeAcao href={ROUTES.criarInvestigacao}>Criar investigação</LinkDeAcao>}
+            acao={<LinkDeAcao href={ROUTES.criarMisterio}>Criar mistério</LinkDeAcao>}
           />
 
           <FiltrosRecolhiveis resumoAtivo={classificacao ? `Classificação: ${classificacao.rotulo}` : undefined}>

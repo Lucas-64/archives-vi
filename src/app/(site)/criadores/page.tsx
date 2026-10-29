@@ -5,7 +5,7 @@ import { PageBody } from "../../../components/page/PageBody";
 import { PageHeader } from "../../../components/page/PageHeader";
 import { EmptyState } from "../../../components/states/EmptyState";
 import { LIMITE_LISTA, criadoresDaPagina } from "../../../server/leitura/usuarios";
-import { perfilParaCriador } from "../../../lib/adaptadores";
+import { criadorListado } from "../../../lib/adaptadores";
 
 // Os dados vêm do banco a cada requisição (não há conteúdo fixo no build).
 export const dynamic = "force-dynamic";
@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 // de usuário. Sem sidebar. Mostra as primeiras LIMITE_LISTA e avisa quando há mais (ainda não há "ver mais").
 export default async function CriadoresPage() {
   const { itens, haMais } = await criadoresDaPagina();
-  const criadores = itens.map(perfilParaCriador);
+  const criadores = itens.map(criadorListado);
 
   return (
     <>

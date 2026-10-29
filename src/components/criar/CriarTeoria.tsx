@@ -70,7 +70,7 @@ export function CriarTeoria() {
           <PageHeader
             titulo="Criar teoria"
             descricao="Escreva uma teoria e acompanhe a prévia enquanto digita."
-            acao={<LinkDeAcao href={ROUTES.criarInvestigacao}>Criar investigação</LinkDeAcao>}
+            acao={<LinkDeAcao href={ROUTES.criarMisterio}>Criar mistério</LinkDeAcao>}
           />
           <PageBody>
             {estado === "carregando" ? <Skeleton height="320px" radius="lg" /> : null}
