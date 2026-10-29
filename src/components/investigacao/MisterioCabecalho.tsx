@@ -3,6 +3,7 @@
 import Image from "next/image";
 import styled from "styled-components";
 
+import { AcaoRestrita } from "../acoes/AcaoRestrita";
 import { Breadcrumb } from "../navigation/Breadcrumb";
 import { ROUTES } from "../../constants/routes";
 import { formatarData } from "../../lib/formatacao";
@@ -71,6 +72,7 @@ export function MisterioCabecalho({ caso, detalhe }: MisterioCabecalhoProps) {
       </Autoria>
 
       <Acoes>
+        <AcaoRestrita rotulo="Acompanhar" mensagem="Acompanhar exige autenticação." />
         <CopyLinkButton />
       </Acoes>
 

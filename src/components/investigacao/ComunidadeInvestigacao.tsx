@@ -7,9 +7,14 @@ import styled from "styled-components";
 import { ROUTES } from "../../constants/routes";
 import type { DetalheReal } from "../../lib/adaptadores";
 import type { CasoDeCard } from "../../types/Case";
+import type { InvestigacaoDetalhe } from "../../types/InvestigacaoDetalhe";
 import { Breadcrumb } from "../navigation/Breadcrumb";
 import { AnchorNav } from "./AnchorNav";
-import { Secao } from "./Secao";
+import { BlocoDemonstracao, SemDados } from "./BlocoDemonstracao";
+import { DiscussaoSection } from "./DiscussaoSection";
+import { LocalizacaoEvidencias } from "./LocalizacaoEvidencias";
+import { Secao, Subtitulo } from "./Secao";
+import { SinteseSection } from "./SinteseSection";
 import { TeoriaSection } from "./TeoriaSection";
 
 export interface ComunidadeInvestigacaoProps {
@@ -19,12 +24,26 @@ export interface ComunidadeInvestigacaoProps {
   historico: ReactNode;
   // Seção de evidências (lista pública, envio, sugestões e fila), montada pela página com dados do servidor.
   evidencias: ReactNode;
+  // Exemplo de discussão e síntese (só para slugs com mock). Sem ele, as seções mostram estado vazio rotulado.
+  demonstracao?: InvestigacaoDetalhe;
 }
 
-// Área comunitária de uma investigação, em /publicacoes/investigacao/[slug] (ADR-020), com dados reais:
-// teoria, evidências e histórico. Discussão, localização das evidências e síntese não aparecem porque a API
-// não tem esses dados (ADR-031); nada é inventado para preenchê-las.
-export function ComunidadeInvestigacao({ caso, detalhe, historico, evidencias }: ComunidadeInvestigacaoProps) {
+const SECOES = [
+  { id: "teoria", rotulo: "Teoria" },
+  { id: "evidencias", rotulo: "Evidências" },
+  { id: "discussao", rotulo: "Discussão" },
+  { id: "localizacao", rotulo: "Localização" },
+  { id: "historico", rotulo: "Histórico" },
+];
+
+// Área comunitária de uma investigação, em /publicacoes/investigacao/[slug] (ADR-020), com o layout antigo
+// restaurado (ADR-039). Teoria, evidências e histórico vêm da API. Discussão, localização e síntese não têm fonte
+// real (ADR-031): mostram o exemplo do slug, rotulado como demonstração, ou um estado vazio rotulado.
+export function ComunidadeInvestigacao({ caso, detalhe, historico, evidencias, demonstracao }: ComunidadeInvestigacaoProps) {
+  const evidenciaDiscussao = demonstracao?.evidencias.find(
+    (evidencia) => evidencia.id === demonstracao.discussaoEvidenciaId,
+  );
+
   return (
     <>
       <Cabecalho>
@@ -35,12 +54,12 @@ export function ComunidadeInvestigacao({ caso, detalhe, historico, evidencias }:
             { label: caso.title },
           ]}
         />
-        <Rotulo>Área da comunidade</Rotulo>
+        <Rotulo>Discussão da comunidade</Rotulo>
         <Titulo>{caso.title}</Titulo>
         <LinkMisterio href={ROUTES.investigacao(caso.id)}>Ler o mistério</LinkMisterio>
       </Cabecalho>
 
-      <AnchorNav />
+      <AnchorNav itens={SECOES} />
 
       <Secao id="teoria" titulo="Teoria">
         <TeoriaSection teoria={detalhe.teoria} revisoes={detalhe.contagens.revisoes} />
@@ -50,8 +69,38 @@ export function ComunidadeInvestigacao({ caso, detalhe, historico, evidencias }:
         {evidencias}
       </Secao>
 
-      <Secao id="historico" titulo="Histórico">
+      <Secao id="discussao" titulo="Discussão">
+        {demonstracao ? (
+          <BlocoDemonstracao>
+            <DiscussaoSection
+              evidenciaId={demonstracao.discussaoEvidenciaId}
+              evidenciaTitulo={evidenciaDiscussao?.titulo ?? ""}
+              discussaoContextual={demonstracao.discussaoContextual}
+              discussaoGeral={demonstracao.discussaoGeral}
+            />
+          </BlocoDemonstracao>
+        ) : (
+          <SemDados>A discussão desta investigação aparece aqui quando houver registro.</SemDados>
+        )}
+      </Secao>
+
+      <Secao id="localizacao" titulo="Localização das evidências">
+        <BlocoDemonstracao>
+          <LocalizacaoEvidencias />
+        </BlocoDemonstracao>
+      </Secao>
+
+      <Secao id="historico" titulo="Histórico e síntese">
+        <Subtitulo>Linha do tempo</Subtitulo>
         {historico}
+        <Subtitulo>Síntese</Subtitulo>
+        {demonstracao ? (
+          <BlocoDemonstracao>
+            <SinteseSection sintese={demonstracao.sintese} />
+          </BlocoDemonstracao>
+        ) : (
+          <SemDados>A síntese desta investigação aparece aqui quando houver registro.</SemDados>
+        )}
       </Secao>
     </>
   );
