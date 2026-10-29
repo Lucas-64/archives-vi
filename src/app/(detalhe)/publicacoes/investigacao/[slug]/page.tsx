@@ -16,6 +16,7 @@ import {
   investigacaoParaCaso,
   sugestaoParaFront,
 } from "../../../../../lib/adaptadores";
+import { detalheDemonstrativo } from "../../../../../lib/demonstracaoInvestigacao";
 import { usuarioDaSessao, type UsuarioDaSessao } from "../../../../../server/auth/sessaoServidor";
 import type { InvestigacaoDetalhePublico } from "../../../../../server/contracts/investigacoes";
 import {
@@ -28,7 +29,8 @@ import {
 
 type Params = Promise<{ slug: string }>;
 
-// Área comunitária de uma investigação real (ADR-020, ADR-031). Dinâmica: investigações criadas depois do build
+// Área comunitária de uma investigação real (ADR-020, ADR-031), com o layout antigo restaurado (ADR-039): discussão,
+// localização e síntese mostram o exemplo do slug (rotulado como demonstração) ou estado vazio rotulado. Dinâmica: investigações criadas depois do build
 // abrem sem recompilar, e um slug inexistente responde HTTP 404 real porque a verificação acontece antes de
 // qualquer Suspense e este grupo não tem `loading.tsx` (ADR-028). O cookie é lido só para as permissões e para
 // as sugestões da própria pessoa; a API repete a autorização em cada operação.
@@ -87,6 +89,7 @@ export default async function ComunidadeInvestigacaoPage({ params }: { params: P
 
   const caso = investigacaoParaCaso(dados);
   const detalhe = investigacaoDetalheParaFront(dados);
+  const demonstracao = detalheDemonstrativo(slug);
 
   return (
     <ContentGrid
@@ -94,6 +97,7 @@ export default async function ComunidadeInvestigacaoPage({ params }: { params: P
         <ComunidadeInvestigacao
           caso={caso}
           detalhe={detalhe}
+          demonstracao={demonstracao}
           evidencias={
             <Suspense fallback={<Skeleton height="260px" radius="lg" />}>
               <Evidencias dados={dados} sessao={sessao} />
@@ -106,7 +110,7 @@ export default async function ComunidadeInvestigacaoPage({ params }: { params: P
           }
         />
       }
-      sidebar={<InvestigacaoSidebar caso={caso} detalhe={detalhe} />}
+      sidebar={<InvestigacaoSidebar caso={caso} detalhe={detalhe} demonstracao={demonstracao} />}
     />
   );
 }
