@@ -5,6 +5,7 @@ import { PublicationCard } from "../../../components/cards/PublicationCard";
 import { FiltrosRecolhiveis } from "../../../components/filters/FiltrosRecolhiveis";
 import { SidebarDemonstrativa } from "../../../components/home/Sidebar";
 import { ContentGrid } from "../../../components/layout/ContentGrid";
+import { Subtitulo } from "../../../components/investigacao/Secao";
 import { CardList } from "../../../components/page/CardList";
 import { NotaLista } from "../../../components/page/NotaLista";
 import { PageBody } from "../../../components/page/PageBody";
@@ -19,8 +20,9 @@ import { investigacoesDaListagem } from "../../../server/leitura/investigacoes";
 import { publicacoesDaListagem } from "../../../server/leitura/publicacoes";
 import { LIMITE_LISTA } from "../../../server/leitura/usuarios";
 
-// Publicações e investigações reais (API, via serviço no processo; ADR-029 e ADR-031), em uma só listagem, filtrada
-// apenas por tema, sem criar vínculos entre elas (ADR-013). A área de cada investigação tem rota própria: /publicacoes/investigacao/[slug].
+// Publicações e investigações reais (API, via serviço no processo; ADR-029 e ADR-031), em dois grupos (Investigações e
+// Publicações), filtrados apenas por tema, sem criar vínculos entre elas (ADR-013). Não há filtro de tipo: teoria e
+// investigação são tratadas como a mesma coisa, e o antigo ?tipo= é ignorado. A área de cada investigação tem rota própria: /publicacoes/investigacao/[slug].
 // Sidebar demonstrativa (ADR-036): tópicos do fórum e atualizações não têm endpoint e aparecem rotulados como exemplo.
 export const dynamic = "force-dynamic";
 
@@ -47,23 +49,13 @@ export default async function PublicacoesPage({
     investigacoesDaListagem(tag),
   ]);
 
-  type Entrada =
-    | { tipo: "investigacao"; data: string; caso: ReturnType<typeof investigacaoParaCaso> }
-    | { tipo: "publicacao"; data: string; publicacao: ReturnType<typeof publicacaoParaFront>; autor: ReturnType<typeof perfilParaCriador> };
+  const investigacoes = investigacoesLista.itens.map(investigacaoParaCaso);
+  const publicacoes = itens.map((item) => ({
+    publicacao: publicacaoParaFront(item),
+    autor: perfilParaCriador({ usuario: item.autor.usuario, nome: item.autor.nome, bio: "" }),
+  }));
 
-  const entradas: Entrada[] = [
-    ...investigacoesLista.itens.map((item): Entrada => {
-      const caso = investigacaoParaCaso(item);
-      return { tipo: "investigacao", data: caso.updatedAt ?? "", caso };
-    }),
-    ...itens.map((item): Entrada => {
-      const publicacao = publicacaoParaFront(item);
-      const autor = perfilParaCriador({ usuario: item.autor.usuario, nome: item.autor.nome, bio: "" });
-      return { tipo: "publicacao", data: publicacao.data.slice(0, 10), publicacao, autor };
-    }),
-  ].sort((a, b) => b.data.localeCompare(a.data));
-
-  const semNada = entradas.length === 0;
+  const semNada = publicacoes.length === 0 && investigacoes.length === 0;
   const tagAtiva = TAGS_TEMATICAS.find((item) => item.id === tag);
 
   return (
@@ -106,23 +98,31 @@ export default async function PublicacoesPage({
               )
             ) : null}
 
-            {entradas.length > 0 ? (
-              <section aria-label="Teorias e investigações">
+            {investigacoes.length > 0 ? (
+              <section aria-label="Investigações">
+                <Subtitulo>Investigações</Subtitulo>
                 <CardList>
-                  {entradas.map((entrada) =>
-                    entrada.tipo === "investigacao" ? (
-                      <CaseCard
-                        key={`i-${entrada.caso.id}`}
-                        caso={entrada.caso}
-                        orientacao="horizontal"
-                        href={ROUTES.comunidadeInvestigacao(entrada.caso.id)}
-                      />
-                    ) : (
-                      <PublicationCard key={`p-${entrada.publicacao.id}`} publicacao={entrada.publicacao} autor={entrada.autor} />
-                    ),
-                  )}
+                  {investigacoes.map((caso) => (
+                    <CaseCard
+                      key={caso.id}
+                      caso={caso}
+                      orientacao="horizontal"
+                      href={ROUTES.comunidadeInvestigacao(caso.id)}
+                    />
+                  ))}
                 </CardList>
                 {investigacoesLista.haMais ? <NotaLista>Mostrando as {LIMITE_LISTA} investigações mais recentes.</NotaLista> : null}
+              </section>
+            ) : null}
+
+            {publicacoes.length > 0 ? (
+              <section aria-label="Publicações">
+                <Subtitulo>Publicações</Subtitulo>
+                <CardList>
+                  {publicacoes.map(({ publicacao, autor }) => (
+                    <PublicationCard key={publicacao.id} publicacao={publicacao} autor={autor} />
+                  ))}
+                </CardList>
                 {haMais ? <NotaLista>Mostrando as {LIMITE_LISTA} publicações mais recentes.</NotaLista> : null}
               </section>
             ) : null}
