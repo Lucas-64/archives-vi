@@ -92,6 +92,12 @@ describe("POST /investigacoes", () => {
     expect((await criar(nova())).status).toBe(401);
     expect((await criar(nova(), m.cookie, { semCsrf: true })).status).toBe(403);
     expect((await criar(nova(), m.cookie, { origem: "http://outro.exemplo" })).status).toBe(403);
+    // `imagem` existe, mas só aceita a URL do Blob devolvida pelo envio (ADR-043): URL livre dá 422.
+    for (const imagem of ["x.png", "https://exemplo.com/capa.jpg"]) {
+      const r = await criar(nova({ imagem }), m.cookie);
+      expect(r.status, imagem).toBe(422);
+      expect(Object.values((await r.json()).erro.campos).join(" ")).toContain("Envie a imagem pelo campo de upload.");
+    }
     expect((await banco.pool.query("select count(*)::int n from investigacoes")).rows[0].n).toBe(antes);
   });
 
@@ -134,7 +140,7 @@ describe("POST /investigacoes", () => {
   it("recusa campos proibidos (422) sem gravar", async () => {
     const m = await registrar();
     const antes = (await banco.pool.query("select count(*)::int n from investigacoes")).rows[0].n;
-    for (const extra of [{ status: "confirmed" }, { estado: "contestada" }, { autor: "outro" }, { autorId: m.id }, { slug: "meu-slug" }, { encerradaPeloAutor: true }, { imagem: "x.png" }, { permissoes: { podeGerenciar: true } }]) {
+    for (const extra of [{ status: "confirmed" }, { estado: "contestada" }, { autor: "outro" }, { autorId: m.id }, { slug: "meu-slug" }, { encerradaPeloAutor: true }, { permissoes: { podeGerenciar: true } }]) {
       const r = await criar(nova(extra), m.cookie);
       expect(r.status, JSON.stringify(extra)).toBe(422);
       expect(Object.values((await r.json()).erro.campos).join(" ")).toContain("Campo não permitido.");

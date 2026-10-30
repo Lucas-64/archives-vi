@@ -347,7 +347,7 @@ describe("leitura", () => {
     for (const proibido of ["email", "senha", "hash", "bio", "a@exemplo.com", "autorId", "status", "criadoEm"]) {
       expect(texto).not.toContain(proibido);
     }
-    expect(Object.keys(c).sort()).toEqual(["autor", "comentarios", "corpo", "curtidas", "data", "euCurti", "id", "resumo", "slug", "tags", "termos", "tipo", "titulo"]);
+    expect(Object.keys(c).sort()).toEqual(["autor", "comentarios", "corpo", "curtidas", "data", "euCurti", "id", "imagem", "resumo", "slug", "tags", "termos", "tipo", "titulo"]);
   });
 
   it("a listagem também não expõe campos fora do contrato", async () => {
