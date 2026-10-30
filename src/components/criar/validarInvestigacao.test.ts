@@ -66,4 +66,19 @@ describe("validarInvestigacao", () => {
     expect(erros["teoria.fontes.0"]).toBeDefined();
     expect(erros["video.url"]).toBe("Informe o link do vídeo.");
   });
+
+  it("imagem de capa: opcional, só https; vazia não é enviada e a válida passa no esquema do servidor", () => {
+    expect(montarEntrada(valido)).not.toHaveProperty("imagem");
+    expect(validarInvestigacao({ ...valido, imagemUrl: "http://exemplo.com/a.jpg" }).imagem).toBeDefined();
+    expect(validarInvestigacao({ ...valido, imagemUrl: "isso nao e url" }).imagem).toBeDefined();
+    expect(validarInvestigacao({ ...valido, imagemUrl: `https://exemplo.com/${"a".repeat(400)}` }).imagem).toBeDefined();
+
+    const comImagem = { ...valido, imagemUrl: " https://exemplo.com/capa.jpg " };
+    expect(validarInvestigacao(comImagem)).toEqual({});
+    const corpo = montarEntrada(comImagem);
+    expect(corpo.imagem).toBe("https://exemplo.com/capa.jpg");
+    expect(esquemaCriarInvestigacao.safeParse(corpo).success).toBe(true);
+    expect(esquemaCriarInvestigacao.safeParse({ ...corpo, imagem: "javascript:alert(1)" }).success).toBe(false);
+    expect(esquemaCriarInvestigacao.safeParse({ ...corpo, imagem: "http://exemplo.com/a.jpg" }).success).toBe(false);
+  });
 });

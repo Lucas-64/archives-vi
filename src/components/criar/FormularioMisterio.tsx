@@ -33,7 +33,8 @@ const contagem = (valor: string, maximo: number) => `${valor.trim().length} de $
 
 // Formulário de criação de mistério (cria uma investigação pela API real), nas mesmas seções da página do
 // mistério: Identificação, Vídeo e Teoria; as evidências vêm depois da criação, na área da comunidade. Validação feita pelo pai; noValidate evita a
-// validação nativa. Não há envio de imagens nem de evidências aqui: a API de criação não os aceita.
+// validação nativa. A imagem de capa é um endereço https (não há upload de arquivo: o projeto não tem storage). Não há
+// envio de evidências aqui.
 export function FormularioMisterio({ rascunho: r, erros, mostrarResumoErro, erroGeral, enviando, onAlterar, onEnviar }: FormularioMisterioProps) {
   const id = useId();
   const campo = <K extends keyof RascunhoInvestigacao>(nome: K, valor: RascunhoInvestigacao[K], chaves: string[]) =>
@@ -92,6 +93,14 @@ export function FormularioMisterio({ rascunho: r, erros, mostrarResumoErro, erro
           ))}
           {erros.tags ? <ErroCampo role="alert">{erros.tags}</ErroCampo> : null}
         </Fieldset>
+
+        <FormField
+          label="Imagem de capa (opcional)"
+          hint="Endereço https de uma imagem. Sem imagem, a investigação usa uma imagem padrão."
+          error={erros.imagem}
+        >
+          <Input name="imagemUrl" type="url" autoComplete="off" value={r.imagemUrl} onChange={(e) => campo("imagemUrl", e.target.value, ["imagem"])} />
+        </FormField>
 
       </Secao>
 

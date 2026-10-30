@@ -11,6 +11,7 @@ export const LIMITES_NOVA_INVESTIGACAO = {
   itensPorLista: 10,
   videoUrl: 200,
   videoTitulo: 120,
+  imagemUrl: 400,
 } as const;
 
 export const CATEGORIAS_NOVA_INVESTIGACAO = [
@@ -30,6 +31,7 @@ export interface RascunhoInvestigacao {
   tags: string[];
   videoUrl: string;
   videoTitulo: string;
+  imagemUrl: string;
   hipotese: string;
   argumentos: string[];
   perguntaCentral: string;
@@ -44,6 +46,7 @@ export const RASCUNHO_VAZIO: RascunhoInvestigacao = {
   tags: [],
   videoUrl: "",
   videoTitulo: "",
+  imagemUrl: "",
   hipotese: "",
   argumentos: [],
   perguntaCentral: "",
@@ -61,6 +64,14 @@ function faixa(valor: string, rotulo: string, minimo: number, maximo: number): s
   if (tamanho < minimo) return `${inicial} precisa ter pelo menos ${minimo} caracteres.`;
   if (tamanho > maximo) return `${inicial} pode ter no máximo ${maximo} caracteres.`;
   return undefined;
+}
+
+function enderecoHttps(valor: string): boolean {
+  try {
+    return new URL(valor).protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 export function validarInvestigacao(r: RascunhoInvestigacao): ErrosInvestigacao {
@@ -86,6 +97,13 @@ export function validarInvestigacao(r: RascunhoInvestigacao): ErrosInvestigacao 
     }
   }
 
+  // Imagem de capa (opcional): endereço https. O servidor valida de novo.
+  const imagem = r.imagemUrl.trim();
+  if (imagem !== "") {
+    if (imagem.length > L.imagemUrl) erros.imagem = "O endereço da imagem é longo demais.";
+    else if (!enderecoHttps(imagem)) erros.imagem = "Use um endereço de imagem que comece com https://.";
+  }
+
   marcar("teoria.hipotese", faixa(r.hipotese, "a hipótese", L.hipotese.minimo, L.hipotese.maximo));
   marcar("teoria.perguntaCentral", faixa(r.perguntaCentral, "a pergunta central", L.perguntaCentral.minimo, L.perguntaCentral.maximo));
 
@@ -101,12 +119,14 @@ export function validarInvestigacao(r: RascunhoInvestigacao): ErrosInvestigacao 
 export function montarEntrada(r: RascunhoInvestigacao) {
   const videoUrl = r.videoUrl.trim();
   const videoTitulo = r.videoTitulo.trim();
+  const imagem = r.imagemUrl.trim();
   return {
     titulo: r.titulo.trim(),
     descricao: r.descricao.trim(),
     categoria: r.categoria,
     ...(r.localizacao.trim() ? { localizacao: r.localizacao.trim() } : {}),
     tags: r.tags,
+    ...(imagem ? { imagem } : {}),
     ...(videoUrl ? { video: { url: videoUrl, ...(videoTitulo ? { titulo: videoTitulo } : {}) } } : {}),
     teoria: {
       hipotese: r.hipotese.trim(),

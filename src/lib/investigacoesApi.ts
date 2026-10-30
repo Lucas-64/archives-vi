@@ -45,6 +45,7 @@ export interface EntradaInvestigacao {
   localizacao?: string;
   tags: string[];
   video?: { url: string; titulo?: string };
+  imagem?: string;
   teoria: { hipotese: string; argumentosFavoraveis: string[]; perguntaCentral: string; fontes: string[] };
 }
 
@@ -60,6 +61,7 @@ const CAMPOS_CRIACAO = [
   "tags",
   "video.url",
   "video.titulo",
+  "imagem",
   "teoria.hipotese",
   "teoria.argumentosFavoraveis",
   "teoria.perguntaCentral",
