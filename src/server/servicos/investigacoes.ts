@@ -103,7 +103,7 @@ function resumoDe(linha: Linha, tags: string[], contagemEvidencias: number): Inv
     slug: i.slug,
     titulo: i.titulo,
     descricao: i.descricao,
-    imagem: null,
+    imagem: i.imagemUrl ?? null,
     status: i.status,
     categoria: i.categoria,
     ...(i.localizacao ? { localizacao: i.localizacao } : {}),
@@ -297,6 +297,7 @@ export async function criarInvestigacao(
         localizacao: entrada.localizacao ?? null,
         videoUrl: entrada.video?.url ?? null,
         videoTitulo: entrada.video?.titulo ?? null,
+        imagemUrl: entrada.imagem ?? null,
         hipotese: entrada.teoria.hipotese,
         perguntaCentral: entrada.teoria.perguntaCentral,
         argumentosFavoraveis: entrada.teoria.argumentosFavoraveis,
@@ -360,6 +361,7 @@ export async function editarInvestigacao(
     if (entrada.descricao !== undefined && entrada.descricao !== atual.descricao) mudancas.descricao = entrada.descricao;
     if (entrada.categoria !== undefined && entrada.categoria !== atual.categoria) mudancas.categoria = entrada.categoria;
     if (entrada.localizacao !== undefined && entrada.localizacao !== atual.localizacao) mudancas.localizacao = entrada.localizacao;
+    if (entrada.imagem !== undefined && entrada.imagem !== atual.imagemUrl) mudancas.imagemUrl = entrada.imagem;
     if (entrada.video !== undefined) {
       const url = entrada.video?.url ?? null;
       const titulo = entrada.video?.titulo ?? null;

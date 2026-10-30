@@ -15,6 +15,7 @@ export const LIMITES_INVESTIGACAO = {
   itensPorLista: 10,
   videoUrl: 200,
   videoTitulo: 120,
+  imagemUrl: 400,
 } as const;
 
 // \t, \n e \r passam; NUL e demais caracteres de controle não são texto.
@@ -53,6 +54,19 @@ const campos = {
       titulo: texto("o título do vídeo", 1, LIMITES_INVESTIGACAO.videoTitulo).optional(),
     })
     .strict(),
+  // Imagem de capa: endereço https (o arquivo não é guardado aqui; sem storage no projeto).
+  imagem: z
+    .string({ error: "Informe o endereço da imagem." })
+    .trim()
+    .max(LIMITES_INVESTIGACAO.imagemUrl, "O endereço da imagem é longo demais.")
+    .refine((v) => !CONTROLE.test(v), "O endereço da imagem contém caracteres inválidos.")
+    .refine((v) => {
+      try {
+        return new URL(v).protocol === "https:";
+      } catch {
+        return false;
+      }
+    }, "Use um endereço de imagem que comece com https://."),
   hipotese: texto("a hipótese", LIMITES_INVESTIGACAO.hipotese.minimo, LIMITES_INVESTIGACAO.hipotese.maximo),
   argumentosFavoraveis: lista("o argumento"),
   perguntaCentral: texto("a pergunta central", LIMITES_INVESTIGACAO.perguntaCentral.minimo, LIMITES_INVESTIGACAO.perguntaCentral.maximo),
@@ -77,6 +91,7 @@ export const esquemaCriarInvestigacao = z
     localizacao: campos.localizacao.optional(),
     tags: campos.tags.default([]),
     video: campos.video.optional(),
+    imagem: campos.imagem.optional(),
     teoria: esquemaTeoria,
   })
   .strict();
@@ -97,6 +112,7 @@ export const esquemaEditarInvestigacao = z
     localizacao: campos.localizacao.nullable().optional(),
     tags: campos.tags.optional(),
     video: campos.video.nullable().optional(),
+    imagem: campos.imagem.nullable().optional(),
     teoria: esquemaTeoriaParcial.optional(),
   })
   .strict()
@@ -132,7 +148,8 @@ export interface InvestigacaoResumo {
   slug: string;
   titulo: string;
   descricao: string;
-  imagem: null;
+  // Endereço da imagem de capa enviada. Nulo: o front usa a imagem padrão na leitura.
+  imagem: string | null;
   status: string;
   categoria: string;
   localizacao?: string;

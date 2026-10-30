@@ -43,6 +43,13 @@
       "when": 1792524628504,
       "tag": "0005_evidencias_moderacao",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793378405287,
+      "tag": "0006_investigacoes_imagem",
+      "breakpoints": true
     }
   ]
 }

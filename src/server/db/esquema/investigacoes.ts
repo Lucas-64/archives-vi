@@ -39,6 +39,8 @@ export const investigacoes = pgTable(
     localizacao: text("localizacao"),
     videoUrl: text("video_url"),
     videoTitulo: text("video_titulo"),
+    // Endereço (https) da imagem de capa enviada por quem criou. Nulo: a leitura usa a imagem padrão, que nunca é gravada.
+    imagemUrl: text("imagem_url"),
     hipotese: text("hipotese").notNull(),
     perguntaCentral: text("pergunta_central").notNull(),
     argumentosFavoraveis: text("argumentos_favoraveis").array().notNull().default(sql`'{}'::text[]`),
@@ -57,6 +59,7 @@ export const investigacoes = pgTable(
     check("investigacoes_status_valido", sql`${tabela.status} in (${lista(STATUS_INVESTIGACAO)})`),
     check("investigacoes_estado_valido", sql`${tabela.estado} in (${lista(ESTADOS_INVESTIGACAO)})`),
     check("investigacoes_localizacao_tamanho", sql`${tabela.localizacao} is null or char_length(${tabela.localizacao}) between 1 and 80`),
+    check("investigacoes_imagem_tamanho", sql`${tabela.imagemUrl} is null or char_length(${tabela.imagemUrl}) <= 400`),
     check("investigacoes_video_tamanho", sql`(${tabela.videoUrl} is null or char_length(${tabela.videoUrl}) <= 200) and (${tabela.videoTitulo} is null or char_length(${tabela.videoTitulo}) between 1 and 120)`),
     check("investigacoes_hipotese_tamanho", sql`char_length(${tabela.hipotese}) between 20 and 2000`),
     check("investigacoes_pergunta_tamanho", sql`char_length(${tabela.perguntaCentral}) between 5 and 300`),

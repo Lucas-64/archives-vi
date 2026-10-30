@@ -1,0 +1,2 @@
+ALTER TABLE "investigacoes" ADD COLUMN "imagem_url" text;--> statement-breakpoint
+ALTER TABLE "investigacoes" ADD CONSTRAINT "investigacoes_imagem_tamanho" CHECK ("investigacoes"."imagem_url" is null or char_length("investigacoes"."imagem_url") <= 400);
