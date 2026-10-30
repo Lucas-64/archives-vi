@@ -43,7 +43,11 @@ describe("seed de perfis de teste", () => {
     expect(contas).toHaveLength(10);
     expect(contas.every((c) => c.demonstrativo && c.senhaHash.startsWith("scrypt$"))).toBe(true);
     expect(await b.db.select().from(investigacoes)).toHaveLength(2);
-    expect(await b.db.select().from(publicacoes)).toHaveLength(7);
+    expect(await b.db.select().from(publicacoes)).toHaveLength(20);
+    // Toda conta de teste tem ao menos 2 publicações (teoria ou investigação).
+    for (const p of PERFIS_TESTE) {
+      expect(PUBLICACOES_TESTE.filter((x) => x.autor === p.usuario).length).toBeGreaterThanOrEqual(2);
+    }
     expect(await b.db.select().from(comentarios)).toHaveLength(7);
     expect(await b.db.select().from(curtidas)).toHaveLength(6);
     const [evidencia] = await b.db.select().from(evidencias);

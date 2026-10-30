@@ -5,7 +5,7 @@ Script: `src/server/cli/seedPerfisTeste.ts` (`npm run seed:perfis-teste`). Cria 
 ## O que cria
 
 - 10 contas com `demonstrativo = true`, e-mail `<usuario>@exemplo.invalid` e hash scrypt da aplicação (`hashSenha`). Usernames: `pedro_rdr`, `caio_exe`, `vini_jpg`, `leo_clips`, `gui_trilhas`, `arthurzin7`, `marcoslima`, `rafael_1899`, `brunofps`, `gta6leaks999`. Onde o apelido original tinha ponto (`caio.exe`, `vini.jpg`, `leo.clips`), o username usa `_` (CHECK `[a-z0-9_]`) e o apelido fica em `nome`.
-- 2 investigações (teias de pistas de `pedro_rdr`; "Como diferenciar uma pista de uma coincidência?" de `caio_exe`), 1 evidência de `gui_trilhas` aceita por `pedro_rdr`, 7 publicações, 7 comentários e 6 curtidas.
+- 2 investigações (teias de pistas de `pedro_rdr`; "Como diferenciar uma pista de uma coincidência?" de `caio_exe`), 1 evidência de `gui_trilhas` aceita por `pedro_rdr`, 20 publicações (2 por conta, todas do tipo teoria ou investigação, nunca mistério), 7 comentários e 6 curtidas.
 - Slugs começam com `teste-` e os textos dizem que o conteúdo é fictício. As tabelas de investigações, publicações etc. não têm coluna `demonstrativo`; a marca de teste está no texto e na autoria das contas demonstrativas.
 
 ## Como rodar

@@ -1,7 +1,7 @@
 // SEED DE PERFIS DE TESTE (docs/backend/seed-perfis-teste.md). Uso:
 //   SEED_SENHA_PERFIS=<senha> npm run seed:perfis-teste -- --confirmar
 //   SEED_SENHA_PERFIS=<senha> npm run seed:perfis-teste -- --confirmar --host-esperado <host>   (banco remoto)
-// Cria 10 contas fictícias (demonstrativo = true) com investigações, uma evidência, publicações, comentários
+// Cria 10 contas fictícias (demonstrativo = true) com 2 mistérios, uma evidência, 20 publicações (2 por conta), comentários
 // e curtidas, todos marcados como conteúdo de teste. A senha vem só de SEED_SENHA_PERFIS (sem valor padrão).
 // Usa só DATABASE_URL e nunca a imprime. Em banco que não seja local, exige --host-esperado igual ao host da
 // URL. É idempotente: a segunda execução não cria nada. RECUSA rodar em NODE_ENV=production.
@@ -106,6 +106,20 @@ export const PUBLICACOES_TESTE: readonly PublicacaoTeste[] = [
   { slug: "teste-lenda-dos-pantanos", titulo: "A lenda dos pântanos", resumo: "Teoria fictícia sobre uma criatura nos pântanos.", tipo: "teoria", autor: "rafael_1899", tags: ["criaturas-lendas"], termos: ["pântano"] },
   { slug: "teste-desempenho-no-trailer", titulo: "Taxa de quadros e pistas", resumo: "Teoria fictícia sobre pistas ligadas à taxa de quadros.", tipo: "teoria", autor: "brunofps", tags: ["teorias-conexoes"], termos: ["fps"] },
   { slug: "teste-vazamento-duvidoso", titulo: "Um suposto vazamento duvidoso", resumo: "Publicação fictícia sobre um boato de vazamento sem fonte.", tipo: "teoria", autor: "gta6leaks999", tags: ["crimes-acontecimentos"], termos: ["boato"] },
+  // Teorias de fã sobre Red Dead Redemption 2, escritas com palavras próprias. Todas fictícias e de teste.
+  { slug: "teste-rdr2-plano-do-dutch", titulo: "O plano do Dutch era sempre o mesmo", resumo: "Teoria fictícia: cada plano \"de última hora\" do Dutch repete a mesma lógica e deixa o bando mais exposto.", tipo: "teoria", autor: "pedro_rdr", tags: ["teorias-conexoes"], termos: ["Dutch", "plano"] },
+  { slug: "teste-rdr2-acampamento-como-mapa", titulo: "O acampamento como mapa do estado do bando", resumo: "Teoria fictícia: a arrumação do acampamento muda conforme o ânimo do grupo e funciona como um indicador escondido.", tipo: "teoria", autor: "pedro_rdr", tags: ["locais-mapas"], termos: ["acampamento"] },
+  { slug: "teste-rdr2-diario-de-arthur", titulo: "O que o diário de Arthur deixa de dizer", resumo: "Teoria fictícia: os desenhos e as lacunas no diário sugerem lembranças que o personagem prefere não escrever.", tipo: "teoria", autor: "caio_exe", tags: ["simbolos-mensagens"], termos: ["diário", "Arthur"] },
+  { slug: "teste-rdr2-estranho-da-cabana", titulo: "O homem estranho e a cabana isolada", resumo: "Teoria fictícia: os encontros com o homem estranho seguem um padrão ligado a lugares isolados do mapa.", tipo: "teoria", autor: "caio_exe", tags: ["criaturas-lendas"], termos: ["estranho", "cabana"] },
+  { slug: "teste-rdr2-cavalo-que-reaparece", titulo: "O cavalo branco que aparece em lugares demais", resumo: "Teoria fictícia: um cavalo claro visto em regiões distantes pode ser uma pista deixada de propósito.", tipo: "teoria", autor: "vini_jpg", tags: ["easter-eggs-segredos"], termos: ["cavalo"] },
+  { slug: "teste-rdr2-trem-fantasma", titulo: "O trem que passa fora do horário", resumo: "Teoria fictícia: um trem visto de madrugada, sem estação nem destino, esconderia uma referência a um evento antigo.", tipo: "teoria", autor: "vini_jpg", tags: ["crimes-acontecimentos"], termos: ["trem"] },
+  { slug: "teste-rdr2-cancao-da-fogueira", titulo: "A canção da fogueira muda de verso", resumo: "Teoria fictícia: pequenas trocas na letra cantada à noite acompanham os capítulos e anunciam mudanças.", tipo: "teoria", autor: "leo_clips", tags: ["audio-transmissoes"], termos: ["canção", "fogueira"] },
+  { slug: "teste-rdr2-ilha-e-o-naufragio", titulo: "A ilha e o naufrágio que ninguém explica", resumo: "Teoria fictícia: os destroços numa ilha remota combinam com histórias contadas por moradores de outra região.", tipo: "teoria", autor: "gui_trilhas", tags: ["locais-mapas", "criaturas-lendas"], termos: ["ilha", "naufrágio"] },
+  { slug: "teste-rdr2-retrato-na-parede", titulo: "O retrato na parede de uma casa abandonada", resumo: "Teoria fictícia: um retrato quase apagado numa casa vazia retrata alguém que aparece mais tarde na história.", tipo: "teoria", autor: "arthurzin7", tags: ["simbolos-mensagens"], termos: ["retrato", "casa"] },
+  { slug: "teste-rdr2-rota-do-cacador", titulo: "A rota do caçador de recompensas", resumo: "Teoria fictícia: os cartazes de procurado seguem uma rota que desenha uma figura quando ligamos os pontos.", tipo: "teoria", autor: "marcoslima", tags: ["locais-mapas", "teorias-conexoes"], termos: ["cartaz", "rota"] },
+  { slug: "teste-rdr2-sino-da-igreja", titulo: "O sino da igreja que toca sozinho", resumo: "Teoria fictícia: o sino ouvido em uma vila vazia teria relação com uma promessa feita por um personagem do bando.", tipo: "teoria", autor: "rafael_1899", tags: ["audio-transmissoes"], termos: ["sino", "igreja"] },
+  { slug: "teste-rdr2-mapa-do-tesouro-falso", titulo: "Os mapas do tesouro que levam ao mesmo lugar", resumo: "Teoria fictícia: dois mapas aparentemente diferentes apontam para o mesmo local e podem ser pistas de uma só história.", tipo: "teoria", autor: "brunofps", tags: ["easter-eggs-segredos", "locais-mapas"], termos: ["tesouro", "mapa"] },
+  { slug: "teste-rdr2-boato-do-final-alternativo", titulo: "O boato do final alternativo", resumo: "Teoria fictícia sobre um boato de final escondido que circula sem prova nenhuma, usada como exemplo de fonte fraca.", tipo: "teoria", autor: "gta6leaks999", tags: ["crimes-acontecimentos"], termos: ["boato", "final"] },
 ];
 
 // 7 comentários em 5 publicações. vini_jpg comenta uma vez; pedro_rdr não comenta.
