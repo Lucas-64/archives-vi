@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { ComunidadeInvestigacao } from "../../../../../components/investigacao/ComunidadeInvestigacao";
+import { ComunidadeInvestigacaoClassica } from "../../../../../components/investigacao-classica/ComunidadeInvestigacaoClassica";
+import { InvestigacaoSidebarClassica } from "../../../../../components/investigacao-classica/InvestigacaoSidebarClassica";
 import { EvidenciasInvestigacao } from "../../../../../components/investigacao/EvidenciasInvestigacao";
 import { HistoricoTimeline } from "../../../../../components/investigacao/HistoricoTimeline";
 import { InvestigacaoSidebar } from "../../../../../components/investigacao/InvestigacaoSidebar";
 import { ContentGrid } from "../../../../../components/layout/ContentGrid";
+import { EmptyState } from "../../../../../components/states/EmptyState";
+import { ROUTES } from "../../../../../constants/routes";
+import { getInvestigacaoPorSlug } from "../../../../../lib/data";
 import { NotaLista } from "../../../../../components/page/NotaLista";
 import { Skeleton } from "../../../../../components/states/Skeleton";
 import {
@@ -38,8 +44,13 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
+  // Versão de backup (mock com conteúdo completo): mesmo título da página antiga (ADR-041).
+  const classico = await getInvestigacaoPorSlug(slug);
+  if (classico?.detalhe) return { title: `Discussão: ${classico.caso.title} | ARCHIVES VI` };
   const dados = await investigacaoPorSlug(slug);
-  if (!dados) return { title: "Investigação não encontrada | ARCHIVES VI" };
+  if (!dados) {
+    return { title: classico ? `Discussão: ${classico.caso.title} | ARCHIVES VI` : "Investigação não encontrada | ARCHIVES VI" };
+  }
   return { title: `Comunidade: ${dados.titulo} | ARCHIVES VI` };
 }
 
@@ -82,10 +93,39 @@ async function Historico({ slug }: { slug: string }) {
 
 export default async function ComunidadeInvestigacaoPage({ params }: { params: Params }) {
   const { slug } = await params;
+
+  // Slug com conteúdo completo no mock (ex.: simbolos-vice-city): a página fica IDÊNTICA à da versão de backup
+  // (ADR-041), com o componente e os dados antigos. As demais seguem lendo o banco, como antes.
+  const classico = await getInvestigacaoPorSlug(slug);
+  if (classico?.detalhe) {
+    return (
+      <ContentGrid
+        main={<ComunidadeInvestigacaoClassica caso={classico.caso} detalhe={classico.detalhe} />}
+        sidebar={<InvestigacaoSidebarClassica caso={classico.caso} detalhe={classico.detalhe} />}
+      />
+    );
+  }
+
   const sessao = await usuarioDaSessao();
   const dados = await investigacaoPorSlug(slug, sessao?.id, sessao?.papel);
 
-  if (!dados) notFound();
+  if (!dados) {
+    // Registro do mock sem a discussão publicada: mesma mensagem da página antiga. Sem registro algum: 404 real.
+    if (classico) {
+      return (
+        <ContentGrid
+          main={
+            <EmptyState
+              titulo={classico.caso.title}
+              descricao="A discussão deste mistério ainda não foi publicada."
+              acao={<Link href={ROUTES.investigacao(classico.caso.id)}>Ler o mistério</Link>}
+            />
+          }
+        />
+      );
+    }
+    notFound();
+  }
 
   const caso = investigacaoParaCaso(dados);
   const detalhe = investigacaoDetalheParaFront(dados);
