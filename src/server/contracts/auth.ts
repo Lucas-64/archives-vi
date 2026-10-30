@@ -56,7 +56,8 @@ export interface UsuarioPrivado {
   usuario: string;
   nome: string;
   bio: string;
-  avatar: null;
+  avatar: string | null;
+  banner: string | null;
   criadoEm: string;
   email: string;
   papel: "membro" | "moderador" | "admin";

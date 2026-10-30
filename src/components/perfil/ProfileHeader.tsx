@@ -7,6 +7,7 @@ import type { Criador } from "../../types/Criador";
 import { Avatar } from "../ui/Avatar";
 import { useSessao } from "../auth/SessaoProvider";
 import { Card } from "../ui/Card";
+import { BannerPerfil } from "./BannerPerfil";
 import { MenuAcoesPerfil } from "./MenuAcoesPerfil";
 
 export interface ProfileHeaderProps {
@@ -20,8 +21,13 @@ export function ProfileHeader({ criador }: ProfileHeaderProps) {
   const { estado } = useSessao();
   return (
     <Card padding="large">
+      {criador.banner ? (
+        <BannerBloco>
+          <BannerPerfil src={criador.banner} />
+        </BannerBloco>
+      ) : null}
       <Cabecalho>
-        <Avatar nome={criador.nome} size="medium" />
+        <Avatar nome={criador.nome} size="medium" src={criador.avatar} />
         <Identidade>
           <Nome>{criador.nome}</Nome>
           <Usuario>@{criador.usuario}</Usuario>
@@ -36,6 +42,10 @@ export function ProfileHeader({ criador }: ProfileHeaderProps) {
     </Card>
   );
 }
+
+const BannerBloco = styled.div`
+  margin-bottom: ${({ theme }) => theme.spacing.lg};
+`;
 
 const Cabecalho = styled.header`
   display: flex;

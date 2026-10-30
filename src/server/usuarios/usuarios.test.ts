@@ -97,6 +97,7 @@ describe("GET /usuarios/{usuario}", () => {
       nome: a.usuario,
       bio: "",
       avatar: null,
+      banner: null,
       criadoEm: expect.any(String),
       indicadores: { publicacoes: 2, investigacoes: 1, evidenciasAceitas: 1, comentarios: 1 },
     });
@@ -299,7 +300,7 @@ describe("PATCH /me/perfil", () => {
 
   it("campos proibidos, vazios e fora dos limites dão 422 e nada muda", async () => {
     const m = await registrarMembro(auth);
-    const proibidos = [{ usuario: "outro_nome" }, { email: "x@y.com" }, { papel: "admin" }, { senha: "senha-de-teste-9" }, { avatar: "http://x" }, { id: m.id }, { demonstrativo: true }, { nome: "Ok", papel: "admin" }];
+    const proibidos = [{ usuario: "outro_nome" }, { email: "x@y.com" }, { papel: "admin" }, { senha: "senha-de-teste-9" }, { id: m.id }, { demonstrativo: true }, { nome: "Ok", papel: "admin" }];
     for (const c of proibidos) expect((await editar(c, m.cookie)).status, JSON.stringify(c)).toBe(422);
     for (const c of [{}, { nome: "" }, { nome: "   " }, { nome: "a".repeat(61) }, { bio: "a".repeat(241) }, { nome: 5 }, { bio: null }, { nome: "com\u0000controle" }, { bio: "com\u0007controle" }]) {
       expect((await editar(c, m.cookie)).status, JSON.stringify(c)).toBe(422);

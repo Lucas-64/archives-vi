@@ -104,6 +104,7 @@ describe("cadastro", () => {
       nome: "Maria Teste",
       bio: "",
       avatar: null,
+      banner: null,
       papel: "membro",
     });
     expect(corpo.usuario.id).toMatch(/^[0-9a-f-]{36}$/);

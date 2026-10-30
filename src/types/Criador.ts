@@ -6,6 +6,9 @@ export interface Criador {
   usuario: string;
   nome: string;
   bio: string;
+  // Imagens enviadas pela pessoa (URL pública do Vercel Blob, ADR-043). Sem elas: iniciais e nenhum banner.
+  avatar?: string;
+  banner?: string;
 }
 
 // Criador na lista de /criadores: além da identidade, até 3 temas reais do conteúdo público e a patente.

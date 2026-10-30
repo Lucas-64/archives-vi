@@ -23,7 +23,11 @@ export default async function MeuPerfilPage() {
   const sessao = await usuarioDaSessao();
   if (!sessao) redirect(ROUTES.entrar);
 
-  const criador = { id: sessao.usuario, usuario: sessao.usuario, nome: sessao.nome, bio: sessao.bio };
+  const criador = { id: sessao.usuario, usuario: sessao.usuario, nome: sessao.nome,
+    bio: sessao.bio,
+    ...(sessao.avatarUrl ? { avatar: sessao.avatarUrl } : {}),
+    ...(sessao.bannerUrl ? { banner: sessao.bannerUrl } : {}),
+  };
 
   return (
     <ContentGrid

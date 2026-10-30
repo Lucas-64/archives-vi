@@ -24,6 +24,8 @@ import { EmptyState } from "../states/EmptyState";
 import { FormField } from "../ui/FormField";
 import { Input } from "../ui/Input";
 import { Textarea } from "../ui/Textarea";
+import { UploadImagem } from "../ui/UploadImagem";
+import { BannerPerfil } from "./BannerPerfil";
 import { AbasPerfil } from "./AbasPerfil";
 import { MeuPerfilPatente } from "./MeuPerfilPatente";
 
@@ -45,7 +47,12 @@ export function MeuPerfilArea({ criador, demonstracao, paineis }: MeuPerfilAreaP
   const formId = `${idBase}-edicao`;
 
   // Dados exibidos: os do servidor, atualizados pela resposta da API quando a edição é confirmada.
-  const [perfil, setPerfil] = useState<PerfilEditado>({ nome: criador.nome, bio: criador.bio });
+  const [perfil, setPerfil] = useState<PerfilEditado>({
+    nome: criador.nome,
+    bio: criador.bio,
+    avatar: criador.avatar ?? null,
+    banner: criador.banner ?? null,
+  });
   const [rascunho, setRascunho] = useState<PerfilEditado>(perfil);
   const [editando, setEditando] = useState(false);
   const [salvando, setSalvando] = useState(false);
@@ -78,7 +85,12 @@ export function MeuPerfilArea({ criador, demonstracao, paineis }: MeuPerfilAreaP
     if (Object.keys(proximosErros).length > 0) return;
 
     setSalvando(true);
-    const resultado = await editarPerfilNaApi({ nome: rascunho.nome.trim(), bio: rascunho.bio.trim() });
+    const resultado = await editarPerfilNaApi({
+      nome: rascunho.nome.trim(),
+      bio: rascunho.bio.trim(),
+      avatar: rascunho.avatar,
+      banner: rascunho.banner,
+    });
     setSalvando(false);
 
     if (resultado.ok) {
@@ -92,7 +104,12 @@ export function MeuPerfilArea({ criador, demonstracao, paineis }: MeuPerfilAreaP
       // Sessão expirada ou revogada: o servidor decide a página (redireciona para /entrar).
       router.refresh();
     }
-    setErros({ nome: resultado.campos.nome, bio: resultado.campos.bio });
+    setErros({
+      nome: resultado.campos.nome,
+      bio: resultado.campos.bio,
+      avatar: resultado.campos.avatar,
+      banner: resultado.campos.banner,
+    });
     setErroGeral(resultado.erroGeral ?? null);
   }
 
@@ -100,8 +117,9 @@ export function MeuPerfilArea({ criador, demonstracao, paineis }: MeuPerfilAreaP
     <Area>
       <Topo>
         <Identidade padding="large">
+          <BannerPerfil src={perfil.banner} />
           <Cabecalho>
-            <Avatar nome={perfil.nome} size="large" />
+            <Avatar nome={perfil.nome} size="large" src={perfil.avatar} />
             <Textos>
               <Nome>{perfil.nome}</Nome>
               <Usuario>@{criador.usuario}</Usuario>
@@ -174,6 +192,27 @@ export function MeuPerfilArea({ criador, demonstracao, paineis }: MeuPerfilAreaP
                   onChange={(evento) => setRascunho({ ...rascunho, bio: evento.target.value })}
                 />
               </FormField>
+
+              <UploadImagem
+                rotulo="Avatar"
+                opcional
+                dica="JPEG, PNG ou WebP, até 5 MB. Sem imagem, aparecem suas iniciais."
+                proporcao="1 / 1"
+                redondo
+                valor={rascunho.avatar}
+                erro={erros.avatar}
+                onChange={(url) => setRascunho({ ...rascunho, avatar: url })}
+              />
+
+              <UploadImagem
+                rotulo="Banner"
+                opcional
+                dica="JPEG, PNG ou WebP, até 5 MB. Aparece no topo do seu perfil."
+                proporcao="3 / 1"
+                valor={rascunho.banner}
+                erro={erros.banner}
+                onChange={(url) => setRascunho({ ...rascunho, banner: url })}
+              />
 
               {erroGeral ? <ErroGeral role="alert">{erroGeral}</ErroGeral> : null}
 

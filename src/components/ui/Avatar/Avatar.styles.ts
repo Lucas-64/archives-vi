@@ -15,6 +15,8 @@ export const StyledAvatar = styled.span<{ $size: AvatarSize }>`
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
   width: ${({ $size }) => SIZES[$size]};
   height: ${({ $size }) => SIZES[$size]};
   border-radius: ${({ theme }) => theme.borderRadius.pill};

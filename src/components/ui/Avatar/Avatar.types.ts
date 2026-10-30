@@ -7,4 +7,6 @@ export interface AvatarProps extends HTMLAttributes<HTMLSpanElement> {
   // so the avatar itself is decorative (aria-hidden).
   nome: string;
   size?: AvatarSize;
+  // Imagem enviada pela pessoa (URL pública do Blob). Sem ela, valem as iniciais.
+  src?: string | null;
 }

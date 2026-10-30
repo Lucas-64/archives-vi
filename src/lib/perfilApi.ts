@@ -5,6 +5,9 @@ import { interpretarErro, type ResultadoAutenticacao } from "./autenticacaoApi";
 export interface PerfilEditado {
   nome: string;
   bio: string;
+  // URL das imagens enviadas (Vercel Blob) ou null quando não há.
+  avatar: string | null;
+  banner: string | null;
 }
 
 export type ResultadoEdicaoPerfil =
@@ -23,11 +26,16 @@ export async function editarPerfilNaApi(dados: PerfilEditado): Promise<Resultado
     });
     const corpo = await resposta.json().catch(() => null);
     if (resposta.ok) {
-      const u = (corpo as { usuario?: { nome?: unknown; bio?: unknown } } | null)?.usuario;
-      if (typeof u?.nome === "string" && typeof u.bio === "string") return { ok: true, perfil: { nome: u.nome, bio: u.bio } };
+      const u = (corpo as { usuario?: { nome?: unknown; bio?: unknown; avatar?: unknown; banner?: unknown } } | null)?.usuario;
+      if (typeof u?.nome === "string" && typeof u.bio === "string") {
+        return {
+          ok: true,
+          perfil: { nome: u.nome, bio: u.bio, avatar: typeof u.avatar === "string" ? u.avatar : null, banner: typeof u.banner === "string" ? u.banner : null },
+        };
+      }
       return { ok: false, campos: {}, erroGeral: MENSAGEM_INDISPONIVEL, semSessao: false };
     }
-    const erro = interpretarErro(resposta.status, corpo, resposta.headers.get("Retry-After"), ["nome", "bio"]) as Exclude<ResultadoAutenticacao, { ok: true }>;
+    const erro = interpretarErro(resposta.status, corpo, resposta.headers.get("Retry-After"), ["nome", "bio", "avatar", "banner"]) as Exclude<ResultadoAutenticacao, { ok: true }>;
     return { ok: false, campos: erro.campos, erroGeral: erro.erroGeral, semSessao: resposta.status === 401 };
   } catch {
     return { ok: false, campos: {}, erroGeral: MENSAGEM_INDISPONIVEL, semSessao: false };

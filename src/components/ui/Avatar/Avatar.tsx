@@ -1,3 +1,6 @@
+import Image from "next/image";
+import { useState } from "react";
+
 import { StyledAvatar } from "./Avatar.styles";
 import type { AvatarProps } from "./Avatar.types";
 
@@ -11,10 +14,17 @@ export function iniciaisDe(nome: string): string {
     .join("");
 }
 
-export function Avatar({ nome, size = "medium", ...props }: AvatarProps) {
+const PIXELS = { small: 28, medium: 40, large: 72 } as const;
+
+export function Avatar({ nome, size = "medium", src, ...props }: AvatarProps) {
+  const [falhou, setFalhou] = useState(false);
   return (
     <StyledAvatar aria-hidden="true" $size={size} {...props}>
-      {iniciaisDe(nome)}
+      {src && !falhou ? (
+        <Image src={src} alt="" fill sizes={`${PIXELS[size]}px`} onError={() => setFalhou(true)} style={{ objectFit: "cover" }} />
+      ) : (
+        iniciaisDe(nome)
+      )}
     </StyledAvatar>
   );
 }

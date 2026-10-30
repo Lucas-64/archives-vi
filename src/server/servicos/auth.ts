@@ -28,14 +28,15 @@ export interface ResultadoSessao {
 export const MENSAGEM_LOGIN_INVALIDO = "E-mail ou senha incorretos.";
 
 export function paraUsuarioPrivado(
-  linha: Pick<Usuario, "id" | "usuario" | "nome" | "bio" | "criadoEm" | "email" | "papel">,
+  linha: Pick<Usuario, "id" | "usuario" | "nome" | "bio" | "avatarUrl" | "bannerUrl" | "criadoEm" | "email" | "papel">,
 ): UsuarioPrivado {
   return {
     id: linha.id,
     usuario: linha.usuario,
     nome: linha.nome,
     bio: linha.bio,
-    avatar: null,
+    avatar: linha.avatarUrl,
+    banner: linha.bannerUrl,
     criadoEm: linha.criadoEm.toISOString(),
     email: linha.email,
     papel: linha.papel,

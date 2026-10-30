@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { esquemaUrlImagem } from "./imagem";
 import { CONTROLE, texto } from "./investigacoes";
 
 // Espelham os CHECKs de `usuarios` (nome 1–60, bio ≤ 240).
@@ -9,7 +10,7 @@ export const esquemaNomeUsuario = z
   .string()
   .regex(/^[a-z0-9_]{3,30}$/);
 
-// `usuario`, `email`, `papel`, `senha`, `avatar` e qualquer outro campo dão 422 "Campo não permitido."
+// `usuario`, `email`, `papel`, `senha` e qualquer outro campo dão 422 "Campo não permitido."
 export const esquemaEditarPerfil = z
   .object({
     nome: texto("o nome", 1, LIMITES_PERFIL.nome).optional(),
@@ -19,6 +20,9 @@ export const esquemaEditarPerfil = z
       .max(LIMITES_PERFIL.bio, `A bio pode ter no máximo ${LIMITES_PERFIL.bio} caracteres.`)
       .refine((v) => !CONTROLE.test(v), "O texto contém caracteres inválidos.")
       .optional(),
+    // Avatar e banner: URL pública do Vercel Blob devolvida pelo envio (ADR-043); null remove a imagem.
+    avatar: esquemaUrlImagem.nullable().optional(),
+    banner: esquemaUrlImagem.nullable().optional(),
   })
   .strict()
   .refine((v) => Object.values(v).some((x) => x !== undefined), { message: "Informe ao menos um campo para alterar." });
@@ -47,7 +51,8 @@ export interface PerfilPublico {
   usuario: string;
   nome: string;
   bio: string;
-  avatar: null;
+  avatar: string | null;
+  banner: string | null;
   criadoEm: string;
   indicadores: IndicadoresPerfil;
 }

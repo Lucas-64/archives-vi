@@ -13,6 +13,8 @@ export interface UsuarioDaSessao {
   usuario: string;
   nome: string;
   bio: string;
+  avatarUrl: string | null;
+  bannerUrl: string | null;
   criadoEm: Date;
   // Só para decisões no servidor (permissões de leitura). Nunca passe para componentes de cliente.
   papel: string;
@@ -26,6 +28,6 @@ export const usuarioDaSessao = cache(async (): Promise<UsuarioDaSessao | null> =
   if (!token) return null;
   const sessao = await validarSessao(obterDb(), token);
   if (!sessao) return null;
-  const { id, usuario, nome, bio, criadoEm, papel } = sessao.usuario;
-  return { id, usuario, nome, bio, criadoEm, papel };
+  const { id, usuario, nome, bio, avatarUrl, bannerUrl, criadoEm, papel } = sessao.usuario;
+  return { id, usuario, nome, bio, avatarUrl, bannerUrl, criadoEm, papel };
 });

@@ -107,11 +107,19 @@ export async function temasDeCriadores(db: Banco, ids: string[]): Promise<Map<st
   return mapa;
 }
 
-type LinhaUsuario = { id: string; usuario: string; nome: string; bio: string; criadoEm: Date };
-const colunas = { id: usuarios.id, usuario: usuarios.usuario, nome: usuarios.nome, bio: usuarios.bio, criadoEm: usuarios.criadoEm };
+type LinhaUsuario = { id: string; usuario: string; nome: string; bio: string; avatarUrl: string | null; bannerUrl: string | null; criadoEm: Date };
+const colunas = {
+  id: usuarios.id,
+  usuario: usuarios.usuario,
+  nome: usuarios.nome,
+  bio: usuarios.bio,
+  avatarUrl: usuarios.avatarUrl,
+  bannerUrl: usuarios.bannerUrl,
+  criadoEm: usuarios.criadoEm,
+};
 
 function perfilDe(l: LinhaUsuario, ind: IndicadoresPerfil): PerfilPublico {
-  return { usuario: l.usuario, nome: l.nome, bio: l.bio, avatar: null, criadoEm: l.criadoEm.toISOString(), indicadores: ind };
+  return { usuario: l.usuario, nome: l.nome, bio: l.bio, avatar: l.avatarUrl, banner: l.bannerUrl, criadoEm: l.criadoEm.toISOString(), indicadores: ind };
 }
 
 // Quem tem perfil público: toda conta (o nome de usuário já é público nas autorias).
@@ -178,6 +186,8 @@ export async function editarPerfil(deps: DependenciasUsuarios, sessao: { id: str
     const mudancas: Partial<typeof usuarios.$inferInsert> = {};
     if (entrada.nome !== undefined && entrada.nome !== atual.nome) mudancas.nome = entrada.nome;
     if (entrada.bio !== undefined && entrada.bio !== atual.bio) mudancas.bio = entrada.bio;
+    if (entrada.avatar !== undefined && entrada.avatar !== atual.avatarUrl) mudancas.avatarUrl = entrada.avatar;
+    if (entrada.banner !== undefined && entrada.banner !== atual.bannerUrl) mudancas.bannerUrl = entrada.banner;
     if (Object.keys(mudancas).length === 0) return paraUsuarioPrivado(atual);
     const [nova] = await tx.update(usuarios).set({ ...mudancas, atualizadoEm: agora }).where(eq(usuarios.id, atual.id)).returning();
     return paraUsuarioPrivado(nova);

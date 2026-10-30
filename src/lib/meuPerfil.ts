@@ -29,6 +29,8 @@ export interface DadosEdicaoPerfil {
 export interface ErrosEdicaoPerfil {
   nome?: string;
   bio?: string;
+  avatar?: string;
+  banner?: string;
 }
 
 // Validação da edição de perfil. Nome obrigatório (sem espaços nas pontas) e limites de tamanho.

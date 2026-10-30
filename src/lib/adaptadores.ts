@@ -15,8 +15,15 @@ import { lerTagTematica } from "./tags";
 import type { TagTematica } from "../constants/tagsTematicas";
 
 // `Criador.id` é o `usuario`: a API não expõe identificador interno e `Publicacao.autorId` aponta para ele.
-export function perfilParaCriador(perfil: Pick<PerfilPublico, "usuario" | "nome" | "bio">): Criador {
-  return { id: perfil.usuario, usuario: perfil.usuario, nome: perfil.nome, bio: perfil.bio };
+export function perfilParaCriador(perfil: Pick<PerfilPublico, "usuario" | "nome" | "bio"> & Partial<Pick<PerfilPublico, "avatar" | "banner">>): Criador {
+  return {
+    id: perfil.usuario,
+    usuario: perfil.usuario,
+    nome: perfil.nome,
+    bio: perfil.bio,
+    ...(perfil.avatar ? { avatar: perfil.avatar } : {}),
+    ...(perfil.banner ? { banner: perfil.banner } : {}),
+  };
 }
 
 // Item da lista de criadores: temas reais (no máximo 3, só ids do catálogo) e patente de demonstração quando houver.

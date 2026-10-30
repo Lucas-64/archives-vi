@@ -21,7 +21,7 @@ export function CreatorCard({ criador, nivelTitulo = 2 }: CreatorCardProps) {
   return (
     <Card padding="medium" hoverable>
       <Cabecalho>
-        <Avatar nome={criador.nome} size="medium" />
+        <Avatar nome={criador.nome} size="medium" src={criador.avatar} />
         <Identidade>
           <Nome as={nivelTitulo === 3 ? "h3" : "h2"}>
             <Link href={ROUTES.perfil(criador.usuario)}>{criador.nome}</Link>
