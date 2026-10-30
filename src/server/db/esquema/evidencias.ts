@@ -28,6 +28,8 @@ export const evidencias = pgTable(
     titulo: text("titulo").notNull(),
     descricao: text("descricao").notNull(),
     fonte: text("fonte"),
+    // Imagem enviada junto da evidência (URL pública do Vercel Blob, ADR-043). Opcional.
+    imagemUrl: text("imagem_url"),
     status: text("status", { enum: STATUS_EVIDENCIA }).notNull().default("pendente"),
     decididaPorId: uuid("decidida_por_id").references(() => usuarios.id, { onDelete: "restrict" }),
     decididaEm: timestamp("decidida_em", { withTimezone: true }),
@@ -48,6 +50,7 @@ export const evidencias = pgTable(
     check("evidencias_status_valido", sql`${tabela.status} in (${lista(STATUS_EVIDENCIA)})`),
     check("evidencias_titulo_tamanho", sql`char_length(${tabela.titulo}) between 3 and 120`),
     check("evidencias_descricao_tamanho", sql`char_length(${tabela.descricao}) between 10 and 1000`),
+    check("evidencias_imagem_tamanho", sql`${tabela.imagemUrl} is null or char_length(${tabela.imagemUrl}) <= 400`),
     check("evidencias_fonte_tamanho", sql`${tabela.fonte} is null or char_length(${tabela.fonte}) between 1 and 300`),
     check("evidencias_motivo_tamanho", sql`${tabela.motivoRecusa} is null or char_length(${tabela.motivoRecusa}) between 1 and 300`),
     // Coerência: pendente não tem decisão; aceita/recusada têm decisor e data; motivo só em recusada.

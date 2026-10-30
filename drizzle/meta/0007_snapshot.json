@@ -1,0 +1,1795 @@
+{
+  "id": "e8076cc9-a8e9-4a5e-8b50-e7f37a486d43",
+  "prevId": "973e61e3-ea70-4206-80ba-692969fd140f",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.usuarios": {
+      "name": "usuarios",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "usuario": {
+          "name": "usuario",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "senha_hash": {
+          "name": "senha_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bio": {
+          "name": "bio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "avatar_url": {
+          "name": "avatar_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "banner_url": {
+          "name": "banner_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "papel": {
+          "name": "papel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'membro'"
+        },
+        "email_verificado_em": {
+          "name": "email_verificado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "demonstrativo": {
+          "name": "demonstrativo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "usuarios_usuario_unique": {
+          "name": "usuarios_usuario_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "usuario"
+          ]
+        },
+        "usuarios_email_unique": {
+          "name": "usuarios_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "usuarios_usuario_formato": {
+          "name": "usuarios_usuario_formato",
+          "value": "\"usuarios\".\"usuario\" ~ '^[a-z0-9_]{3,30}$'"
+        },
+        "usuarios_email_formato": {
+          "name": "usuarios_email_formato",
+          "value": "\"usuarios\".\"email\" = lower(\"usuarios\".\"email\") and \"usuarios\".\"email\" ~ '^[^[:space:]@]+@[^[:space:]@]+\\.[^[:space:]@]+$' and char_length(\"usuarios\".\"email\") <= 254"
+        },
+        "usuarios_nome_tamanho": {
+          "name": "usuarios_nome_tamanho",
+          "value": "char_length(\"usuarios\".\"nome\") between 1 and 60"
+        },
+        "usuarios_avatar_tamanho": {
+          "name": "usuarios_avatar_tamanho",
+          "value": "\"usuarios\".\"avatar_url\" is null or char_length(\"usuarios\".\"avatar_url\") <= 400"
+        },
+        "usuarios_banner_tamanho": {
+          "name": "usuarios_banner_tamanho",
+          "value": "\"usuarios\".\"banner_url\" is null or char_length(\"usuarios\".\"banner_url\") <= 400"
+        },
+        "usuarios_bio_tamanho": {
+          "name": "usuarios_bio_tamanho",
+          "value": "char_length(\"usuarios\".\"bio\") <= 240"
+        },
+        "usuarios_papel_valido": {
+          "name": "usuarios_papel_valido",
+          "value": "\"usuarios\".\"papel\" in ('membro', 'moderador', 'admin')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.sessoes": {
+      "name": "sessoes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "usuario_id": {
+          "name": "usuario_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "ultimo_uso_em": {
+          "name": "ultimo_uso_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "expira_em": {
+          "name": "expira_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expira_absoluta_em": {
+          "name": "expira_absoluta_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "revogada_em": {
+          "name": "revogada_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ip_hash": {
+          "name": "ip_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "agente": {
+          "name": "agente",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "sessoes_usuario_idx": {
+          "name": "sessoes_usuario_idx",
+          "columns": [
+            {
+              "expression": "usuario_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sessoes_expira_idx": {
+          "name": "sessoes_expira_idx",
+          "columns": [
+            {
+              "expression": "expira_em",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sessoes_usuario_id_usuarios_id_fk": {
+          "name": "sessoes_usuario_id_usuarios_id_fk",
+          "tableFrom": "sessoes",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "usuario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "sessoes_token_hash_unique": {
+          "name": "sessoes_token_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "token_hash"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.limites_taxa": {
+      "name": "limites_taxa",
+      "schema": "",
+      "columns": {
+        "chave": {
+          "name": "chave",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "janela_inicio": {
+          "name": "janela_inicio",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contagem": {
+          "name": "contagem",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tags": {
+      "name": "tags",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "rotulo": {
+          "name": "rotulo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.publicacao_tags": {
+      "name": "publicacao_tags",
+      "schema": "",
+      "columns": {
+        "publicacao_id": {
+          "name": "publicacao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tag_id": {
+          "name": "tag_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "publicacao_tags_tag_idx": {
+          "name": "publicacao_tags_tag_idx",
+          "columns": [
+            {
+              "expression": "tag_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "publicacao_tags_publicacao_id_publicacoes_id_fk": {
+          "name": "publicacao_tags_publicacao_id_publicacoes_id_fk",
+          "tableFrom": "publicacao_tags",
+          "tableTo": "publicacoes",
+          "columnsFrom": [
+            "publicacao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "publicacao_tags_tag_id_tags_id_fk": {
+          "name": "publicacao_tags_tag_id_tags_id_fk",
+          "tableFrom": "publicacao_tags",
+          "tableTo": "tags",
+          "columnsFrom": [
+            "tag_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "publicacao_tags_publicacao_id_tag_id_pk": {
+          "name": "publicacao_tags_publicacao_id_tag_id_pk",
+          "columns": [
+            "publicacao_id",
+            "tag_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.publicacao_termos": {
+      "name": "publicacao_termos",
+      "schema": "",
+      "columns": {
+        "publicacao_id": {
+          "name": "publicacao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ordem": {
+          "name": "ordem",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "termo": {
+          "name": "termo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "publicacao_termos_publicacao_id_publicacoes_id_fk": {
+          "name": "publicacao_termos_publicacao_id_publicacoes_id_fk",
+          "tableFrom": "publicacao_termos",
+          "tableTo": "publicacoes",
+          "columnsFrom": [
+            "publicacao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "publicacao_termos_publicacao_id_ordem_pk": {
+          "name": "publicacao_termos_publicacao_id_ordem_pk",
+          "columns": [
+            "publicacao_id",
+            "ordem"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "publicacao_termos_tamanho": {
+          "name": "publicacao_termos_tamanho",
+          "value": "char_length(\"publicacao_termos\".\"termo\") between 1 and 60"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.publicacoes": {
+      "name": "publicacoes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "titulo": {
+          "name": "titulo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "resumo": {
+          "name": "resumo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "corpo": {
+          "name": "corpo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "imagem_url": {
+          "name": "imagem_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "autor_id": {
+          "name": "autor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "(timezone('America/Sao_Paulo', now()))::date"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'publicado'"
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "publicacoes_ordem_idx": {
+          "name": "publicacoes_ordem_idx",
+          "columns": [
+            {
+              "expression": "data",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            },
+            {
+              "expression": "criado_em",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "publicacoes_autor_idx": {
+          "name": "publicacoes_autor_idx",
+          "columns": [
+            {
+              "expression": "autor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "publicacoes_tipo_idx": {
+          "name": "publicacoes_tipo_idx",
+          "columns": [
+            {
+              "expression": "tipo",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "publicacoes_autor_id_usuarios_id_fk": {
+          "name": "publicacoes_autor_id_usuarios_id_fk",
+          "tableFrom": "publicacoes",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "autor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "publicacoes_slug_unique": {
+          "name": "publicacoes_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "publicacoes_slug_formato": {
+          "name": "publicacoes_slug_formato",
+          "value": "\"publicacoes\".\"slug\" ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length(\"publicacoes\".\"slug\") <= 80"
+        },
+        "publicacoes_titulo_tamanho": {
+          "name": "publicacoes_titulo_tamanho",
+          "value": "char_length(\"publicacoes\".\"titulo\") between 3 and 120"
+        },
+        "publicacoes_resumo_tamanho": {
+          "name": "publicacoes_resumo_tamanho",
+          "value": "char_length(\"publicacoes\".\"resumo\") between 1 and 200"
+        },
+        "publicacoes_imagem_tamanho": {
+          "name": "publicacoes_imagem_tamanho",
+          "value": "\"publicacoes\".\"imagem_url\" is null or char_length(\"publicacoes\".\"imagem_url\") <= 400"
+        },
+        "publicacoes_corpo_tamanho": {
+          "name": "publicacoes_corpo_tamanho",
+          "value": "\"publicacoes\".\"corpo\" is null or char_length(\"publicacoes\".\"corpo\") <= 2000"
+        },
+        "publicacoes_tipo_valido": {
+          "name": "publicacoes_tipo_valido",
+          "value": "\"publicacoes\".\"tipo\" in ('teoria', 'investigacao')"
+        },
+        "publicacoes_status_valido": {
+          "name": "publicacoes_status_valido",
+          "value": "\"publicacoes\".\"status\" in ('publicado', 'oculto')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.comentarios": {
+      "name": "comentarios",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "publicacao_id": {
+          "name": "publicacao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "autor_id": {
+          "name": "autor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "texto": {
+          "name": "texto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "comentarios_publicacao_ordem_idx": {
+          "name": "comentarios_publicacao_ordem_idx",
+          "columns": [
+            {
+              "expression": "publicacao_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "criado_em",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "comentarios_autor_idx": {
+          "name": "comentarios_autor_idx",
+          "columns": [
+            {
+              "expression": "autor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "comentarios_publicacao_id_publicacoes_id_fk": {
+          "name": "comentarios_publicacao_id_publicacoes_id_fk",
+          "tableFrom": "comentarios",
+          "tableTo": "publicacoes",
+          "columnsFrom": [
+            "publicacao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "comentarios_autor_id_usuarios_id_fk": {
+          "name": "comentarios_autor_id_usuarios_id_fk",
+          "tableFrom": "comentarios",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "autor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "comentarios_texto_tamanho": {
+          "name": "comentarios_texto_tamanho",
+          "value": "char_length(\"comentarios\".\"texto\") between 1 and 2000"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.curtidas": {
+      "name": "curtidas",
+      "schema": "",
+      "columns": {
+        "publicacao_id": {
+          "name": "publicacao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "usuario_id": {
+          "name": "usuario_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "curtidas_usuario_idx": {
+          "name": "curtidas_usuario_idx",
+          "columns": [
+            {
+              "expression": "usuario_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "curtidas_publicacao_id_publicacoes_id_fk": {
+          "name": "curtidas_publicacao_id_publicacoes_id_fk",
+          "tableFrom": "curtidas",
+          "tableTo": "publicacoes",
+          "columnsFrom": [
+            "publicacao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "curtidas_usuario_id_usuarios_id_fk": {
+          "name": "curtidas_usuario_id_usuarios_id_fk",
+          "tableFrom": "curtidas",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "usuario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "curtidas_publicacao_id_usuario_id_pk": {
+          "name": "curtidas_publicacao_id_usuario_id_pk",
+          "columns": [
+            "publicacao_id",
+            "usuario_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.investigacao_historico": {
+      "name": "investigacao_historico",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "investigacao_id": {
+          "name": "investigacao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "autor_id": {
+          "name": "autor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "titulo": {
+          "name": "titulo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "resumo": {
+          "name": "resumo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "investigacao_historico_ordem_idx": {
+          "name": "investigacao_historico_ordem_idx",
+          "columns": [
+            {
+              "expression": "investigacao_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "criado_em",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "investigacao_historico_investigacao_id_investigacoes_id_fk": {
+          "name": "investigacao_historico_investigacao_id_investigacoes_id_fk",
+          "tableFrom": "investigacao_historico",
+          "tableTo": "investigacoes",
+          "columnsFrom": [
+            "investigacao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "investigacao_historico_autor_id_usuarios_id_fk": {
+          "name": "investigacao_historico_autor_id_usuarios_id_fk",
+          "tableFrom": "investigacao_historico",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "autor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "investigacao_historico_tipo_valido": {
+          "name": "investigacao_historico_tipo_valido",
+          "value": "\"investigacao_historico\".\"tipo\" in ('criada', 'teoria', 'estado', 'encerrada', 'evidencia', 'status')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.investigacao_tags": {
+      "name": "investigacao_tags",
+      "schema": "",
+      "columns": {
+        "investigacao_id": {
+          "name": "investigacao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tag_id": {
+          "name": "tag_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "investigacao_tags_tag_idx": {
+          "name": "investigacao_tags_tag_idx",
+          "columns": [
+            {
+              "expression": "tag_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "investigacao_tags_investigacao_id_investigacoes_id_fk": {
+          "name": "investigacao_tags_investigacao_id_investigacoes_id_fk",
+          "tableFrom": "investigacao_tags",
+          "tableTo": "investigacoes",
+          "columnsFrom": [
+            "investigacao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "investigacao_tags_tag_id_tags_id_fk": {
+          "name": "investigacao_tags_tag_id_tags_id_fk",
+          "tableFrom": "investigacao_tags",
+          "tableTo": "tags",
+          "columnsFrom": [
+            "tag_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "investigacao_tags_investigacao_id_tag_id_pk": {
+          "name": "investigacao_tags_investigacao_id_tag_id_pk",
+          "columns": [
+            "investigacao_id",
+            "tag_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.investigacoes": {
+      "name": "investigacoes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "titulo": {
+          "name": "titulo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "descricao": {
+          "name": "descricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "categoria": {
+          "name": "categoria",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'investigating'"
+        },
+        "estado": {
+          "name": "estado",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'em_andamento'"
+        },
+        "encerrada_pelo_autor": {
+          "name": "encerrada_pelo_autor",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "localizacao": {
+          "name": "localizacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "video_url": {
+          "name": "video_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "video_titulo": {
+          "name": "video_titulo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "imagem_url": {
+          "name": "imagem_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hipotese": {
+          "name": "hipotese",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pergunta_central": {
+          "name": "pergunta_central",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "argumentos_favoraveis": {
+          "name": "argumentos_favoraveis",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "fontes": {
+          "name": "fontes",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "autor_id": {
+          "name": "autor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "investigacoes_ordem_idx": {
+          "name": "investigacoes_ordem_idx",
+          "columns": [
+            {
+              "expression": "atualizado_em",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "investigacoes_autor_idx": {
+          "name": "investigacoes_autor_idx",
+          "columns": [
+            {
+              "expression": "autor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "investigacoes_categoria_idx": {
+          "name": "investigacoes_categoria_idx",
+          "columns": [
+            {
+              "expression": "categoria",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "investigacoes_autor_id_usuarios_id_fk": {
+          "name": "investigacoes_autor_id_usuarios_id_fk",
+          "tableFrom": "investigacoes",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "autor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "investigacoes_slug_unique": {
+          "name": "investigacoes_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "investigacoes_slug_formato": {
+          "name": "investigacoes_slug_formato",
+          "value": "\"investigacoes\".\"slug\" ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length(\"investigacoes\".\"slug\") <= 80"
+        },
+        "investigacoes_titulo_tamanho": {
+          "name": "investigacoes_titulo_tamanho",
+          "value": "char_length(\"investigacoes\".\"titulo\") between 3 and 120"
+        },
+        "investigacoes_descricao_tamanho": {
+          "name": "investigacoes_descricao_tamanho",
+          "value": "char_length(\"investigacoes\".\"descricao\") between 20 and 500"
+        },
+        "investigacoes_categoria_valida": {
+          "name": "investigacoes_categoria_valida",
+          "value": "\"investigacoes\".\"categoria\" in ('sighting', 'location', 'symbol', 'broadcast', 'phenomenon', 'community-discovery')"
+        },
+        "investigacoes_status_valido": {
+          "name": "investigacoes_status_valido",
+          "value": "\"investigacoes\".\"status\" in ('investigating', 'confirmed', 'debunked', 'classified', 'community')"
+        },
+        "investigacoes_estado_valido": {
+          "name": "investigacoes_estado_valido",
+          "value": "\"investigacoes\".\"estado\" in ('em_andamento', 'teoria_apoiada', 'contestada', 'inconclusiva')"
+        },
+        "investigacoes_localizacao_tamanho": {
+          "name": "investigacoes_localizacao_tamanho",
+          "value": "\"investigacoes\".\"localizacao\" is null or char_length(\"investigacoes\".\"localizacao\") between 1 and 80"
+        },
+        "investigacoes_imagem_tamanho": {
+          "name": "investigacoes_imagem_tamanho",
+          "value": "\"investigacoes\".\"imagem_url\" is null or char_length(\"investigacoes\".\"imagem_url\") <= 400"
+        },
+        "investigacoes_video_tamanho": {
+          "name": "investigacoes_video_tamanho",
+          "value": "(\"investigacoes\".\"video_url\" is null or char_length(\"investigacoes\".\"video_url\") <= 200) and (\"investigacoes\".\"video_titulo\" is null or char_length(\"investigacoes\".\"video_titulo\") between 1 and 120)"
+        },
+        "investigacoes_hipotese_tamanho": {
+          "name": "investigacoes_hipotese_tamanho",
+          "value": "char_length(\"investigacoes\".\"hipotese\") between 20 and 2000"
+        },
+        "investigacoes_pergunta_tamanho": {
+          "name": "investigacoes_pergunta_tamanho",
+          "value": "char_length(\"investigacoes\".\"pergunta_central\") between 5 and 300"
+        },
+        "investigacoes_listas_tamanho": {
+          "name": "investigacoes_listas_tamanho",
+          "value": "cardinality(\"investigacoes\".\"argumentos_favoraveis\") <= 10 and cardinality(\"investigacoes\".\"fontes\") <= 10"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.evidencias": {
+      "name": "evidencias",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "investigacao_id": {
+          "name": "investigacao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "autor_id": {
+          "name": "autor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "origem": {
+          "name": "origem",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "titulo": {
+          "name": "titulo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "descricao": {
+          "name": "descricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fonte": {
+          "name": "fonte",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "imagem_url": {
+          "name": "imagem_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pendente'"
+        },
+        "decidida_por_id": {
+          "name": "decidida_por_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "decidida_em": {
+          "name": "decidida_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motivo_recusa": {
+          "name": "motivo_recusa",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "relacionada_a_id": {
+          "name": "relacionada_a_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "evidencias_investigacao_ordem_idx": {
+          "name": "evidencias_investigacao_ordem_idx",
+          "columns": [
+            {
+              "expression": "investigacao_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "criado_em",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "evidencias_autor_idx": {
+          "name": "evidencias_autor_idx",
+          "columns": [
+            {
+              "expression": "autor_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "criado_em",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "evidencias_decisor_idx": {
+          "name": "evidencias_decisor_idx",
+          "columns": [
+            {
+              "expression": "decidida_por_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "evidencias_investigacao_id_investigacoes_id_fk": {
+          "name": "evidencias_investigacao_id_investigacoes_id_fk",
+          "tableFrom": "evidencias",
+          "tableTo": "investigacoes",
+          "columnsFrom": [
+            "investigacao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "evidencias_autor_id_usuarios_id_fk": {
+          "name": "evidencias_autor_id_usuarios_id_fk",
+          "tableFrom": "evidencias",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "autor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "evidencias_decidida_por_id_usuarios_id_fk": {
+          "name": "evidencias_decidida_por_id_usuarios_id_fk",
+          "tableFrom": "evidencias",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "decidida_por_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "evidencias_relacionada_mesma_investigacao_fk": {
+          "name": "evidencias_relacionada_mesma_investigacao_fk",
+          "tableFrom": "evidencias",
+          "tableTo": "evidencias",
+          "columnsFrom": [
+            "relacionada_a_id",
+            "investigacao_id"
+          ],
+          "columnsTo": [
+            "id",
+            "investigacao_id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "evidencias_id_investigacao_unique": {
+          "name": "evidencias_id_investigacao_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "investigacao_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "evidencias_origem_valida": {
+          "name": "evidencias_origem_valida",
+          "value": "\"evidencias\".\"origem\" in ('imagem_propria', 'imagem_terceiro', 'referencia_textual', 'origem_nao_verificada')"
+        },
+        "evidencias_status_valido": {
+          "name": "evidencias_status_valido",
+          "value": "\"evidencias\".\"status\" in ('pendente', 'aceita', 'recusada')"
+        },
+        "evidencias_titulo_tamanho": {
+          "name": "evidencias_titulo_tamanho",
+          "value": "char_length(\"evidencias\".\"titulo\") between 3 and 120"
+        },
+        "evidencias_descricao_tamanho": {
+          "name": "evidencias_descricao_tamanho",
+          "value": "char_length(\"evidencias\".\"descricao\") between 10 and 1000"
+        },
+        "evidencias_imagem_tamanho": {
+          "name": "evidencias_imagem_tamanho",
+          "value": "\"evidencias\".\"imagem_url\" is null or char_length(\"evidencias\".\"imagem_url\") <= 400"
+        },
+        "evidencias_fonte_tamanho": {
+          "name": "evidencias_fonte_tamanho",
+          "value": "\"evidencias\".\"fonte\" is null or char_length(\"evidencias\".\"fonte\") between 1 and 300"
+        },
+        "evidencias_motivo_tamanho": {
+          "name": "evidencias_motivo_tamanho",
+          "value": "\"evidencias\".\"motivo_recusa\" is null or char_length(\"evidencias\".\"motivo_recusa\") between 1 and 300"
+        },
+        "evidencias_decisao_coerente": {
+          "name": "evidencias_decisao_coerente",
+          "value": "(\"evidencias\".\"status\" = 'pendente' and \"evidencias\".\"decidida_por_id\" is null and \"evidencias\".\"decidida_em\" is null and \"evidencias\".\"motivo_recusa\" is null)\n        or (\"evidencias\".\"status\" = 'aceita' and \"evidencias\".\"decidida_por_id\" is not null and \"evidencias\".\"decidida_em\" is not null and \"evidencias\".\"motivo_recusa\" is null)\n        or (\"evidencias\".\"status\" = 'recusada' and \"evidencias\".\"decidida_por_id\" is not null and \"evidencias\".\"decidida_em\" is not null)"
+        },
+        "evidencias_sem_autorrelacionamento": {
+          "name": "evidencias_sem_autorrelacionamento",
+          "value": "\"evidencias\".\"relacionada_a_id\" is null or \"evidencias\".\"relacionada_a_id\" <> \"evidencias\".\"id\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.auditoria": {
+      "name": "auditoria",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ator_id": {
+          "name": "ator_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ator_rotulo": {
+          "name": "ator_rotulo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "acao": {
+          "name": "acao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "alvo_tipo": {
+          "name": "alvo_tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "alvo_id": {
+          "name": "alvo_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "antes": {
+          "name": "antes",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "depois": {
+          "name": "depois",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motivo": {
+          "name": "motivo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "auditoria_ordem_idx": {
+          "name": "auditoria_ordem_idx",
+          "columns": [
+            {
+              "expression": "criado_em",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "auditoria_alvo_idx": {
+          "name": "auditoria_alvo_idx",
+          "columns": [
+            {
+              "expression": "alvo_tipo",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "alvo_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "auditoria_acao_idx": {
+          "name": "auditoria_acao_idx",
+          "columns": [
+            {
+              "expression": "acao",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "auditoria_ator_idx": {
+          "name": "auditoria_ator_idx",
+          "columns": [
+            {
+              "expression": "ator_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "auditoria_ator_id_usuarios_id_fk": {
+          "name": "auditoria_ator_id_usuarios_id_fk",
+          "tableFrom": "auditoria",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "ator_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "auditoria_acao_valida": {
+          "name": "auditoria_acao_valida",
+          "value": "\"auditoria\".\"acao\" in ('investigacao.status', 'evidencia.aceitar', 'evidencia.recusar', 'usuario.papel', 'admin.bootstrap')"
+        },
+        "auditoria_alvo_valido": {
+          "name": "auditoria_alvo_valido",
+          "value": "\"auditoria\".\"alvo_tipo\" in ('investigacao', 'evidencia', 'usuario')"
+        },
+        "auditoria_ator_definido": {
+          "name": "auditoria_ator_definido",
+          "value": "\"auditoria\".\"ator_id\" is not null or \"auditoria\".\"ator_rotulo\" is not null"
+        },
+        "auditoria_motivo_tamanho": {
+          "name": "auditoria_motivo_tamanho",
+          "value": "\"auditoria\".\"motivo\" is null or char_length(\"auditoria\".\"motivo\") between 1 and 300"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

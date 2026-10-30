@@ -21,6 +21,8 @@ export const publicacoes = pgTable(
     resumo: text("resumo").notNull(),
     // Nulo nas publicações do seed, que só têm resumo editorial.
     corpo: text("corpo"),
+    // Imagem enviada pela pessoa ao criar (URL pública do Vercel Blob, ADR-043). Opcional.
+    imagemUrl: text("imagem_url"),
     tipo: text("tipo", { enum: TIPOS_PUBLICACAO }).notNull(),
     autorId: uuid("autor_id")
       .notNull()
@@ -36,6 +38,7 @@ export const publicacoes = pgTable(
     check("publicacoes_slug_formato", sql`${tabela.slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length(${tabela.slug}) <= 80`),
     check("publicacoes_titulo_tamanho", sql`char_length(${tabela.titulo}) between 3 and 120`),
     check("publicacoes_resumo_tamanho", sql`char_length(${tabela.resumo}) between 1 and 200`),
+    check("publicacoes_imagem_tamanho", sql`${tabela.imagemUrl} is null or char_length(${tabela.imagemUrl}) <= 400`),
     check("publicacoes_corpo_tamanho", sql`${tabela.corpo} is null or char_length(${tabela.corpo}) <= 2000`),
     check("publicacoes_tipo_valido", sql`${tabela.tipo} in ('teoria', 'investigacao')`),
     check("publicacoes_status_valido", sql`${tabela.status} in ('publicado', 'oculto')`),

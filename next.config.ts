@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Imagens enviadas pela pessoa ficam no Vercel Blob (ADR-043): só o host público do Blob, dentro de imagens/.
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com", pathname: "/imagens/**" }],
+  },
   compiler: {
     // Lets the SWC compiler add the displayName/SSR class-name support that
     // styled-components needs to produce stable markup between server and client.
