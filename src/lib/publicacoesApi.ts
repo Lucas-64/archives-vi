@@ -52,8 +52,8 @@ function lerComentario(v: unknown): ComentarioApi | null {
   return { id: c.id, texto: c.texto, autor: { nome: c.autor.nome, usuario: c.autor.usuario }, criadoEm: c.criadoEm };
 }
 
-export function criarPublicacaoNaApi(dados: { titulo: string; corpo: string }) {
-  return chamar("/api/v1/publicacoes", "POST", dados, ["titulo", "corpo"], (json) => {
+export function criarPublicacaoNaApi(dados: { titulo: string; corpo: string; imagem?: string }) {
+  return chamar("/api/v1/publicacoes", "POST", dados, ["titulo", "corpo", "imagem"], (json) => {
     const slug = (json as { slug?: unknown } | null)?.slug;
     return texto(slug) ? { slug } : null;
   });

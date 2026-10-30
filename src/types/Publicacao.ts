@@ -9,6 +9,8 @@ export interface Publicacao {
   resumo: string;
   // Texto completo. Presente quando vem da API; os dados antigos só têm o resumo.
   corpo?: string;
+  // Imagem enviada pela pessoa (URL pública do Vercel Blob, ADR-043). A imagem padrão é aplicada na leitura.
+  imagemUrl?: string;
   tipo: TipoPublicacao;
   autorId: string;
   data: string;

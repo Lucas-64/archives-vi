@@ -7,6 +7,8 @@ export const LIMITES_TEORIA = {
 export interface RascunhoTeoria {
   titulo: string;
   texto: string;
+  // URL devolvida pelo envio de imagem (Vercel Blob). Vazia: sem imagem.
+  imagem: string;
 }
 
 export type ErrosTeoria = Partial<Record<keyof RascunhoTeoria, string>>;

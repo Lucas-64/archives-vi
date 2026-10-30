@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { IDS_TAGS } from "../db/esquema/tags";
 import { TIPOS_PUBLICACAO } from "../db/esquema/publicacoes";
+import { esquemaUrlImagem } from "./imagem";
 
 // Limites do /criar do front (LIMITES_TEORIA), copiados aqui como fonte autoritativa.
 export const LIMITES_TEORIA = {
@@ -29,6 +30,8 @@ export const esquemaCriarPublicacao = z
       .min(LIMITES_TEORIA.corpo.minimo, `O texto precisa ter pelo menos ${LIMITES_TEORIA.corpo.minimo} caracteres.`)
       .max(LIMITES_TEORIA.corpo.maximo, `O texto pode ter no máximo ${LIMITES_TEORIA.corpo.maximo} caracteres.`)
       .refine((v) => !CONTROLE.test(v), "O texto contém caracteres inválidos."),
+    // Imagem opcional: URL pública do Vercel Blob devolvida pelo envio (ADR-043).
+    imagem: esquemaUrlImagem.optional(),
   })
   .strict();
 
@@ -74,6 +77,8 @@ export interface PublicacaoPublica {
   titulo: string;
   resumo: string;
   corpo: string | null;
+  // Endereço da imagem enviada (Vercel Blob). Nulo: sem imagem própria.
+  imagem: string | null;
   tipo: "teoria" | "investigacao";
   autor: { nome: string; usuario: string };
   data: string;

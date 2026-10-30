@@ -8,6 +8,7 @@ import { Card } from "../ui/Card";
 import { FormField } from "../ui/FormField";
 import { Input } from "../ui/Input";
 import { Textarea } from "../ui/Textarea";
+import { UploadImagem } from "../ui/UploadImagem";
 import { LIMITES_TEORIA, type ErrosTeoria, type RascunhoTeoria } from "./validarTeoria";
 
 export interface FormularioTeoriaProps {
@@ -64,6 +65,16 @@ export function FormularioTeoria({
             onChange={(event) => onAlterar("texto", event.target.value)}
           />
         </FormField>
+
+        <UploadImagem
+          rotulo="Imagem"
+          opcional
+          dica="JPEG, PNG ou WebP, até 5 MB. Aparece no card da teoria; sem imagem, usa-se uma imagem padrão."
+          proporcao="16 / 9"
+          valor={rascunho.imagem}
+          erro={erros.imagem}
+          onChange={(url) => onAlterar("imagem", url ?? "")}
+        />
 
         {mostrarResumoErro ? (
           <Alerta role="alert">Não foi possível enviar. Corrija os campos destacados.</Alerta>

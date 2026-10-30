@@ -18,7 +18,7 @@ describe("adaptadores API -> front", () => {
 
   it("publicação: autorId é o usuario, tags fora do catálogo são descartadas, nada é inventado", () => {
     const p = publicacaoParaFront({
-      id: "1", slug: "s", titulo: "T", resumo: "R", corpo: null, tipo: "teoria",
+      id: "1", slug: "s", titulo: "T", resumo: "R", corpo: null, imagem: null, tipo: "teoria",
       autor: { nome: "Ana", usuario: "ana_s" }, data: "2026-10-01",
       tags: ["ovnis-extraterrestres", "inexistente"], termos: ["x"], comentarios: 3, curtidas: 9, euCurti: true,
     });
@@ -30,7 +30,7 @@ describe("adaptadores API -> front", () => {
 
   it("publicação com corpo: o texto completo é preservado", () => {
     const p = publicacaoParaFront({
-      id: "1", slug: "s", titulo: "T", resumo: "R", corpo: "Texto completo", tipo: "teoria",
+      id: "1", slug: "s", titulo: "T", resumo: "R", corpo: "Texto completo", imagem: null, tipo: "teoria",
       autor: { nome: "Ana", usuario: "ana_s" }, data: "2026-10-01", tags: [], termos: [], comentarios: 0, curtidas: 0, euCurti: false,
     });
     expect(p.corpo).toBe("Texto completo");

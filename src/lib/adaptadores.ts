@@ -43,6 +43,7 @@ export function publicacaoParaFront(p: PublicacaoPublica): Publicacao {
     titulo: p.titulo,
     resumo: p.resumo,
     corpo: p.corpo ?? undefined,
+    imagemUrl: p.imagem ?? undefined,
     tipo: p.tipo,
     autorId: p.autor.usuario,
     data: p.data,
@@ -102,6 +103,7 @@ export function evidenciaParaFront(e: EvidenciaPublica): Evidencia {
     data: dia(e.data),
     fonte: e.fonte,
     temDiscussao: false,
+    ...(e.imagens[0] ? { imagemUrl: e.imagens[0].url } : {}),
     ...(e.relacionadaA ? { relacionadaA: e.relacionadaA } : {}),
     ...(e.origemComunidade ? { origemComunidade: e.origemComunidade } : {}),
   };

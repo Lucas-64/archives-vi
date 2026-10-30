@@ -39,6 +39,7 @@ const colunas = {
   titulo: publicacoes.titulo,
   resumo: publicacoes.resumo,
   corpo: publicacoes.corpo,
+  imagemUrl: publicacoes.imagemUrl,
   tipo: publicacoes.tipo,
   data: publicacoes.data,
   autorNome: usuarios.nome,
@@ -52,6 +53,7 @@ type LinhaPublicacao = {
   titulo: string;
   resumo: string;
   corpo: string | null;
+  imagemUrl: string | null;
   tipo: "teoria" | "investigacao";
   data: string;
   autorNome: string;
@@ -100,6 +102,7 @@ async function montar(db: Banco, linhas: LinhaPublicacao[], visitanteId?: string
     titulo: linha.titulo,
     resumo: linha.resumo,
     corpo: linha.corpo,
+    imagem: linha.imagemUrl,
     tipo: linha.tipo,
     autor: { nome: linha.autorNome, usuario: linha.autorUsuario },
     data: linha.data,
@@ -216,6 +219,7 @@ export async function criarPublicacao(
         titulo: entrada.titulo,
         resumo: resumoDoCorpo(entrada.corpo),
         corpo: entrada.corpo,
+        imagemUrl: entrada.imagem ?? null,
         tipo: "teoria",
         autorId: autor.id,
         data: diaLocal(agora),
@@ -231,6 +235,7 @@ export async function criarPublicacao(
     titulo: criada.titulo,
     resumo: criada.resumo,
     corpo: criada.corpo,
+    imagem: criada.imagemUrl,
     tipo: criada.tipo,
     autor: { nome: autor.nome, usuario: autor.usuario },
     data: criada.data,

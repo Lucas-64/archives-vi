@@ -22,7 +22,7 @@ import { temErros, validarTeoria, type ErrosTeoria, type RascunhoTeoria } from "
 export function CriarTeoria() {
   const router = useRouter();
   const { estado } = useSessao();
-  const [rascunho, setRascunho] = useState<RascunhoTeoria>({ titulo: "", texto: "" });
+  const [rascunho, setRascunho] = useState<RascunhoTeoria>({ titulo: "", texto: "", imagem: "" });
   const [tentouEnviar, setTentouEnviar] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [errosServidor, setErrosServidor] = useState<ErrosTeoria>({});
@@ -44,7 +44,11 @@ export function CriarTeoria() {
     if (existeErro) return;
 
     setEnviando(true);
-    const resultado = await criarPublicacaoNaApi({ titulo: rascunho.titulo.trim(), corpo: rascunho.texto.trim() });
+    const resultado = await criarPublicacaoNaApi({
+      titulo: rascunho.titulo.trim(),
+      corpo: rascunho.texto.trim(),
+      ...(rascunho.imagem ? { imagem: rascunho.imagem } : {}),
+    });
 
     if (resultado.ok) {
       // Mantém o estado "enviando" até a navegação, para não permitir um segundo envio.
@@ -52,7 +56,7 @@ export function CriarTeoria() {
       return;
     }
     setEnviando(false);
-    setErrosServidor({ titulo: resultado.campos.titulo, texto: resultado.campos.corpo });
+    setErrosServidor({ titulo: resultado.campos.titulo, texto: resultado.campos.corpo, imagem: resultado.campos.imagem });
     setErroGeral(resultado.semSessao ? "Sua sessão expirou. Entre novamente para publicar." : (resultado.erroGeral ?? null));
   }
 

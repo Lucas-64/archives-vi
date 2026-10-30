@@ -2,7 +2,7 @@
 
 // Variante dedicada do PublicationCard para a listagem de Teorias e investigações (ADR-042): mesmo conteúdo, com a
 // capa no mesmo formato do CaseCardClassico (280px ao lado no desktop, 16:9 no alto no celular). Publicações não
-// têm imagem própria: usam sempre a imagem padrão. O PublicationCard (Início, Explorar, perfil) não muda.
+// têm imagem própria só quando a pessoa enviou uma; sem ela, vale a imagem padrão. O PublicationCard (Início, Explorar, perfil) não muda.
 import Link from "next/link";
 import styled from "styled-components";
 
@@ -30,7 +30,7 @@ export function PublicationCardComCapa({ publicacao, autor, nivelTitulo = 2 }: P
   return (
     <Article>
       <Media>
-        <ImagemCapa sizes="(max-width: 767px) 100vw, (max-width: 1280px) 50vw, 33vw" />
+        <ImagemCapa src={publicacao.imagemUrl} sizes="(max-width: 767px) 100vw, (max-width: 1280px) 50vw, 33vw" />
       </Media>
 
       <Body>
