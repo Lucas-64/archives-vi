@@ -1,11 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useState, type FormEvent } from "react";
 import styled from "styled-components";
 
-import { ROUTES } from "../../constants/routes";
 import { decidirSugestaoNaApi, enviarEvidenciaNaApi, type OrigemEnviavel } from "../../lib/investigacoesApi";
 import { ROTULO_ORIGEM } from "../../lib/investigacaoEstado";
 import { formatarData } from "../../lib/formatacao";
@@ -17,6 +15,7 @@ import { Button } from "../ui/Button";
 import { FormField } from "../ui/FormField";
 import { Input } from "../ui/Input";
 import { Textarea } from "../ui/Textarea";
+import { CartaoEnviarEvidencia } from "../investigacao-classica/CartaoEnviarEvidencia";
 import { EvidenciaCard } from "./EvidenciaCard";
 
 export type SugestaoNaFila = SugestaoDaPessoa & { enviadaPor: Pessoa };
@@ -82,13 +81,9 @@ export function EvidenciasInvestigacao({
       )}
       {haMais ? <NotaLista>Mostrando as primeiras evidências aceitas.</NotaLista> : null}
 
-      {podeSugerir ? (
+      <CartaoEnviarEvidencia podeEnviar={podeSugerir}>
         <FormularioEvidencia slug={slug} />
-      ) : (
-        <Restrita>
-          Enviar evidências exige conta. <Link href={ROUTES.entrar}>Entre para continuar</Link>
-        </Restrita>
-      )}
+      </CartaoEnviarEvidencia>
 
       {minhasSugestoes.length > 0 ? <MinhasSugestoes itens={minhasSugestoes} /> : null}
 
@@ -154,8 +149,7 @@ function FormularioEvidencia({ slug }: { slug: string }) {
   }
 
   return (
-    <Painel aria-labelledby={`${id}-titulo`}>
-      <TituloPainel id={`${id}-titulo`}>Enviar evidência</TituloPainel>
+    <>
       <Aviso>
         Se você não é a pessoa responsável pela investigação, o envio vira uma sugestão pendente de análise. Envio de imagens
         ainda não está disponível.
@@ -193,7 +187,7 @@ function FormularioEvidencia({ slug }: { slug: string }) {
           </div>
         </Campos>
       </form>
-    </Painel>
+    </>
   );
 }
 
@@ -332,16 +326,6 @@ const Lista = styled.ol`
   flex-direction: column;
   gap: 16px;
   list-style: none;
-`;
-
-const Restrita = styled.p`
-  font-size: 13px;
-  color: ${({ theme }) => theme.colors.textSecondary};
-
-  a {
-    font-weight: 600;
-    color: ${({ theme }) => theme.colors.pink};
-  }
 `;
 
 const Painel = styled.section`

@@ -23,13 +23,13 @@ export function ExigeSessao({ children }: { children: ReactNode }) {
 }
 
 // Páginas de entrada e cadastro: quem já tem sessão vai para o início.
-export function RedirecionaSeAutenticado() {
+export function RedirecionaSeAutenticado({ destino = ROUTES.inicio }: { destino?: string }) {
   const router = useRouter();
   const { estado } = useSessao();
 
   useEffect(() => {
-    if (estado === "autenticado") router.replace(ROUTES.inicio);
-  }, [estado, router]);
+    if (estado === "autenticado") router.replace(destino);
+  }, [estado, router, destino]);
 
   return null;
 }

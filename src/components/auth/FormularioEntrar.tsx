@@ -19,7 +19,7 @@ interface ErrosEntrar {
 
 // Formulário de entrada. Valida o básico no navegador e autentica pela API; quem decide é o servidor.
 // Os valores são lidos do FormData no envio e não ficam em estado nem em armazenamento.
-export function FormularioEntrar() {
+export function FormularioEntrar({ destino = ROUTES.inicio }: { destino?: string }) {
   const router = useRouter();
   const { atualizar } = useSessao();
   const [erros, setErros] = useState<ErrosEntrar>({});
@@ -53,7 +53,7 @@ export function FormularioEntrar() {
     if (resultado.ok) {
       // Relê a sessão (o cabeçalho muda) e mantém o botão desabilitado até a navegação terminar.
       await atualizar();
-      router.replace(ROUTES.inicio);
+      router.replace(destino);
       return;
     }
     setEnviando(false);
