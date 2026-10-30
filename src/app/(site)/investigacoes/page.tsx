@@ -16,7 +16,7 @@ import { filtrarInvestigacoes, lerClassificacao } from "../../../lib/investigaca
 import { investigacoesDaListagem } from "../../../server/leitura/investigacoes";
 import { LIMITE_LISTA } from "../../../server/leitura/usuarios";
 
-// Listagem de investigações reais (API, via serviço no processo; ADR-029 e ADR-031).
+// Listagem de mistérios reais (tabela `investigacoes`; ADR-040) (API, via serviço no processo; ADR-029 e ADR-031).
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<{ classificacao?: string }>;
@@ -45,8 +45,8 @@ export default async function InvestigacoesPage({ searchParams }: { searchParams
       main={
         <>
           <PageHeader
-            titulo="Investigações"
-            descricao="Investigações organizadas em torno de evidências, conexões e discussão."
+            titulo="Mistérios"
+            descricao="Mistérios organizados em torno de evidências, conexões e discussão."
             acao={<LinkDeAcao href={ROUTES.criarMisterio}>Criar mistério</LinkDeAcao>}
           />
 
@@ -57,11 +57,11 @@ export default async function InvestigacoesPage({ searchParams }: { searchParams
           <PageBody>
             {visiveis.length === 0 ? (
               <EmptyState
-                titulo={classificacao ? "Nenhuma investigação nesta classificação" : "Nenhuma investigação por enquanto"}
+                titulo={classificacao ? "Nenhum mistério nesta classificação" : "Nenhum mistério por enquanto"}
                 descricao={
                   classificacao
-                    ? `Não há investigações em "${classificacao.rotulo}" no momento. Tente outra classificação.`
-                    : "Assim que novas investigações forem publicadas, elas aparecem aqui."
+                    ? `Não há mistérios em "${classificacao.rotulo}" no momento. Tente outra classificação.`
+                    : "Assim que novos mistérios forem publicados, eles aparecem aqui."
                 }
               />
             ) : (
@@ -74,8 +74,8 @@ export default async function InvestigacoesPage({ searchParams }: { searchParams
             {haMais ? (
               <NotaLista>
                 {classificacao
-                  ? `Filtrando entre as ${LIMITE_LISTA} investigações mais recentes.`
-                  : `Mostrando as ${LIMITE_LISTA} investigações mais recentes.`}
+                  ? `Filtrando entre os ${LIMITE_LISTA} mistérios mais recentes.`
+                  : `Mostrando os ${LIMITE_LISTA} mistérios mais recentes.`}
               </NotaLista>
             ) : null}
           </PageBody>

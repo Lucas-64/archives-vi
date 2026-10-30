@@ -179,7 +179,7 @@ export function contribuicoesRecentes(
 // para a rota continuar estática (ADR-014).
 export const ABAS_PERFIL = [
   { chave: "visao-geral", rotulo: "Visão geral", parametro: undefined },
-  { chave: "investigacoes", rotulo: "Investigações", parametro: "investigacoes" },
+  { chave: "investigacoes", rotulo: "Mistérios", parametro: "investigacoes" },
   { chave: "teorias-publicacoes", rotulo: "Teorias e publicações", parametro: "teorias-publicacoes" },
   { chave: "conquistas", rotulo: "Conquistas", parametro: "conquistas" },
 ] as const;

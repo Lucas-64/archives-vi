@@ -57,12 +57,12 @@ export default async function PerfilPage({ params }: { params: Params }) {
           <ProfileHeader criador={criador} />
           <IndicadoresContribuicao
             itens={[
-              { rotulo: "Investigações", valor: indicadores.investigacoes },
+              { rotulo: "Mistérios", valor: indicadores.investigacoes },
               { rotulo: "Publicações", valor: indicadores.publicacoes },
               { rotulo: "Evidências aceitas", valor: indicadores.evidenciasAceitas },
               { rotulo: "Comentários", valor: indicadores.comentarios },
             ]}
-            nota="Contagens de conteúdo público: publicações publicadas, investigações que a pessoa abriu, evidências aceitas e comentários em publicações."
+            nota="Contagens de conteúdo público: publicações publicadas, mistérios que a pessoa abriu, evidências aceitas e comentários em publicações."
           />
           {/* A aba é escolhida no cliente por ?aba=. */}
           <AbasPerfil

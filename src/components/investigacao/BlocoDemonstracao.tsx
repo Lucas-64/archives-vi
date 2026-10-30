@@ -14,7 +14,7 @@ export function BlocoDemonstracao({ children }: { children: ReactNode }) {
         <Badge size="small" variant="secondary" uppercase>
           Demonstração
         </Badge>
-        <Nota>Conteúdo de exemplo. Não são ações nem registros reais desta investigação.</Nota>
+        <Nota>Conteúdo de exemplo. Não são ações nem registros reais deste mistério.</Nota>
       </Selo>
       {children}
     </Bloco>

@@ -24,8 +24,8 @@ export function InvestigacoesPerfil({ criadas, participacoes }: InvestigacoesPer
         <Titulo id="perfil-investigacoes-criadas">Criadas por este membro</Titulo>
         {criadas.length === 0 ? (
           <EmptyState
-            titulo="Nenhuma investigação criada aqui"
-            descricao="Quando este membro abrir uma investigação, ela aparece aqui."
+            titulo="Nenhum mistério criado aqui"
+            descricao="Quando este membro abrir um mistério, ele aparece aqui."
           />
         ) : (
           <CardList>
@@ -42,7 +42,7 @@ export function InvestigacoesPerfil({ criadas, participacoes }: InvestigacoesPer
           {participacoes.length === 0 ? (
             <EmptyState
               titulo="Nenhuma participação aqui"
-              descricao="Este membro não aparece como participante de nenhuma investigação com detalhe publicado."
+              descricao="Este membro não aparece como participante de nenhum mistério com detalhe publicado."
             />
           ) : (
             <CardList>

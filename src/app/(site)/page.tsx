@@ -22,7 +22,7 @@ export default async function HomePage() {
   // Slides do banner depois da apresentação: as mesmas investigações recentes, sem critério de curadoria.
   const destaques: DestaqueHero[] = recentes.map((caso) => ({
     id: caso.id,
-    rotulo: "Investigação recente",
+    rotulo: "Mistério recente",
     titulo: caso.title,
     descricao: caso.description,
     href: ROUTES.investigacao(caso.id),

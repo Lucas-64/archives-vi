@@ -101,10 +101,10 @@ export function Hero({ destaques = [], autoplay = true, intervaloMs = 7000 }: He
                 <Tag>Archives VI</Tag>
                 <Titulo>A verdade está escondida em Leonida</Titulo>
                 <Descricao>
-                  Investigações, evidências e teorias da comunidade de GTA VI, reunidas em um só lugar.
+                  Mistérios, evidências e teorias da comunidade de GTA VI, reunidas em um só lugar.
                 </Descricao>
                 <Acoes>
-                  <Acao href={ROUTES.investigacoes}>Ver investigações</Acao>
+                  <Acao href={ROUTES.investigacoes}>Ver mistérios</Acao>
                   <Acao href={ROUTES.teorias}>Ler teorias</Acao>
                 </Acoes>
               </Content>

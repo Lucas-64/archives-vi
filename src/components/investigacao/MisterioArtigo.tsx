@@ -82,9 +82,9 @@ export function TransicaoComunidade({ slug }: { slug: string }) {
   return (
     <Transicao aria-labelledby="misterio-comunidade">
       <h2 id="misterio-comunidade">Continue na comunidade</h2>
-      <p>As teorias, as evidências e as discussões deste mistério ficam na área de teorias e investigações.</p>
+      <p>As teorias, as evidências e as discussões deste mistério ficam na área da comunidade.</p>
       <Botoes>
-        <BotaoPrimario href={ROUTES.comunidadeInvestigacao(slug)}>Explorar teorias e investigações</BotaoPrimario>
+        <BotaoPrimario href={ROUTES.comunidadeInvestigacao(slug)}>Explorar a comunidade do mistério</BotaoPrimario>
         <BotaoSecundario href={ROUTES.teorias}>Todas as teorias e investigações</BotaoSecundario>
       </Botoes>
     </Transicao>

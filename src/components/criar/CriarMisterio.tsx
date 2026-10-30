@@ -121,7 +121,7 @@ export function CriarMisterio() {
       }
       sidebar={
         <>
-          <SidebarBox titulo="Estado da investigação">
+          <SidebarBox titulo="Estado do mistério">
             <Badge size="small" variant={estadoInicial.variant} uppercase>
               {estadoInicial.rotulo}
             </Badge>

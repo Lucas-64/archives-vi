@@ -13,7 +13,7 @@ export const ID_CRIADOR_DEMONSTRATIVO = "analista-vb";
 export const ABAS_MEU_PERFIL = [
   { chave: "visao-geral", rotulo: "Visão geral" },
   { chave: "teorias-publicacoes", rotulo: "Teorias e publicações", parametro: "teorias-publicacoes" },
-  { chave: "investigacoes", rotulo: "Investigações", parametro: "investigacoes" },
+  { chave: "investigacoes", rotulo: "Mistérios", parametro: "investigacoes" },
   { chave: "evidencias", rotulo: "Evidências", parametro: "evidencias" },
   { chave: "atividade", rotulo: "Atividade", parametro: "atividade" },
 ] as const;

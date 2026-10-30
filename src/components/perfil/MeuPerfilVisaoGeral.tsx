@@ -68,10 +68,10 @@ export function MeuPerfilVisaoGeral({ publicacoes, investigacoes }: MeuPerfilVis
 
         <Cartao aria-labelledby="meu-perfil-investigacoes">
           <Cabecalho>
-            <Titulo id="meu-perfil-investigacoes">Minhas investigações</Titulo>
+            <Titulo id="meu-perfil-investigacoes">Meus mistérios</Titulo>
           </Cabecalho>
           {investigacoes.length === 0 ? (
-            <Vazio>Você ainda não abriu investigações.</Vazio>
+            <Vazio>Você ainda não abriu mistérios.</Vazio>
           ) : (
             <Resumo>
               {investigacoes.slice(0, LIMITE_RESUMO).map((caso) => (
@@ -85,7 +85,7 @@ export function MeuPerfilVisaoGeral({ publicacoes, investigacoes }: MeuPerfilVis
             </Resumo>
           )}
           <Rodape>
-            <IrParaAba aba="investigacoes">Ver todas as investigações</IrParaAba>
+            <IrParaAba aba="investigacoes">Ver todos os mistérios</IrParaAba>
           </Rodape>
         </Cartao>
       </Coluna>

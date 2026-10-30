@@ -48,7 +48,7 @@ export function Footer() {
             ARCHIVES <span>VI</span>
           </Brand>
           <Lema>A verdade está escondida em Leonida</Lema>
-          <Resumo>Investigações, evidências e teorias da comunidade de GTA VI, reunidas em um só lugar.</Resumo>
+          <Resumo>Mistérios, evidências e teorias da comunidade de GTA VI, reunidas em um só lugar.</Resumo>
         </Marca>
 
         <Colunas aria-label="Links do rodapé">

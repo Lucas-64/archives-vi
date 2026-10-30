@@ -28,7 +28,7 @@ export function InvestigacaoSidebar({ caso, detalhe, demonstracao }: Investigaca
 
   return (
     <>
-      <SidebarBox titulo="Estado da investigação">
+      <SidebarBox titulo="Estado do mistério">
         <Badge size="small" variant={estado.variant} uppercase>
           {estado.rotulo}
         </Badge>

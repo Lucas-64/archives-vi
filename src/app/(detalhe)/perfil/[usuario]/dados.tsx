@@ -45,7 +45,7 @@ async function Investigacoes({ usuario }: { usuario: string }) {
   return (
     <>
       <InvestigacoesPerfil criadas={itens.map(investigacaoParaCaso)} />
-      {haMais ? <NotaLista>Mostrando as {LIMITE_LISTA} investigações mais recentes.</NotaLista> : null}
+      {haMais ? <NotaLista>Mostrando os {LIMITE_LISTA} mistérios mais recentes.</NotaLista> : null}
     </>
   );
 }

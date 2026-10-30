@@ -16,14 +16,14 @@ export function InvestigacoesRecentes({ casos }: InvestigacoesRecentesProps) {
   return (
     <section aria-labelledby="recentes-titulo">
       <Header>
-        <Titulo id="recentes-titulo">Investigações recentes</Titulo>
+        <Titulo id="recentes-titulo">Mistérios recentes</Titulo>
         <Link href={ROUTES.investigacoes}>Ver todos</Link>
       </Header>
 
       {casos.length === 0 ? (
         <EmptyState
-          titulo="Nenhuma investigação por enquanto"
-          descricao="Assim que novas investigações forem abertas, elas aparecem aqui."
+          titulo="Nenhum mistério por enquanto"
+          descricao="Assim que novos mistérios forem abertos, eles aparecem aqui."
         />
       ) : (
         <Grid>

@@ -27,7 +27,7 @@ export default async function CriadoresPage() {
         {criadores.length === 0 ? (
           <EmptyState
             titulo="Nenhum criador por enquanto"
-            descricao="Os criadores aparecem aqui quando publicam uma teoria ou abrem uma investigação."
+            descricao="Os criadores aparecem aqui quando publicam uma teoria ou abrem um mistério."
           />
         ) : (
           <>
