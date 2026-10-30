@@ -1,0 +1,208 @@
+"use client";
+
+// Cópia dedicada da versão de components/investigacao/EvidenciaCard.tsx do commit 355b30ad (ADR-041). Usada só pelas páginas de investigação;
+// Mistérios continua usando o componente atual. Não editar para ajustar Mistérios.
+import Link from "next/link";
+import styled from "styled-components";
+
+import { formatarData } from "../../lib/formatacao";
+import { ROTULO_ORIGEM } from "../../lib/investigacaoEstado";
+import type { Evidencia, OrigemEvidencia } from "../../types/InvestigacaoDetalhe";
+import { Avatar } from "../ui/Avatar";
+import { Badge } from "../ui/Badge";
+import { AvaliacoesContagem } from "../investigacao/AvaliacoesContagem";
+import { GaleriaEvidencia } from "../investigacao/GaleriaEvidencia";
+import { MidiaPlaceholder } from "../investigacao/MidiaPlaceholder";
+
+export interface EvidenciaCardClassicoProps {
+  evidencia: Evidencia;
+  // True only when the author of the evidence is the investigation's creator.
+  // Acceptance of a community suggestion never sets this.
+  ehDoCriador: boolean;
+}
+
+// Evidence card. Origin, contradictions and support have the same visual weight: no ranking,
+// no percentage, no score.
+export function EvidenciaCardClassico({ evidencia, ehDoCriador }: EvidenciaCardClassicoProps) {
+  const { id, origem, titulo, descricao, autor, data, fonte, comentarios, avaliacoes } = evidencia;
+  const tituloId = `evidencia-${id}-titulo`;
+  const temImagens = (evidencia.imagens?.length ?? 0) > 0;
+
+  return (
+    <Card id={`evidencia-${id}`} aria-labelledby={tituloId}>
+      {temImagens ? (
+        <GaleriaEvidencia imagens={evidencia.imagens ?? []} identificador={`#${id}`} />
+      ) : (
+        <MidiaPlaceholder origem={origem} />
+      )}
+
+      <Corpo>
+        <Topo>
+          <Identificadores>
+            <Identificador>EVIDÊNCIA #{id}</Identificador>
+            {ehDoCriador ? (
+              <Badge size="small" variant="secondary">
+                Evidência do criador
+              </Badge>
+            ) : null}
+          </Identificadores>
+          <Badge size="small" variant={variantOrigem(origem)}>
+            {ROTULO_ORIGEM[origem]}
+          </Badge>
+        </Topo>
+
+        <Titulo id={tituloId}>{titulo}</Titulo>
+        <Descricao>{descricao}</Descricao>
+
+        <Meta>
+          <Avatar nome={autor.nome} size="small" />
+          <span>
+            {autor.nome} <Usuario>@{autor.usuario}</Usuario>
+          </span>
+          <time dateTime={data}>{formatarData(data)}</time>
+          {comentarios !== undefined ? <span>{comentarios} comentários</span> : null}
+        </Meta>
+
+        {evidencia.origemComunidade ? (
+          <Procedencia>
+            <span>
+              Evidência enviada por <Usuario>@{evidencia.origemComunidade.enviadaPor.usuario}</Usuario>
+            </span>
+            <span>
+              Status: Aceita pelo investigador <Usuario>@{evidencia.origemComunidade.aceitaPor.usuario}</Usuario>
+            </span>
+          </Procedencia>
+        ) : null}
+
+        <Fonte>
+          {fonte ? `Fonte: ${fonte}` : "Fonte pendente de verificação."}
+        </Fonte>
+
+        {avaliacoes ? <AvaliacoesContagem avaliacoes={avaliacoes} /> : null}
+
+        <Acoes>
+          {evidencia.temDiscussao ? (
+            <a href="#discussao">Ver discussão da evidência</a>
+          ) : (
+            <Desabilitado>Sem discussão publicada</Desabilitado>
+          )}
+          {evidencia.relacionadaA ? (
+            <a href={`#evidencia-${evidencia.relacionadaA}`}>
+              Relacionada à evidência #{evidencia.relacionadaA}
+            </a>
+          ) : null}
+          <Link href="/entrar">Entre para avaliar</Link>
+        </Acoes>
+      </Corpo>
+    </Card>
+  );
+}
+
+function variantOrigem(origem: OrigemEvidencia) {
+  return origem === "origem_nao_verificada" ? "warning" : "default";
+}
+
+const Card = styled.article`
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme }) => theme.colors.card};
+  scroll-margin-top: 96px;
+`;
+
+const Corpo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+`;
+
+const Topo = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+`;
+
+const Identificadores = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+`;
+
+const Identificador = styled.span`
+  font-family: ${({ theme }) => theme.fonts.mono};
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const Titulo = styled.h3`
+  font-family: ${({ theme }) => theme.fonts.display};
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-transform: uppercase;
+`;
+
+const Descricao = styled.p`
+  font-size: 14px;
+  line-height: 1.6;
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const Meta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const Procedencia = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-left: 2px solid ${({ theme }) => theme.colors.border};
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  overflow-wrap: anywhere;
+`;
+
+const Usuario = styled.span`
+  color: ${({ theme }) => theme.colors.pink};
+`;
+
+const Fonte = styled.p`
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const Acoes = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+
+  a {
+    color: ${({ theme }) => theme.colors.pink};
+  }
+
+  a:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.pink};
+    outline-offset: 2px;
+  }
+`;
+
+const Desabilitado = styled.span`
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
