@@ -11,6 +11,7 @@ import { Button } from "../ui/Button";
 import { FormField } from "../ui/FormField";
 import { Input } from "../ui/Input";
 import { Textarea } from "../ui/Textarea";
+import { UploadImagem } from "../ui/UploadImagem";
 import {
   CATEGORIAS_NOVA_INVESTIGACAO,
   LIMITES_NOVA_INVESTIGACAO as L,
@@ -33,7 +34,7 @@ const contagem = (valor: string, maximo: number) => `${valor.trim().length} de $
 
 // Formulário de criação de mistério (cria uma investigação pela API real), nas mesmas seções da página do
 // mistério: Identificação, Vídeo e Teoria; as evidências vêm depois da criação, na área da comunidade. Validação feita pelo pai; noValidate evita a
-// validação nativa. A imagem de capa é um endereço https (não há upload de arquivo: o projeto não tem storage). Não há
+// validação nativa. A imagem de capa é enviada pelo UploadImagem (Vercel Blob) e o formulário guarda só a URL devolvida. Não há
 // envio de evidências aqui.
 export function FormularioMisterio({ rascunho: r, erros, mostrarResumoErro, erroGeral, enviando, onAlterar, onEnviar }: FormularioMisterioProps) {
   const id = useId();
@@ -94,13 +95,15 @@ export function FormularioMisterio({ rascunho: r, erros, mostrarResumoErro, erro
           {erros.tags ? <ErroCampo role="alert">{erros.tags}</ErroCampo> : null}
         </Fieldset>
 
-        <FormField
-          label="Imagem de capa (opcional)"
-          hint="Endereço https de uma imagem. Sem imagem, a investigação usa uma imagem padrão."
-          error={erros.imagem}
-        >
-          <Input name="imagemUrl" type="url" autoComplete="off" value={r.imagemUrl} onChange={(e) => campo("imagemUrl", e.target.value, ["imagem"])} />
-        </FormField>
+        <UploadImagem
+          rotulo="Imagem de capa"
+          opcional
+          dica="JPEG, PNG ou WebP, até 5 MB. Sem imagem, a investigação usa uma imagem padrão."
+          proporcao="16 / 7"
+          valor={r.imagemUrl}
+          erro={erros.imagem}
+          onChange={(url) => campo("imagemUrl", url ?? "", ["imagem"])}
+        />
 
       </Secao>
 

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { CATEGORIAS_INVESTIGACAO, ESTADOS_INVESTIGACAO } from "../db/esquema/investigacoes";
 import { IDS_TAGS } from "../db/esquema/tags";
+import { esquemaUrlImagem } from "./imagem";
 import { extrairIdYoutube } from "../investigacoes/youtube";
 
 // Limites iniciais e provisórios (D-F), espelhados nos CHECKs da migração 0004.
@@ -54,19 +55,8 @@ const campos = {
       titulo: texto("o título do vídeo", 1, LIMITES_INVESTIGACAO.videoTitulo).optional(),
     })
     .strict(),
-  // Imagem de capa: endereço https (o arquivo não é guardado aqui; sem storage no projeto).
-  imagem: z
-    .string({ error: "Informe o endereço da imagem." })
-    .trim()
-    .max(LIMITES_INVESTIGACAO.imagemUrl, "O endereço da imagem é longo demais.")
-    .refine((v) => !CONTROLE.test(v), "O endereço da imagem contém caracteres inválidos.")
-    .refine((v) => {
-      try {
-        return new URL(v).protocol === "https:";
-      } catch {
-        return false;
-      }
-    }, "Use um endereço de imagem que comece com https://."),
+  // Imagem de capa: URL pública do Vercel Blob devolvida pelo envio (ADR-043); URL https livre é recusada.
+  imagem: esquemaUrlImagem,
   hipotese: texto("a hipótese", LIMITES_INVESTIGACAO.hipotese.minimo, LIMITES_INVESTIGACAO.hipotese.maximo),
   argumentosFavoraveis: lista("o argumento"),
   perguntaCentral: texto("a pergunta central", LIMITES_INVESTIGACAO.perguntaCentral.minimo, LIMITES_INVESTIGACAO.perguntaCentral.maximo),

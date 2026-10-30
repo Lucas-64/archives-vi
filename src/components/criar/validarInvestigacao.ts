@@ -1,3 +1,5 @@
+import { urlDeImagemPermitida } from "../../lib/urlImagem";
+
 // Validação local do formulário de investigação. Espelha os limites do contrato do servidor
 // (`LIMITES_INVESTIGACAO` em src/server/contracts/investigacoes.ts; o teste valida que continuam iguais).
 // É só conveniência: o servidor valida de novo e é quem decide.
@@ -66,14 +68,6 @@ function faixa(valor: string, rotulo: string, minimo: number, maximo: number): s
   return undefined;
 }
 
-function enderecoHttps(valor: string): boolean {
-  try {
-    return new URL(valor).protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
 export function validarInvestigacao(r: RascunhoInvestigacao): ErrosInvestigacao {
   const L = LIMITES_NOVA_INVESTIGACAO;
   const erros: ErrosInvestigacao = {};
@@ -97,11 +91,11 @@ export function validarInvestigacao(r: RascunhoInvestigacao): ErrosInvestigacao 
     }
   }
 
-  // Imagem de capa (opcional): endereço https. O servidor valida de novo.
+  // Imagem de capa (opcional): URL devolvida pelo envio (Vercel Blob). O servidor valida de novo.
   const imagem = r.imagemUrl.trim();
   if (imagem !== "") {
     if (imagem.length > L.imagemUrl) erros.imagem = "O endereço da imagem é longo demais.";
-    else if (!enderecoHttps(imagem)) erros.imagem = "Use um endereço de imagem que comece com https://.";
+    else if (!urlDeImagemPermitida(imagem)) erros.imagem = "Envie a imagem pelo campo de upload.";
   }
 
   marcar("teoria.hipotese", faixa(r.hipotese, "a hipótese", L.hipotese.minimo, L.hipotese.maximo));

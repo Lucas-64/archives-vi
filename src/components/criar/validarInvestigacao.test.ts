@@ -67,18 +67,21 @@ describe("validarInvestigacao", () => {
     expect(erros["video.url"]).toBe("Informe o link do vídeo.");
   });
 
-  it("imagem de capa: opcional, só https; vazia não é enviada e a válida passa no esquema do servidor", () => {
+  it("imagem de capa: opcional, só a URL do Vercel Blob (devolvida pelo envio); URL https livre é recusada", () => {
+    const blob = "https://abc123.public.blob.vercel-storage.com/imagens/0f6c3a2e-1111-4222-8333-444455556666.jpg";
     expect(montarEntrada(valido)).not.toHaveProperty("imagem");
-    expect(validarInvestigacao({ ...valido, imagemUrl: "http://exemplo.com/a.jpg" }).imagem).toBeDefined();
+    expect(validarInvestigacao({ ...valido, imagemUrl: "https://exemplo.com/a.jpg" }).imagem).toBeDefined();
+    expect(validarInvestigacao({ ...valido, imagemUrl: "http://abc123.public.blob.vercel-storage.com/imagens/a.jpg" }).imagem).toBeDefined();
     expect(validarInvestigacao({ ...valido, imagemUrl: "isso nao e url" }).imagem).toBeDefined();
-    expect(validarInvestigacao({ ...valido, imagemUrl: `https://exemplo.com/${"a".repeat(400)}` }).imagem).toBeDefined();
+    expect(validarInvestigacao({ ...valido, imagemUrl: `${blob}${"a".repeat(400)}` }).imagem).toBeDefined();
 
-    const comImagem = { ...valido, imagemUrl: " https://exemplo.com/capa.jpg " };
+    const comImagem = { ...valido, imagemUrl: ` ${blob} ` };
     expect(validarInvestigacao(comImagem)).toEqual({});
     const corpo = montarEntrada(comImagem);
-    expect(corpo.imagem).toBe("https://exemplo.com/capa.jpg");
+    expect(corpo.imagem).toBe(blob);
     expect(esquemaCriarInvestigacao.safeParse(corpo).success).toBe(true);
-    expect(esquemaCriarInvestigacao.safeParse({ ...corpo, imagem: "javascript:alert(1)" }).success).toBe(false);
-    expect(esquemaCriarInvestigacao.safeParse({ ...corpo, imagem: "http://exemplo.com/a.jpg" }).success).toBe(false);
+    for (const ruim of ["javascript:alert(1)", "http://abc123.public.blob.vercel-storage.com/imagens/a.jpg", "https://exemplo.com/a.jpg", "https://abc123.public.blob.vercel-storage.com/outra/a.jpg"]) {
+      expect(esquemaCriarInvestigacao.safeParse({ ...corpo, imagem: ruim }).success).toBe(false);
+    }
   });
 });
