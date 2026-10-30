@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import { useState } from "react";
 import styled from "styled-components";
 
 import { formatarData } from "../../lib/formatacao";
@@ -15,11 +17,12 @@ export interface EvidenciaCardProps {
   ehDoCriador: boolean;
 }
 
-// Evidência aceita, como a API a entrega: sem imagens, avaliações nem discussão (não existem na API).
-// Nenhuma pontuação, porcentagem ou ranking.
+// Evidência aceita, como a API a entrega: com a imagem enviada, quando há (proporção fixa), e sem avaliações nem
+// discussão (não existem na API). Nenhuma pontuação, porcentagem ou ranking.
 export function EvidenciaCard({ evidencia, ehDoCriador }: EvidenciaCardProps) {
   const { id, origem, titulo, descricao, autor, data, fonte } = evidencia;
   const tituloId = `evidencia-${id}-titulo`;
+  const [imagemFalhou, setImagemFalhou] = useState(false);
 
   return (
     <Card id={`evidencia-${id}`} aria-labelledby={tituloId}>
@@ -40,6 +43,19 @@ export function EvidenciaCard({ evidencia, ehDoCriador }: EvidenciaCardProps) {
 
         <Titulo id={tituloId}>{titulo}</Titulo>
         <Descricao>{descricao}</Descricao>
+
+        {evidencia.imagemUrl && !imagemFalhou ? (
+          <Imagem>
+            <Image
+              src={evidencia.imagemUrl}
+              alt={`Imagem enviada com a evidência: ${titulo}`}
+              fill
+              sizes="(max-width: 767px) 100vw, 560px"
+              onError={() => setImagemFalhou(true)}
+              style={{ objectFit: "cover" }}
+            />
+          </Imagem>
+        ) : null}
 
         <Meta>
           <Avatar nome={autor.nome} size="small" />
@@ -177,4 +193,15 @@ const Acoes = styled.div`
     outline: 2px solid ${({ theme }) => theme.colors.pink};
     outline-offset: 2px;
   }
+`;
+
+const Imagem = styled.div`
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme }) => theme.colors.backgroundSecondary};
 `;

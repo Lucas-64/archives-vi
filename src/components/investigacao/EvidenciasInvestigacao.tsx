@@ -15,6 +15,7 @@ import { Button } from "../ui/Button";
 import { FormField } from "../ui/FormField";
 import { Input } from "../ui/Input";
 import { Textarea } from "../ui/Textarea";
+import { UploadImagem } from "../ui/UploadImagem";
 import { CartaoEnviarEvidencia } from "../investigacao-classica/CartaoEnviarEvidencia";
 import { EvidenciaCard } from "./EvidenciaCard";
 
@@ -99,6 +100,7 @@ function FormularioEvidencia({ slug }: { slug: string }) {
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
   const [fonte, setFonte] = useState("");
+  const [imagem, setImagem] = useState<string | null>(null);
   const [erros, setErros] = useState<Record<string, string>>({});
   const [erroGeral, setErroGeral] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState<string | null>(null);
@@ -129,6 +131,7 @@ function FormularioEvidencia({ slug }: { slug: string }) {
       titulo: titulo.trim(),
       descricao: descricao.trim(),
       ...(fonte.trim() ? { fonte: fonte.trim() } : {}),
+      ...(imagem ? { imagem } : {}),
     });
     setEnviando(false);
 
@@ -136,6 +139,7 @@ function FormularioEvidencia({ slug }: { slug: string }) {
       setTitulo("");
       setDescricao("");
       setFonte("");
+      setImagem(null);
       setSucesso(
         resultado.status === "aceita"
           ? "Evidência publicada na lista desta investigação."
@@ -144,21 +148,20 @@ function FormularioEvidencia({ slug }: { slug: string }) {
       router.refresh();
       return;
     }
-    setErros({ origem: resultado.campos.origem ?? "", titulo: resultado.campos.titulo ?? "", descricao: resultado.campos.descricao ?? "", fonte: resultado.campos.fonte ?? "" });
+    setErros({ origem: resultado.campos.origem ?? "", titulo: resultado.campos.titulo ?? "", descricao: resultado.campos.descricao ?? "", fonte: resultado.campos.fonte ?? "", imagem: resultado.campos.imagem ?? "" });
     setErroGeral(resultado.semSessao ? "Sua sessão expirou. Entre novamente para enviar." : (resultado.erroGeral ?? null));
   }
 
   return (
     <>
       <Aviso>
-        Se você não é a pessoa responsável pela investigação, o envio vira uma sugestão pendente de análise. Envio de imagens
-        ainda não está disponível.
+        Se você não é a pessoa responsável pela investigação, o envio vira uma sugestão pendente de análise.
       </Aviso>
       <form onSubmit={enviar} noValidate aria-label="Enviar evidência">
         <Campos>
           <Fieldset>
             <legend>Origem</legend>
-            {(["referencia_textual", "origem_nao_verificada"] as const).map((valor) => (
+            {(imagem ? (["imagem_propria", "imagem_terceiro"] as const) : (["referencia_textual", "origem_nao_verificada"] as const)).map((valor) => (
               <label key={valor}>
                 <input type="radio" name={`${id}-origem`} checked={origem === valor} onChange={() => setOrigem(valor)} />{" "}
                 {ROTULO_ORIGEM[valor]}
@@ -176,6 +179,18 @@ function FormularioEvidencia({ slug }: { slug: string }) {
           <FormField label="Fonte (opcional)" error={erros.fonte || undefined}>
             <Input name="fonte" autoComplete="off" value={fonte} onChange={(e) => setFonte(e.target.value)} />
           </FormField>
+          <UploadImagem
+            rotulo="Imagem"
+            opcional
+            dica="JPEG, PNG ou WebP, até 5 MB. Ao anexar uma imagem, informe se ela é sua ou de terceiro."
+            proporcao="16 / 9"
+            valor={imagem}
+            erro={erros.imagem || undefined}
+            onChange={(url) => {
+              setImagem(url);
+              setOrigem(url ? "imagem_propria" : "referencia_textual");
+            }}
+          />
 
           {erroGeral ? <Erro role="alert">{erroGeral}</Erro> : null}
           {sucesso ? <Sucesso role="status">{sucesso}</Sucesso> : null}

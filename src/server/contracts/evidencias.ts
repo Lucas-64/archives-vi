@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { ORIGENS_EVIDENCIA, STATUS_EVIDENCIA } from "../db/esquema/evidencias";
+import { esquemaUrlImagem } from "./imagem";
 import { texto } from "./investigacoes";
 
 // Espelham os CHECKs da migração 0005. Provisórios (D-P) quanto a limites de envio.
@@ -11,13 +12,15 @@ export const LIMITES_EVIDENCIA = {
   motivo: { maximo: 300 },
 } as const;
 
-// Estrito: `status`, `autor`, `imagemArquivoIds`, `imagens` e qualquer outro campo dão 422 (D-G).
+// Estrito: `status`, `autor`, `imagens` e qualquer outro campo dão 422 (D-G). `imagem` é opcional: só a URL pública do
+// Vercel Blob devolvida pelo envio (ADR-043).
 export const esquemaCriarEvidencia = z
   .object({
     origem: z.enum(ORIGENS_EVIDENCIA, { error: "Origem inválida." }),
     titulo: texto("o título", LIMITES_EVIDENCIA.titulo.minimo, LIMITES_EVIDENCIA.titulo.maximo),
     descricao: texto("a descrição", LIMITES_EVIDENCIA.descricao.minimo, LIMITES_EVIDENCIA.descricao.maximo),
     fonte: texto("a fonte", 1, LIMITES_EVIDENCIA.fonte.maximo).optional(),
+    imagem: esquemaUrlImagem.optional(),
     relacionadaA: z.uuid({ error: "Identificador de evidência inválido." }).optional(),
   })
   .strict();
@@ -48,7 +51,8 @@ export interface EvidenciaPublica {
   autor: Pessoa;
   data: string;
   fonte: string | null;
-  imagens: [];
+  // Zero ou uma imagem (URL pública do Blob).
+  imagens: { url: string }[];
   relacionadaA?: string;
   origemComunidade?: { enviadaPor: Pessoa; aceitaPor: Pessoa };
 }

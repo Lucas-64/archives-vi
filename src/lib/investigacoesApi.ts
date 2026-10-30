@@ -2,13 +2,15 @@
 // registro gravado. Quem pode enviar, aceitar ou recusar é decidido pelo servidor.
 import { chamar, texto } from "./publicacoesApi";
 
-export type OrigemEnviavel = "referencia_textual" | "origem_nao_verificada";
+export type OrigemEnviavel = "referencia_textual" | "origem_nao_verificada" | "imagem_propria" | "imagem_terceiro";
 
 export interface EntradaEvidencia {
   origem: OrigemEnviavel;
   titulo: string;
   descricao: string;
   fonte?: string;
+  // URL devolvida pelo envio de imagem (UploadImagem). Opcional.
+  imagem?: string;
 }
 
 // `aceita`: o responsável publicou a própria evidência. `pendente`: a sugestão aguarda análise.
@@ -17,7 +19,7 @@ export function enviarEvidenciaNaApi(slug: string, dados: EntradaEvidencia) {
     `/api/v1/investigacoes/${encodeURIComponent(slug)}/evidencias`,
     "POST",
     dados,
-    ["origem", "titulo", "descricao", "fonte"],
+    ["origem", "titulo", "descricao", "fonte", "imagem"],
     (json) => {
       const e = json as { id?: unknown; status?: unknown } | null;
       return texto(e?.id) && (e.status === "aceita" || e.status === "pendente") ? { status: e.status as "aceita" | "pendente" } : null;

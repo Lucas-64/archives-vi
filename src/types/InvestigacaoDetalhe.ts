@@ -67,6 +67,8 @@ export interface Evidencia {
   relacionadaA?: string;
   temDiscussao: boolean;
   imagens?: ImagemEvidencia[];
+  // Imagem enviada pela pessoa (URL pública do Vercel Blob, ADR-043). Só as evidências do banco têm.
+  imagemUrl?: string;
   // Presente quando a evidência veio de uma sugestão aceita. A aprovação não muda a autoria.
   origemComunidade?: { enviadaPor: Pessoa; aceitaPor: Pessoa };
 }

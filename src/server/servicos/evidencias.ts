@@ -83,7 +83,7 @@ function publicaDe(l: Linha): EvidenciaPublica {
     autor: enviadaPor,
     data: new Date(l.criadoEmTexto).toISOString(),
     fonte: e.fonte,
-    imagens: [],
+    imagens: e.imagemUrl ? [{ url: e.imagemUrl }] : [],
     ...(e.relacionadaAId ? { relacionadaA: e.relacionadaAId } : {}),
     // Só quando outra pessoa aceitou: a autoria original nunca muda.
     ...(e.status === "aceita" && aceitaPor && e.decididaPorId !== e.autorId ? { origemComunidade: { enviadaPor, aceitaPor } } : {}),
@@ -192,6 +192,7 @@ export async function criarEvidencia(
         titulo: entrada.titulo,
         descricao: entrada.descricao,
         fonte: entrada.fonte ?? null,
+        imagemUrl: entrada.imagem ?? null,
         relacionadaAId: entrada.relacionadaA ?? null,
         status: doResponsavel ? "aceita" : "pendente",
         decididaPorId: doResponsavel ? usuario.id : null,
