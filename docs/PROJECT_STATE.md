@@ -49,8 +49,8 @@ Iniciado antes da validação do front por decisão registrada no ADR-022, sem a
 **Rotas implementadas** (grupo `(site)`):
 
 - `/`: Home (Hero em destaque, Explorar, Mistérios em alta, sidebar).
-- `/publicacoes`: dois grupos reais, Investigações e Publicações (ADR-039), sem filtro de tipo (`?tipo=` ignorado), com filtro de tema, botão Mostrar/Ocultar filtros e sidebar demonstrativa.
-- `/publicacoes/investigacao/[slug]` (grupo `(detalhe)`, dinâmica): área da comunidade com teoria, evidências aceitas, envio e acompanhamento de sugestões, fila de análise (responsável e moderação) e histórico, tudo real. Discussão, localização e síntese voltam como exemplo rotulado ou estado vazio (ADR-039). 404 real. A página editorial continua em `/investigacoes/[slug]` (ADR-020).
+- `/publicacoes`: layout do backup (ADR-041): abas Todas, Teorias e Investigações, filtro de tema, grupos Investigações e Publicações e sidebar de fórum e atualizações, com dados reais.
+- `/publicacoes/investigacao/[slug]` (grupo `(detalhe)`, dinâmica): área da comunidade com teoria, evidências aceitas, envio e acompanhamento de sugestões, fila de análise (responsável e moderação) e histórico, tudo real. Slugs com conteúdo no mock (ex.: simbolos-vice-city) mostram a página idêntica à do backup; os do banco seguem com exemplo rotulado ou estado vazio (ADR-039/041). 404 real. A página editorial continua em `/investigacoes/[slug]` (ADR-020).
 - `/publicacao/[slug]` (grupo `(detalhe)`, dinâmica): texto completo, curtir e comentários reais, autor e relacionadas. 404 real; abre publicações criadas depois do build.
 - `/investigacoes`: listagem real (Etapa I, Fatia 4), com abas Todas, Em andamento e Resolvidas (aplicadas sobre as 50 mais recentes), sem sidebar.
 - `/investigacoes/[slug]` (grupo `(detalhe)`, dinâmica): página editorial do mistério com dados reais (teoria, vídeo, estado, autor), Fotografias (exemplo rotulado ou estado vazio) e Acompanhar desabilitado (ADR-039). 404 real.
