@@ -11,6 +11,7 @@ export const STATUS_POR_CODIGO = {
   validacao: 422,
   limite_excedido: 429,
   erro_interno: 500,
+  servico_indisponivel: 503,
 } as const;
 
 export type CodigoErro = keyof typeof STATUS_POR_CODIGO;
@@ -27,6 +28,7 @@ export const MENSAGEM_PADRAO: Record<CodigoErro, string> = {
   validacao: "Revise os campos destacados.",
   limite_excedido: "Muitas requisições. Tente novamente em instantes.",
   erro_interno: "Algo deu errado. Tente novamente.",
+  servico_indisponivel: "Serviço indisponível no momento.",
 };
 
 export interface OpcoesErroApi {

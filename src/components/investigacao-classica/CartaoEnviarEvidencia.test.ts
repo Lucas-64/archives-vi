@@ -1,4 +1,4 @@
-import { createElement } from "react";
+import { createElement, type ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ThemeProvider } from "styled-components";
 import { describe, expect, it, vi } from "vitest";
@@ -11,7 +11,7 @@ vi.mock("next/navigation", () => ({ usePathname: () => "/publicacoes/investigaca
 function renderizar(podeEnviar: boolean) {
   const formulario = createElement("form", { "aria-label": "Formulario de teste" }, "campos do formulario");
   return renderToStaticMarkup(
-    createElement(ThemeProvider, { theme }, createElement(CartaoEnviarEvidencia, { podeEnviar }, formulario)),
+    createElement(ThemeProvider, { theme }, createElement(CartaoEnviarEvidencia, { podeEnviar } as ComponentProps<typeof CartaoEnviarEvidencia>, formulario)),
   );
 }
 
