@@ -8,20 +8,23 @@ import {
   ENCERRADA_PELO_AUTOR,
   ESTADO_INVESTIGACAO,
 } from "../../lib/investigacaoEstado";
-import type { Case } from "../../types/Case";
+import type { CasoDeCard } from "../../types/Case";
 import type { InvestigacaoDetalhe } from "../../types/InvestigacaoDetalhe";
 import { Avatar } from "../ui/Avatar";
 import { Badge } from "../ui/Badge";
 import { SidebarBox } from "../sidebar/SidebarBox";
+import { SemDados } from "../investigacao/BlocoDemonstracao";
 
 export interface InvestigacaoSidebarClassicaProps {
-  caso: Case;
+  caso: CasoDeCard;
   detalhe: InvestigacaoDetalhe;
+  // Investigação do banco: atividade recente e participantes não têm fonte real (estado vazio rotulado).
+  semFonte?: boolean;
 }
 
 // Investigation sidebar: state, summary, recent activity and participants.
 // It replaces the home sidebar on this page and uses the same SidebarBox.
-export function InvestigacaoSidebarClassica({ caso, detalhe }: InvestigacaoSidebarClassicaProps) {
+export function InvestigacaoSidebarClassica({ caso, detalhe, semFonte = false }: InvestigacaoSidebarClassicaProps) {
   const estado = ESTADO_INVESTIGACAO[detalhe.estado];
 
   return (
@@ -47,28 +50,40 @@ export function InvestigacaoSidebarClassica({ caso, detalhe }: InvestigacaoSideb
       </SidebarBox>
 
       <SidebarBox titulo="Atividade recente">
-        <Nota>Itens demonstrativos, não ações reais de usuários.</Nota>
-        <Lista>
-          {detalhe.atividadeRecente.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </Lista>
+        {semFonte ? (
+          <SemDados />
+        ) : (
+          <>
+            <Nota>Itens demonstrativos, não ações reais de usuários.</Nota>
+            <Lista>
+              {detalhe.atividadeRecente.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </Lista>
+          </>
+        )}
       </SidebarBox>
 
       <SidebarBox titulo="Participantes">
-        <Nota>
-          {detalhe.contagens.participantes} participantes. Lista parcial demonstrativa.
-        </Nota>
-        <Participantes>
-          {detalhe.participantes.map((pessoa) => (
-            <li key={pessoa.usuario}>
-              <Avatar nome={pessoa.nome} size="small" />
-              <span>
-                {pessoa.nome} <Usuario>@{pessoa.usuario}</Usuario>
-              </span>
-            </li>
-          ))}
-        </Participantes>
+        {semFonte ? (
+          <SemDados />
+        ) : (
+          <>
+            <Nota>
+              {detalhe.contagens.participantes} participantes. Lista parcial demonstrativa.
+            </Nota>
+            <Participantes>
+              {detalhe.participantes.map((pessoa) => (
+                <li key={pessoa.usuario}>
+                  <Avatar nome={pessoa.nome} size="small" />
+                  <span>
+                    {pessoa.nome} <Usuario>@{pessoa.usuario}</Usuario>
+                  </span>
+                </li>
+              ))}
+            </Participantes>
+          </>
+        )}
       </SidebarBox>
     </>
   );

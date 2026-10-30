@@ -65,6 +65,7 @@ export function investigacaoParaCaso(i: InvestigacaoResumo): CasoDeCard {
     updatedAt: i.atualizadoEm.slice(0, 10),
     tags: tagsDoCatalogo(i.tags),
     video: i.video,
+    capa: i.imagem ?? undefined,
   };
 }
 

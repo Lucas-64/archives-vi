@@ -15,7 +15,9 @@ export type CaseCategory =
 
 // Investigação como o card a mostra. Investigações vindas da API não têm imagem (sem upload), e as imagens de
 // seção nunca entram em conteúdo de usuário: sem `image`, o card mostra um bloco neutro.
-export type CasoDeCard = Omit<Case, "image"> & { image?: Case["image"] };
+// `capa` é o endereço da imagem de capa enviada pela pessoa (investigações da API); só as páginas de investigação a
+// usam (com a imagem padrão quando vazia, ADR-042). Mistérios não lê este campo.
+export type CasoDeCard = Omit<Case, "image"> & { image?: Case["image"]; capa?: string };
 
 export interface Case {
   id: string;

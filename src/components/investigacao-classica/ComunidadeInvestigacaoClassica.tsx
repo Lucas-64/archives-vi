@@ -3,15 +3,19 @@
 // Cópia dedicada da versão de components/investigacao/ComunidadeInvestigacao.tsx do commit 355b30ad (ADR-041). Usada só pelas páginas de investigação;
 // Mistérios continua usando o componente atual. Não editar para ajustar Mistérios.
 import Link from "next/link";
+import type { ReactNode } from "react";
 import styled from "styled-components";
 
 import { ROUTES } from "../../constants/routes";
-import type { Case } from "../../types/Case";
+import type { ImagemDeCapa } from "../../constants/imagemPadraoInvestigacao";
+import type { CasoDeCard } from "../../types/Case";
 import type { InvestigacaoDetalhe } from "../../types/InvestigacaoDetalhe";
 import { Breadcrumb } from "../navigation/Breadcrumb";
+import { SemDados } from "../investigacao/BlocoDemonstracao";
 import { AnchorNavClassica } from "./AnchorNavClassica";
 import { DiscussaoSection } from "../investigacao/DiscussaoSection";
 import { EvidenciasListClassica } from "./EvidenciasListClassica";
+import { ImagemCapa } from "./ImagemCapa";
 import { HistoricoTimeline } from "../investigacao/HistoricoTimeline";
 import { LocalizacaoEvidencias } from "../investigacao/LocalizacaoEvidencias";
 import { Secao, Subtitulo } from "../investigacao/Secao";
@@ -19,14 +23,30 @@ import { SinteseSection } from "../investigacao/SinteseSection";
 import { TeoriaSection } from "../investigacao/TeoriaSection";
 
 export interface ComunidadeInvestigacaoClassicaProps {
-  caso: Case;
+  caso: CasoDeCard;
   detalhe: InvestigacaoDetalhe;
+  // Imagem de capa enviada (ou do mock). Vazia: imagem padrão (ADR-042). A capa aparece sempre.
+  capa?: ImagemDeCapa | null;
+  // Investigação do banco: lista de evidências real (envio, sugestões e aceitar/recusar pela API), no lugar da
+  // lista do backup, que é simulada.
+  evidenciasReais?: ReactNode;
+  // Investigação do banco: discussão e síntese não têm fonte real e mostram estado vazio rotulado.
+  semFonte?: boolean;
+  // O link "Ler o mistério" só aparece quando a página do mistério existe (evita 404).
+  mostrarLinkMisterio?: boolean;
 }
 
 // Área comunitária de um mistério, em /publicacoes/investigacao/[slug] (ADR-020). Reúne as seções que
 // antes ficavam no detalhe da investigação: teoria, evidências com sugestões, discussão, localização,
 // histórico e síntese. Os componentes são os mesmos; só a página mudou.
-export function ComunidadeInvestigacaoClassica({ caso, detalhe }: ComunidadeInvestigacaoClassicaProps) {
+export function ComunidadeInvestigacaoClassica({
+  caso,
+  detalhe,
+  capa,
+  evidenciasReais,
+  semFonte = false,
+  mostrarLinkMisterio = true,
+}: ComunidadeInvestigacaoClassicaProps) {
   const evidenciaDiscussao = detalhe.evidencias.find(
     (evidencia) => evidencia.id === detalhe.discussaoEvidenciaId,
   );
@@ -43,8 +63,13 @@ export function ComunidadeInvestigacaoClassica({ caso, detalhe }: ComunidadeInve
         />
         <Rotulo>Discussão da comunidade</Rotulo>
         <Titulo>{caso.title}</Titulo>
-        <LinkMisterio href={ROUTES.investigacao(caso.id)}>Ler o mistério</LinkMisterio>
+        {mostrarLinkMisterio ? <LinkMisterio href={ROUTES.investigacao(caso.id)}>Ler o mistério</LinkMisterio> : null}
       </Cabecalho>
+
+      {/* Capa: mesmo bloco da capa do backup (proporção fixa); toda investigação mostra uma imagem. */}
+      <Capa>
+        <ImagemCapa src={capa} sizes="(max-width: 1023px) 100vw, 900px" priority />
+      </Capa>
 
       <AnchorNavClassica />
 
@@ -53,21 +78,27 @@ export function ComunidadeInvestigacaoClassica({ caso, detalhe }: ComunidadeInve
       </Secao>
 
       <Secao id="evidencias" titulo="Evidências">
-        <EvidenciasListClassica
-          evidencias={detalhe.evidencias}
-          sugestoes={detalhe.sugestoes}
-          investigador={detalhe.autor}
-          total={detalhe.contagens.evidencias}
-        />
+        {evidenciasReais ?? (
+          <EvidenciasListClassica
+            evidencias={detalhe.evidencias}
+            sugestoes={detalhe.sugestoes}
+            investigador={detalhe.autor}
+            total={detalhe.contagens.evidencias}
+          />
+        )}
       </Secao>
 
       <Secao id="discussao" titulo="Discussão">
-        <DiscussaoSection
-          evidenciaId={detalhe.discussaoEvidenciaId}
-          evidenciaTitulo={evidenciaDiscussao?.titulo ?? ""}
-          discussaoContextual={detalhe.discussaoContextual}
-          discussaoGeral={detalhe.discussaoGeral}
-        />
+        {semFonte ? (
+          <SemDados>A discussão desta investigação aparece aqui quando houver registro.</SemDados>
+        ) : (
+          <DiscussaoSection
+            evidenciaId={detalhe.discussaoEvidenciaId}
+            evidenciaTitulo={evidenciaDiscussao?.titulo ?? ""}
+            discussaoContextual={detalhe.discussaoContextual}
+            discussaoGeral={detalhe.discussaoGeral}
+          />
+        )}
       </Secao>
 
       <Secao id="localizacao" titulo="Localização das evidências">
@@ -78,7 +109,11 @@ export function ComunidadeInvestigacaoClassica({ caso, detalhe }: ComunidadeInve
         <Subtitulo>Linha do tempo</Subtitulo>
         <HistoricoTimeline registros={detalhe.historico} />
         <Subtitulo>Síntese</Subtitulo>
-        <SinteseSection sintese={detalhe.sintese} />
+        {semFonte ? (
+          <SemDados>A síntese desta investigação aparece aqui quando houver registro.</SemDados>
+        ) : (
+          <SinteseSection sintese={detalhe.sintese} />
+        )}
       </Secao>
     </>
   );
@@ -89,6 +124,20 @@ const Cabecalho = styled.header`
   flex-direction: column;
   gap: 10px;
   min-width: 0;
+`;
+
+const Capa = styled.div`
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  border-radius: ${({ theme }) => theme.borderRadius.lg};
+  overflow: hidden;
+  background: ${({ theme }) => theme.colors.backgroundSecondary};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+
+  @media (max-width: 767px) {
+    aspect-ratio: 16 / 10;
+  }
 `;
 
 const Rotulo = styled.p`

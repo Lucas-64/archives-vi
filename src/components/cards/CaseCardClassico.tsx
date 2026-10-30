@@ -2,7 +2,6 @@
 
 // Cópia dedicada da versão de components/cards/CaseCard.tsx do commit 355b30ad (ADR-041). Usada só pelas páginas de investigação;
 // Mistérios continua usando o componente atual. Não editar para ajustar Mistérios.
-import Image from "next/image";
 import Link from "next/link";
 import styled from "styled-components";
 
@@ -10,6 +9,7 @@ import { ROUTES } from "../../constants/routes";
 import { categoriaDoStatus } from "../../lib/investigacaoClassica";
 import { formatarData } from "../../lib/formatacao";
 import type { CasoDeCard } from "../../types/Case";
+import { ImagemCapa } from "../investigacao-classica/ImagemCapa";
 import { StatusBadge } from "../ui/StatusBadge";
 
 export interface CaseCardClassicoProps {
@@ -28,16 +28,8 @@ export function CaseCardClassico({ caso, orientacao = "vertical", href }: CaseCa
   return (
     <Article $horizontal={orientacao === "horizontal"}>
       <Media $horizontal={orientacao === "horizontal"}>
-        {/* Investigações vindas da API não têm imagem (sem upload): sem `image`, fica o bloco neutro. */}
-        {caso.image ? (
-          <Image
-            src={caso.image}
-            alt=""
-            fill
-            sizes="(max-width: 767px) 100vw, (max-width: 1280px) 50vw, 33vw"
-            style={{ objectFit: "cover" }}
-          />
-        ) : null}
+        {/* Toda investigação mostra uma capa: a enviada (`capa`), a do mock (`image`) ou a padrão (ADR-042). */}
+        <ImagemCapa src={caso.capa ?? caso.image} sizes="(max-width: 767px) 100vw, (max-width: 1280px) 50vw, 33vw" />
       </Media>
 
       <Body>

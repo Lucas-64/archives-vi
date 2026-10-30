@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { CaseCardClassico } from "../../../components/cards/CaseCardClassico";
-import { PublicationCard } from "../../../components/cards/PublicationCard";
+import { PublicationCardComCapa } from "../../../components/cards/PublicationCardComCapa";
 import { FilterTabs } from "../../../components/filters/FilterTabs";
 import { ContentGrid } from "../../../components/layout/ContentGrid";
 import { Subtitulo } from "../../../components/investigacao/Secao";
@@ -144,7 +144,7 @@ export default async function PublicacoesPage({
                 <Subtitulo>{rotuloPublicacoes}</Subtitulo>
                 <CardList>
                   {publicacoes.map(({ publicacao, autor }) => (
-                    <PublicationCard key={publicacao.id} publicacao={publicacao} autor={autor} />
+                    <PublicationCardComCapa key={publicacao.id} publicacao={publicacao} autor={autor} />
                   ))}
                 </CardList>
                 {haMais ? <NotaLista>Mostrando as {LIMITE_LISTA} publicações mais recentes.</NotaLista> : null}
