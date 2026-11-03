@@ -52,7 +52,7 @@ export function Header() {
                 aria-current={ativo(ROUTES.meuPerfil) ? "page" : undefined}
                 $active={ativo(ROUTES.meuPerfil)}
               >
-                <Avatar nome={usuario?.nome ?? ""} size="small" />
+                <Avatar nome={usuario?.nome ?? ""} size="small" src={usuario?.avatar} />
                 <span>Meu perfil</span>
               </ActionLink>
               <BotaoSair />

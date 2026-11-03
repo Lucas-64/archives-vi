@@ -8,6 +8,8 @@ export type EstadoSessao = "carregando" | "visitante" | "autenticado" | "erro";
 
 export interface UsuarioSessao {
   usuario: string;
+  // Avatar enviado (URL pública do Blob, ADR-043); ausente: iniciais.
+  avatar?: string;
   nome: string;
   papel: "membro" | "moderador" | "admin";
 }
@@ -27,7 +29,12 @@ const PAPEIS = new Set(["membro", "moderador", "admin"]);
 export function lerUsuarioDaResposta(corpo: unknown): UsuarioSessao | null {
   const u = (corpo as { usuario?: unknown } | null)?.usuario as Record<string, unknown> | null | undefined;
   if (!u || typeof u.usuario !== "string" || typeof u.nome !== "string" || typeof u.papel !== "string" || !PAPEIS.has(u.papel)) return null;
-  return { usuario: u.usuario, nome: u.nome, papel: u.papel as UsuarioSessao["papel"] };
+  return {
+    usuario: u.usuario,
+    nome: u.nome,
+    papel: u.papel as UsuarioSessao["papel"],
+    ...(typeof u.avatar === "string" && u.avatar ? { avatar: u.avatar } : {}),
+  };
 }
 
 async function consultarSessao(): Promise<{ estado: EstadoSessao; usuario: UsuarioSessao | null }> {
