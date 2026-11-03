@@ -1,7 +1,15 @@
 import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 
-import { LIMITE_IMAGEM_BYTES, detectarTipoImagem, novoCaminhoImagem, prepararImagem, type ArmazenamentoImagens } from "../armazenamento/imagens";
+import { BlobAccessError, BlobStoreNotFoundError, BlobStoreSuspendedError, BlobClientTokenExpiredError, BlobUnknownError } from "@vercel/blob";
+import {
+  LIMITE_IMAGEM_BYTES,
+  detectarTipoImagem,
+  novoCaminhoImagem,
+  prepararImagem,
+  traduzirFalhaDoBlob,
+  type ArmazenamentoImagens,
+} from "../armazenamento/imagens";
 import { urlDeImagemPermitida } from "../contracts/imagem";
 import { ErroApi } from "../http/erros";
 import { criarManipuladoresUploads } from "./rotas";
@@ -114,6 +122,42 @@ describe("POST /api/v1/uploads/imagem", () => {
     const resposta = await rotas.enviar(requisicao(blob(await imagem("png"), "image/png")), undefined);
     expect(resposta.status).toBe(503);
     expect(JSON.stringify(await resposta.json())).toContain("Envio de imagens indisponível no momento.");
+  });
+
+  it("falha de autenticação do Blob (token inválido, revogado, loja ausente): 503 com a mesma mensagem do caso sem token", async () => {
+    for (const Falha of [BlobAccessError, BlobStoreNotFoundError, BlobStoreSuspendedError, BlobClientTokenExpiredError]) {
+      const armazenamento: ArmazenamentoImagens = {
+        async salvar() {
+          throw traduzirFalhaDoBlob(new Falha(), () => {}) ?? new Error("não traduzido");
+        },
+      };
+      const rotas = criarManipuladoresUploads({ autenticar: logado, armazenamento });
+      const resposta = await rotas.enviar(requisicao(blob(await imagem("png"), "image/png")), undefined);
+      expect(resposta.status, Falha.name).toBe(503);
+      const corpo = await resposta.json();
+      expect(corpo.erro.codigo).toBe("servico_indisponivel");
+      expect(corpo.erro.mensagem).toBe("Envio de imagens indisponível no momento.");
+    }
+  });
+
+  it("traduzirFalhaDoBlob registra o motivo sem token e deixa erros genéricos de fora (500)", () => {
+    const registros: { nome: string; mensagem: string }[] = [];
+    expect(traduzirFalhaDoBlob(new BlobAccessError(), (r) => registros.push(r))?.status).toBe(503);
+    expect(registros).toEqual([expect.objectContaining({ nome: "BlobAccessError" })]);
+    expect(JSON.stringify(registros)).not.toMatch(/vercel_blob_rw_/);
+    expect(traduzirFalhaDoBlob(new BlobUnknownError(), () => {})).toBeNull();
+    expect(traduzirFalhaDoBlob(new Error("falha qualquer"), () => {})).toBeNull();
+  });
+
+  it("erro genérico do armazenamento continua 500", async () => {
+    const armazenamento: ArmazenamentoImagens = {
+      async salvar() {
+        throw new Error("falha qualquer");
+      },
+    };
+    const rotas = criarManipuladoresUploads({ autenticar: logado, armazenamento });
+    const resposta = await rotas.enviar(requisicao(blob(await imagem("png"), "image/png")), undefined);
+    expect(resposta.status).toBe(500);
   });
 
   it("arquivo válido: grava com nome gerado, redimensiona e devolve a URL pública", async () => {

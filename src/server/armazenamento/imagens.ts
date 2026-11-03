@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 
 import sharp from "sharp";
 
+import { ErroApi } from "../http/erros";
+
 // Armazenamento e preparo de imagens enviadas (ADR-043). Só jpeg, png e webp, no máximo 5 MB, reconhecidos pelo
 // CONTEÚDO (não pelo Content-Type nem pelo nome), redimensionados para no máximo 1920 px de largura e gravados com
 // nome gerado no servidor (o nome original nunca é usado).
@@ -54,6 +56,24 @@ export function armazenamentoConfigurado(ambiente: NodeJS.ProcessEnv = process.e
   return Boolean(ambiente.BLOB_READ_WRITE_TOKEN);
 }
 
+export const MENSAGEM_ARMAZENAMENTO_INDISPONIVEL = "Envio de imagens indisponível no momento.";
+
+// Falhas do Blob que são de configuração (token inválido ou revogado, loja inexistente ou suspensa) viram 503 com a
+// mesma mensagem do caso sem token, para a interface mostrar o mesmo estado. O motivo vai ao log (nome e mensagem do
+// erro, nunca o token). Qualquer outro erro do `put` segue como está e responde 500.
+const FALHAS_DE_CONFIGURACAO = ["BlobAccessError", "BlobStoreNotFoundError", "BlobStoreSuspendedError", "BlobClientTokenExpiredError"];
+
+export function traduzirFalhaDoBlob(
+  erro: unknown,
+  registrar: (registro: { nivel: "erro"; nome: string; mensagem: string }) => void = (r) => console.error(JSON.stringify(r)),
+): ErroApi | null {
+  if (!(erro instanceof Error)) return null;
+  const nome = erro.constructor?.name ?? erro.name;
+  if (!FALHAS_DE_CONFIGURACAO.includes(nome)) return null;
+  registrar({ nivel: "erro", nome, mensagem: erro.message });
+  return new ErroApi("servico_indisponivel", MENSAGEM_ARMAZENAMENTO_INDISPONIVEL);
+}
+
 // Vercel Blob, com o token do ambiente (`BLOB_READ_WRITE_TOKEN`; nunca vai ao navegador nem ao repositório).
 // Sem token, devolve null e a rota responde 503 com mensagem clara. Não há outro caminho de armazenamento.
 export function armazenamentoVercelBlob(ambiente: NodeJS.ProcessEnv = process.env): ArmazenamentoImagens | null {
@@ -62,14 +82,18 @@ export function armazenamentoVercelBlob(ambiente: NodeJS.ProcessEnv = process.en
   return {
     async salvar(caminho, dados, tipo) {
       const { put } = await import("@vercel/blob");
-      const resultado = await put(caminho, dados, {
-        access: "public",
-        contentType: tipo,
-        addRandomSuffix: false,
-        allowOverwrite: false,
-        token,
-      });
-      return resultado.url;
+      try {
+        const resultado = await put(caminho, dados, {
+          access: "public",
+          contentType: tipo,
+          addRandomSuffix: false,
+          allowOverwrite: false,
+          token,
+        });
+        return resultado.url;
+      } catch (erro) {
+        throw traduzirFalhaDoBlob(erro) ?? erro;
+      }
     },
   };
 }

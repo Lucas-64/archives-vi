@@ -3,6 +3,7 @@ import { exigirOrigemConfiavel, exigirSessao } from "../auth/guarda";
 import {
   LARGURA_MAXIMA_IMAGEM,
   LIMITE_IMAGEM_BYTES,
+  MENSAGEM_ARMAZENAMENTO_INDISPONIVEL,
   TIPOS_IMAGEM,
   armazenamentoConfigurado,
   armazenamentoVercelBlob,
@@ -53,7 +54,7 @@ export function criarManipuladoresUploads(opcoes: OpcoesRotasUploads = {}) {
       else await exigirSessao((opcoes.obterDb ?? obterDb)(), requisicao, cookie, agora());
 
       const destino = armazenamento();
-      if (!destino) throw new ErroApi("servico_indisponivel", "Envio de imagens indisponível no momento.");
+      if (!destino) throw new ErroApi("servico_indisponivel", MENSAGEM_ARMAZENAMENTO_INDISPONIVEL);
 
       const declarado = Number(requisicao.headers.get("content-length"));
       if (Number.isFinite(declarado) && declarado > LIMITE_IMAGEM_BYTES + FOLGA_CORPO_BYTES) {
