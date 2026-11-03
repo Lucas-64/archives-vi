@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { ContentGrid } from "../../../../components/layout/ContentGrid";
 import { Breadcrumb } from "../../../../components/navigation/Breadcrumb";
 import { ComentariosSection } from "../../../../components/publicacao/ComentariosSection";
+import { ImagemPublicacao } from "../../../../components/publicacao/ImagemPublicacao";
 import { PublicacaoCabecalho } from "../../../../components/publicacao/PublicacaoCabecalho";
 import { AutorCard } from "../../../../components/sidebar/AutorCard";
 import { RelacionadasList } from "../../../../components/sidebar/RelacionadasList";
@@ -70,6 +71,7 @@ export default async function PublicacaoPage({ params }: { params: Params }) {
             ]}
           />
           <PublicacaoCabecalho publicacao={publicacao} autor={autor} curtidas={dados.curtidas} euCurti={dados.euCurti} />
+          <ImagemPublicacao src={publicacao.imagemUrl} titulo={publicacao.titulo} />
           <Suspense fallback={<Skeleton height="220px" radius="lg" />}>
             <Comentarios slug={slug} total={dados.comentarios} />
           </Suspense>
