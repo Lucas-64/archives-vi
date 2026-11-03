@@ -575,3 +575,5 @@ Decisão (Lucas, 2026-10-30): **1) Branch `separar-misterios-teorias`** descarta
 Efeito sobre decisões anteriores: o ADR-042 deixa de valer onde diz que não há upload e que a capa é um endereço https; o ADR-031 deixa de valer para imagens de evidência. Pendência: **`BLOB_READ_WRITE_TOKEN`** não existe em `.env.local`; sem ele o envio real não foi exercitado em nenhum ambiente (os testes usam armazenamento simulado). Além disso, o componente confia no Blob para servir a imagem; imagens já salvas não são apagadas ao serem removidas do registro (limpeza de órfãs não existe).
 
 Status: Accepted (decisão do Lucas em 2026-10-30).
+
+Atualização (2026-11-03, validação com token real): o envio foi exercitado de ponta a ponta. Falha de autenticação do Blob (`BlobAccessError`, `BlobStoreNotFoundError`, `BlobStoreSuspendedError`, `BlobClientTokenExpiredError`) responde 503 com a mesma mensagem e código do caso sem token; outros erros do `put` seguem 500. A imagem da teoria aparece também no detalhe da publicação e o avatar, no cabeçalho do site. A imagem redimensionada pode ultrapassar 5 MB (o limite vale para o arquivo enviado, não para o resultado).

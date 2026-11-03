@@ -4,7 +4,7 @@
 
 ## Próximo passo
 
-**Upload de imagem (2026-10-30, ADR-043):** implementado e validado com armazenamento simulado nos testes; o envio real depende de `BLOB_READ_WRITE_TOKEN` em `.env.local`/Vercel, que NÃO está configurado (a interface mostra "Envio de imagens indisponível no momento."). Pontos com upload: capa da investigação, evidência, teoria, avatar e banner. Sem ponto de upload real: fórum, galeria, Fotografias. Próximo passo: configurar o token, subir uma imagem real e validar o fluxo de ponta a ponta.
+**Upload de imagem (ADR-043):** implementado e validado com o Vercel Blob real em 2026-11-03 (token configurado). Pontos com upload: capa da investigação, evidência, teoria, avatar e banner. Sem ponto de upload real: fórum, galeria, Fotografias. Pendências: limpeza de imagens órfãs no Blob (remover do registro não apaga o arquivo).
 
 As sete rotas da fase 2 estão implementadas e verificadas, e a fase 2.1 (acabamento) foi concluída. No lote 1, as entradas de navegação aprovadas foram implementadas (`/explorar` na navegação principal; `/criadores` e `/criar` no cabeçalho desktop) e as decisões de produto foram registradas em `docs/DECISIONS.md` (ADR-012 a ADR-016). No lote 2, as rotas `/perfil/[usuario]`, `/investigacoes/[slug]` e `/publicacao/[slug]` passaram a responder HTTP 404 real para recursos inexistentes, verificado em produção (ADR-014). No lote 3B, a página de não encontrado passou a usar o shell compartilhado do site (`SiteShell`), com status 404 mantido. O trabalho do lote 2 em diante e o perfil social foram commitados em `53acd0ad` e enviados para `origin/main`. Próximas tarefas: (1) decidir a entrada de `/criadores` na barra mobile; (2) isolar o console por página em `next dev`. Nenhuma delas começa sem autorização específica.
 
