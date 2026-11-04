@@ -2,7 +2,8 @@
 
 import styled from "styled-components";
 
-import { CaseCard } from "../cards/CaseCard";
+import { CaseCardClassico } from "../cards/CaseCardClassico";
+import { ROUTES } from "../../constants/routes";
 import { CardList } from "../page/CardList";
 import { EmptyState } from "../states/EmptyState";
 import type { CasoDeCard } from "../../types/Case";
@@ -24,13 +25,13 @@ export function InvestigacoesPerfil({ criadas, participacoes }: InvestigacoesPer
         <Titulo id="perfil-investigacoes-criadas">Criadas por este membro</Titulo>
         {criadas.length === 0 ? (
           <EmptyState
-            titulo="Nenhum mistério criado aqui"
-            descricao="Quando este membro abrir um mistério, ele aparece aqui."
+            titulo="Nenhuma investigação aberta aqui"
+            descricao="Quando este membro abrir uma investigação, ela aparece aqui."
           />
         ) : (
           <CardList>
             {criadas.map((caso) => (
-              <CaseCard key={caso.id} caso={caso} orientacao="horizontal" />
+              <CaseCardClassico key={caso.id} caso={caso} orientacao="horizontal" href={ROUTES.investigacao(caso.id)} />
             ))}
           </CardList>
         )}
@@ -42,12 +43,12 @@ export function InvestigacoesPerfil({ criadas, participacoes }: InvestigacoesPer
           {participacoes.length === 0 ? (
             <EmptyState
               titulo="Nenhuma participação aqui"
-              descricao="Este membro não aparece como participante de nenhum mistério com detalhe publicado."
+              descricao="Este membro não aparece como participante de nenhuma investigação."
             />
           ) : (
             <CardList>
               {participacoes.map((caso) => (
-                <CaseCard key={caso.id} caso={caso} orientacao="horizontal" />
+                <CaseCardClassico key={caso.id} caso={caso} orientacao="horizontal" href={ROUTES.investigacao(caso.id)} />
               ))}
             </CardList>
           )}

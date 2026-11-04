@@ -1,6 +1,7 @@
 // Busca da página /buscar. Funções puras: recebem a consulta e as listas já lidas
 // de src/lib/data.ts e devolvem os resultados por tipo. Não acessam dados nem mocks.
 import { ROUTES } from "@/constants/routes";
+import { CLASSIFICACOES_MISTERIO } from "@/constants/classificacoesMisterio";
 import { rotuloDaTag } from "@/lib/tags";
 import { normalizarParaBusca } from "@/lib/texto";
 import type { CasoDeCard } from "@/types/Case";
@@ -8,16 +9,30 @@ import type { Criador } from "@/types/Criador";
 import type { Publicacao } from "@/types/Publicacao";
 
 // Valores de aba aceitos na URL (?tipo=...). Qualquer outro valor equivale a "todos".
-export const ABAS_BUSCA = ["todos", "publicacoes", "investigacoes", "criadores"] as const;
+// "misterios" é o tipo simples (ADR-044); "investigacoes" é o objeto rico.
+export const ABAS_BUSCA = ["todos", "misterios", "investigacoes", "publicacoes", "criadores"] as const;
 export type AbaBusca = (typeof ABAS_BUSCA)[number];
 
+// Mistério como a busca o usa (subconjunto de MisterioResumo).
+export interface MisterioDeBusca {
+  slug: string;
+  titulo: string;
+  descricao: string;
+  imagem: string | null;
+  classificacao: string;
+  investigacoesAbertas: number;
+  atualizadoEm: string;
+}
+
 export interface DadosBusca {
+  misterios?: readonly MisterioDeBusca[];
   publicacoes: readonly Publicacao[];
   investigacoes: readonly CasoDeCard[];
   criadores: readonly Criador[];
 }
 
 export interface ResultadoBusca {
+  misterios: MisterioDeBusca[];
   publicacoes: Publicacao[];
   investigacoes: CasoDeCard[];
   criadores: Criador[];
@@ -70,6 +85,14 @@ function pesquisarInvestigacoes(termo: string, investigacoes: readonly CasoDeCar
   return [...comData, ...semData];
 }
 
+// Mistérios: título, descrição e rótulo da classificação. Mais recentes primeiro.
+function pesquisarMisterios(termo: string, misterios: readonly MisterioDeBusca[]): MisterioDeBusca[] {
+  const rotulo = (id: string) => CLASSIFICACOES_MISTERIO.find((c) => c.id === id)?.rotulo ?? "";
+  return misterios
+    .filter((item) => contem(item.titulo, termo) || contem(item.descricao, termo) || contem(rotulo(item.classificacao), termo))
+    .sort((a, b) => b.atualizadoEm.localeCompare(a.atualizadoEm));
+}
+
 // Criadores: nome, usuário e bio. Mantém a ordem do mock.
 function pesquisarCriadores(termo: string, criadores: readonly Criador[]): Criador[] {
   return criadores.filter(
@@ -81,11 +104,12 @@ function pesquisarCriadores(termo: string, criadores: readonly Criador[]): Criad
 // Consulta vazia devolve listas vazias.
 export function buscar(consulta: string, aba: AbaBusca, dados: DadosBusca): ResultadoBusca {
   const termo = normalizarParaBusca(normalizarConsulta(consulta));
-  const vazio: ResultadoBusca = { publicacoes: [], investigacoes: [], criadores: [] };
+  const vazio: ResultadoBusca = { misterios: [], publicacoes: [], investigacoes: [], criadores: [] };
 
   if (!termo) return vazio;
 
   return {
+    misterios: aba === "todos" || aba === "misterios" ? pesquisarMisterios(termo, dados.misterios ?? []) : [],
     publicacoes:
       aba === "todos" || aba === "publicacoes" ? pesquisarPublicacoes(termo, dados.publicacoes) : [],
     investigacoes:
@@ -95,7 +119,7 @@ export function buscar(consulta: string, aba: AbaBusca, dados: DadosBusca): Resu
 }
 
 export function contarResultados(resultado: ResultadoBusca): number {
-  return resultado.publicacoes.length + resultado.investigacoes.length + resultado.criadores.length;
+  return resultado.misterios.length + resultado.publicacoes.length + resultado.investigacoes.length + resultado.criadores.length;
 }
 
 // Monta o endereço de /buscar mantendo a consulta. A aba "todos" não aparece na URL.

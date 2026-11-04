@@ -3,63 +3,40 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import styled from "styled-components";
 
 import { ROUTES } from "../../constants/routes";
-import { criarInvestigacaoNaApi } from "../../lib/investigacoesApi";
-import { useRascunhoAutomatico } from "../../lib/useRascunhoAutomatico";
+import { classificacaoDoMisterio } from "../../lib/misterio";
+import { criarMisterioNaApi } from "../../lib/misteriosApi";
 import { useSessao } from "../auth/SessaoProvider";
-import { ROTULO_CATEGORIA, ESTADO_INVESTIGACAO } from "../../lib/investigacaoEstado";
-import { AnchorNav } from "../investigacao/AnchorNav";
 import { ContentGrid } from "../layout/ContentGrid";
 import { Breadcrumb } from "../navigation/Breadcrumb";
-import { SidebarBox } from "../sidebar/SidebarBox";
-import { Badge } from "../ui/Badge";
 import { PageBody } from "../page/PageBody";
 import { PageHeader } from "../page/PageHeader";
 import { EmptyState } from "../states/EmptyState";
 import { Skeleton } from "../states/Skeleton";
+import { ClassificacaoBadge } from "../ui/ClassificacaoBadge";
 import { FormularioMisterio } from "./FormularioMisterio";
-import {
-  RASCUNHO_VAZIO,
-  montarEntrada,
-  validarInvestigacao,
-  type ErrosInvestigacao,
-  type RascunhoInvestigacao,
-} from "./validarInvestigacao";
+import { PreviaCard } from "./PreviaCard";
+import { MISTERIO_VAZIO, montarEntradaMisterio, validarMisterio, type ErrosMisterio, type RascunhoMisterio } from "./validarMisterio";
 
-// Estado da página /criar/misterio (a interface chama de "mistério" o que a API chama de investigação). Cria pela API real (POST /api/v1/investigacoes). O sucesso só existe
-// depois de o servidor confirmar (201 com o slug); então a pessoa é levada à investigação criada.
-// Exige sessão (a API também exige). Limites e permissões são decididos pelo servidor.
+// Página /criar/misterio (ADR-044): postagem simples, publicada por POST /api/v1/misterios. O sucesso só existe
+// depois de o servidor confirmar; então a pessoa é levada ao mistério criado. Exige sessão.
 export function CriarMisterio() {
   const router = useRouter();
-  const { estado, usuario } = useSessao();
-  const [rascunho, setRascunho] = useState<RascunhoInvestigacao>(RASCUNHO_VAZIO);
+  const { estado } = useSessao();
+  const [rascunho, setRascunho] = useState<RascunhoMisterio>(MISTERIO_VAZIO);
   const [tentouEnviar, setTentouEnviar] = useState(false);
   const [enviando, setEnviando] = useState(false);
-  const [errosServidor, setErrosServidor] = useState<ErrosInvestigacao>({});
+  const [errosServidor, setErrosServidor] = useState<ErrosMisterio>({});
   const [erroGeral, setErroGeral] = useState<string | null>(null);
 
-  const errosLocais = validarInvestigacao(rascunho);
+  const errosLocais = validarMisterio(rascunho);
 
-  // Rascunho automático (só neste navegador, por usuário). Apagado ao publicar.
-  const chaveRascunho = estado === "autenticado" && usuario ? `rascunho:investigacao:${usuario.usuario}` : null;
-  const autosave = useRascunhoAutomatico<RascunhoInvestigacao>(
-    chaveRascunho,
-    rascunho,
-    RASCUNHO_VAZIO,
-    setRascunho,
-    (r) => JSON.stringify(r) === JSON.stringify(RASCUNHO_VAZIO),
-  );
-
-  // Alterar um campo limpa o que o servidor recusou nele (o erro de uma lista some ao editar qualquer item).
-  function alterar(proximo: RascunhoInvestigacao, chaves: string[]) {
+  function alterar(proximo: RascunhoMisterio, chaves: string[]) {
     setRascunho(proximo);
     setErrosServidor((atuais) => {
       const restantes = { ...atuais };
-      for (const chave of Object.keys(restantes)) {
-        if (chaves.some((c) => chave === c || chave.startsWith(`${c}.`))) delete restantes[chave];
-      }
+      for (const chave of chaves) delete restantes[chave];
       return restantes;
     });
   }
@@ -72,22 +49,17 @@ export function CriarMisterio() {
     if (Object.keys(errosLocais).length > 0) return;
 
     setEnviando(true);
-    const resultado = await criarInvestigacaoNaApi(montarEntrada(rascunho));
-
+    const resultado = await criarMisterioNaApi(montarEntradaMisterio(rascunho));
     if (resultado.ok) {
-      autosave.limpar();
-      // Mantém o estado "enviando" até a navegação, para não permitir um segundo envio.
-      router.push(ROUTES.investigacao(resultado.slug));
+      router.push(ROUTES.misterio(resultado.slug));
       return;
     }
     setEnviando(false);
     setErrosServidor(resultado.campos);
-    setErroGeral(resultado.semSessao ? "Sua sessão expirou. Entre novamente para criar o mistério." : (resultado.erroGeral ?? null));
+    setErroGeral(resultado.semSessao ? "Sua sessão expirou. Entre novamente para publicar o mistério." : (resultado.erroGeral ?? null));
   }
 
-  const erros: ErrosInvestigacao = { ...(tentouEnviar ? errosLocais : {}), ...errosServidor };
-
-  const estadoInicial = ESTADO_INVESTIGACAO.em_andamento;
+  const erros: ErrosMisterio = { ...(tentouEnviar ? errosLocais : {}), ...errosServidor };
 
   return (
     <ContentGrid
@@ -102,98 +74,37 @@ export function CriarMisterio() {
           />
           <PageHeader
             titulo="Criar mistério"
-            descricao="Abra um mistério com sua hipótese, argumentos e fontes, nas mesmas seções da página do mistério. As evidências são enviadas depois, na página dele."
+            descricao="Compartilhe algo curioso com uma imagem ou um vídeo. Quem quiser aprofundar abre uma investigação a partir dele."
           />
-          <AnchorNav rotulo="Etapas para criar o mistério" itens={ETAPAS} />
           <PageBody>
-            {estado === "carregando" ? <Skeleton height="520px" radius="lg" /> : null}
+            {estado === "carregando" ? <Skeleton height="420px" radius="lg" /> : null}
             {estado === "erro" ? (
               <EmptyState titulo="Não foi possível verificar sua sessão" descricao="Recarregue a página para tentar de novo." />
             ) : null}
             {estado === "visitante" ? (
               <EmptyState
                 titulo="Entre para criar um mistério"
-                descricao="Criar um mistério exige uma conta. Entre ou crie a sua para abrir mistérios."
+                descricao="Criar um mistério exige uma conta. Entre ou crie a sua."
                 acao={<Link href={ROUTES.entrar}>Entrar</Link>}
               />
             ) : null}
-            {estado === "autenticado" && autosave.restaurado ? (
-              <AvisoRascunho role="status">
-                Rascunho restaurado neste navegador.{" "}
-                <button type="button" onClick={autosave.descartar}>
-                  Descartar rascunho
-                </button>
-              </AvisoRascunho>
-            ) : null}
             {estado === "autenticado" ? (
-              <FormularioMisterio
-                rascunho={rascunho}
-                erros={erros}
-                mostrarResumoErro={Object.keys(erros).length > 0}
-                erroGeral={erroGeral}
-                enviando={enviando}
-                onAlterar={alterar}
-                onEnviar={enviar}
-              />
+              <FormularioMisterio rascunho={rascunho} erros={erros} erroGeral={erroGeral} enviando={enviando} onAlterar={alterar} onEnviar={enviar} />
             ) : null}
           </PageBody>
         </>
       }
       sidebar={
-        <>
-          <SidebarBox titulo="Estado do mistério">
-            <Badge size="small" variant={estadoInicial.variant} uppercase>
-              {estadoInicial.rotulo}
-            </Badge>
-            <Nota>Todo mistério novo começa assim. {estadoInicial.descricao}</Nota>
-          </SidebarBox>
-
-          <SidebarBox titulo="Resumo">
-            <Texto>{rascunho.descricao.trim() || "A descrição aparece aqui enquanto você escreve."}</Texto>
-            <Nota>Título: {rascunho.titulo.trim() || "ainda não informado"}</Nota>
-            <Nota>Categoria: {ROTULO_CATEGORIA[rascunho.categoria] ?? "ainda não escolhida"}</Nota>
-            <Nota>Local: {rascunho.localizacao.trim() || "não informado"}</Nota>
-          </SidebarBox>
-        </>
+        estado === "autenticado" ? (
+          <PreviaCard
+            titulo={rascunho.titulo.trim() || "Título do mistério"}
+            descricao={rascunho.descricao.trim() || "A descrição aparece aqui enquanto você escreve."}
+            imagem={rascunho.imagemUrl}
+            selo={rascunho.classificacao ? <ClassificacaoBadge classificacao={classificacaoDoMisterio(rascunho.classificacao)} /> : undefined}
+            meta={["Nenhuma investigação aberta"]}
+          />
+        ) : undefined
       }
     />
   );
 }
-
-// Mesmas seções (e ids) do formulário. Segue a ordem da página do mistério.
-const ETAPAS = [
-  { id: "passo-identificacao", rotulo: "1. Identificação" },
-  { id: "passo-video", rotulo: "2. Vídeo" },
-  { id: "passo-teoria", rotulo: "3. Teoria" },
-  { id: "passo-evidencias", rotulo: "4. Evidências" },
-] as const;
-
-const Nota = styled.p`
-  margin-top: 8px;
-  font-size: 12px;
-  line-height: 1.5;
-  color: ${({ theme }) => theme.colors.textSecondary};
-  overflow-wrap: anywhere;
-`;
-
-const Texto = styled.p`
-  font-size: 14px;
-  line-height: 1.6;
-  color: ${({ theme }) => theme.colors.text};
-  overflow-wrap: anywhere;
-`;
-
-const AvisoRascunho = styled.p`
-  padding: 12px 16px;
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  font-size: 14px;
-  color: ${({ theme }) => theme.colors.textSecondary};
-
-  button {
-    color: ${({ theme }) => theme.colors.pink};
-    text-decoration: underline;
-    font: inherit;
-    cursor: pointer;
-  }
-`;

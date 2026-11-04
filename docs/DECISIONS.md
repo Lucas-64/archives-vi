@@ -577,3 +577,15 @@ Efeito sobre decisões anteriores: o ADR-042 deixa de valer onde diz que não h�
 Status: Accepted (decisão do Lucas em 2026-10-30).
 
 Atualização (2026-11-03, validação com token real): o envio foi exercitado de ponta a ponta. Falha de autenticação do Blob (`BlobAccessError`, `BlobStoreNotFoundError`, `BlobStoreSuspendedError`, `BlobClientTokenExpiredError`) responde 503 com a mesma mensagem e código do caso sem token; outros erros do `put` seguem 500. A imagem da teoria aparece também no detalhe da publicação e o avatar, no cabeçalho do site. A imagem redimensionada pode ultrapassar 5 MB (o limite vale para o arquivo enviado, não para o resultado).
+
+## ADR-044 Mistério e Investigação como tipos distintos
+
+Decisão (Lucas, 2026-11-04, D1 a D8 da auditoria `auditoria-misterios-investigacoes-v2`): **Mistério** é a postagem simples (título, descrição, classificação, imagem ou vídeo, com comentários no lote 2), tabela `misterios`. **Investigação** é o objeto rico (hipótese, pergunta central, argumentos, fontes, evidências, histórico), tabela `investigacoes`, que absorve o antigo "Criar teoria"; `publicacoes` fica sem tela de criação. O vínculo mistério → investigação é **opcional** (`investigacoes.misterio_id`) e "aberta" significa não encerrada pelo autor (`investigacoesAbertas`). Substitui, no que for incompatível, os ADR-013 (sem vínculo), ADR-020, ADR-038 e ADR-043 (nomes das entradas de criação).
+
+Por que: o modelo anterior chamava de "Mistério" o objeto rico e de "Teoria" o simples, o oposto do conceito do produto. Separar os tipos evita migrar dados (os de exemplo são recriados) e permite ligar mistérios e investigações sem duplicar o modelo.
+
+Consequências: a classificação do mistério vira coluna; a exceção por slug (`src/lib/investigacao.ts`) fica obsoleta para mistérios novos; a busca deixa de listar mistérios até a aba "Mistérios" (lote 2); a migração `0008` só deve ir à `main` com o lote 3 validado (comentários e curtidas em investigação).
+
+Front (lote 2): rotas `/misterios`, `/misterios/[slug]` (simples, sem evidências nem votos; comentários ainda indisponíveis, vêm no Back 2), `/investigacoes` (lista de investigações, com `?misterio=<slug>`), `/investigacoes/[slug]` (a página rica, antes em `/publicacoes/investigacao/[slug]`, com redirect 308), `/criar/misterio` (formulário curto: título, imagem, vídeo, descrição, classificação, com prévia do card) e `/criar/investigacao` (formulário longo, vínculo opcional por `?misterio=`, prévia do card e rascunho automático em `localStorage`). `/criar` redireciona para `/criar/investigacao`; `/publicacoes` fica como "Publicações" antigas, sem criação. Busca ganha a aba "Mistérios". Perfil: abas "Minhas investigações", "Meus mistérios" e "Minhas publicações" (mistérios por autor filtrados na listagem geral até a API ter o filtro `autor`). Removidas as listas repetidas (grupo de mistérios em `/publicacoes`, slides do Início, "recentes" do Explorar; `/publicacoes` limitada a 12).
+
+Status: Accepted (Lucas, 2026-11-04). A migração `0008` e o lote só vão para a `main` com o lote 3 validado (comentários e curtidas em investigação) e confirmação do Lucas.

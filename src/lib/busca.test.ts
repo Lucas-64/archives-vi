@@ -13,6 +13,7 @@ describe("buscar (dados reais adaptados)", () => {
   const dados = {
     publicacoes: [publicacao({ id: "1", titulo: "Frequência estranha" }), publicacao({ id: "2", titulo: "Outra", tags: ["ovnis-extraterrestres"] })],
     investigacoes: [caso({ id: "vice", title: "Luzes", location: "Vice Beach" })],
+    misterios: [{ slug: "m", titulo: "Mural curioso", descricao: "Um detalhe", imagem: null, classificacao: "easter-egg", investigacoesAbertas: 0, atualizadoEm: "2026-01-01T00:00:00Z" }],
     criadores: [],
   };
 
@@ -20,6 +21,12 @@ describe("buscar (dados reais adaptados)", () => {
     expect(buscar("frequencia", "todos", dados).publicacoes.map((p) => p.id)).toEqual(["1"]);
     expect(buscar("OVNIs", "todos", dados).publicacoes.map((p) => p.id)).toEqual(["2"]);
     expect(buscar("vice", "todos", dados).investigacoes.map((c) => c.id)).toEqual(["vice"]);
+  });
+
+  it("busca mistérios por título e por classificação, e a aba isola o tipo", () => {
+    expect(buscar("mural", "todos", dados).misterios.map((m) => m.slug)).toEqual(["m"]);
+    expect(buscar("easter", "misterios", dados).misterios.map((m) => m.slug)).toEqual(["m"]);
+    expect(buscar("mural", "investigacoes", dados).misterios).toEqual([]);
   });
 
   it("aba restringe o tipo e consulta vazia não devolve nada", () => {

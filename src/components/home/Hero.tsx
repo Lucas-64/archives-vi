@@ -104,8 +104,8 @@ export function Hero({ destaques = [], autoplay = true, intervaloMs = 7000 }: He
                   Mistérios, evidências e teorias da comunidade de GTA VI, reunidas em um só lugar.
                 </Descricao>
                 <Acoes>
-                  <Acao href={ROUTES.investigacoes}>Ver mistérios</Acao>
-                  <Acao href={ROUTES.teorias}>Ler teorias</Acao>
+                  <Acao href={ROUTES.misterios}>Ver mistérios</Acao>
+                  <Acao href={ROUTES.investigacoes}>Ver investigações</Acao>
                 </Acoes>
               </Content>
             </Slide>

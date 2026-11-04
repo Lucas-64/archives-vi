@@ -4,31 +4,42 @@ import Link from "next/link";
 import styled from "styled-components";
 
 import { ROUTES } from "../../constants/routes";
-import type { CasoDeCard } from "../../types/Case";
-import { CaseCard } from "../cards/CaseCard";
+import { classificacaoDoMisterio, textoInvestigacoesAbertas } from "../../lib/misterio";
+import type { MisterioResumo } from "../../server/contracts/misterios";
+import { MisterioCard } from "../cards/MisterioCard";
+import { ClassificacaoBadge } from "../ui/ClassificacaoBadge";
 import { EmptyState } from "../states/EmptyState";
 
-export interface InvestigacoesRecentesProps {
-  casos: CasoDeCard[];
+export interface MisteriosRecentesProps {
+  misterios: readonly MisterioResumo[];
 }
 
-export function InvestigacoesRecentes({ casos }: InvestigacoesRecentesProps) {
+export function MisteriosRecentes({ misterios }: MisteriosRecentesProps) {
   return (
     <section aria-labelledby="recentes-titulo">
       <Header>
         <Titulo id="recentes-titulo">Mistérios recentes</Titulo>
-        <Link href={ROUTES.investigacoes}>Ver todos</Link>
+        <Link href={ROUTES.misterios}>Ver todos</Link>
       </Header>
 
-      {casos.length === 0 ? (
+      {misterios.length === 0 ? (
         <EmptyState
           titulo="Nenhum mistério por enquanto"
           descricao="Assim que novos mistérios forem abertos, eles aparecem aqui."
         />
       ) : (
         <Grid>
-          {casos.map((caso) => (
-            <CaseCard key={caso.id} caso={caso} />
+          {misterios.map((item) => (
+            <MisterioCard
+              key={item.id}
+              orientacao="vertical"
+              titulo={item.titulo}
+              descricao={item.descricao}
+              imagem={item.imagem}
+              selo={<ClassificacaoBadge classificacao={classificacaoDoMisterio(item.classificacao)} />}
+              meta={[textoInvestigacoesAbertas(item.investigacoesAbertas)]}
+              href={ROUTES.misterio(item.slug)}
+            />
           ))}
         </Grid>
       )}

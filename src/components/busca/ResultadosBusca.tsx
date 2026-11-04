@@ -2,10 +2,14 @@
 
 import styled from "styled-components";
 
-import { CaseCard } from "../cards/CaseCard";
+import { CaseCardClassico } from "../cards/CaseCardClassico";
+import { MisterioCard } from "../cards/MisterioCard";
 import { CreatorCard } from "../cards/CreatorCard";
 import { PublicationCard } from "../cards/PublicationCard";
+import { ROUTES } from "../../constants/routes";
+import { classificacaoDoMisterio, textoInvestigacoesAbertas } from "../../lib/misterio";
 import { CardList } from "../page/CardList";
+import { ClassificacaoBadge } from "../ui/ClassificacaoBadge";
 import type { ResultadoBusca } from "../../lib/busca";
 import type { Criador } from "../../types/Criador";
 
@@ -19,14 +23,35 @@ function contagemDe(total: number): string {
   return `${total} ${total === 1 ? "resultado" : "resultados"}`;
 }
 
-// Grupos de resultado na ordem da especificação: publicações, investigações e criadores.
+// Grupos de resultado: mistérios, investigações, publicações antigas e criadores.
 // Cada grupo aparece somente quando tem itens.
 export function ResultadosBusca({ resultado, criadores }: ResultadosBuscaProps) {
   const autores = new Map(criadores.map((criador) => [criador.id, criador]));
-  const { publicacoes, investigacoes, criadores: encontrados } = resultado;
+  const { misterios, publicacoes, investigacoes, criadores: encontrados } = resultado;
 
   return (
     <Grupos>
+      {misterios.length > 0 ? (
+        <Grupo aria-labelledby="resultado-misterios">
+          <TituloGrupo id="resultado-misterios">
+            Mistérios <Contagem>{contagemDe(misterios.length)}</Contagem>
+          </TituloGrupo>
+          <CardList>
+            {misterios.map((item) => (
+              <MisterioCard
+                key={item.slug}
+                titulo={item.titulo}
+                descricao={item.descricao}
+                imagem={item.imagem}
+                selo={<ClassificacaoBadge classificacao={classificacaoDoMisterio(item.classificacao)} />}
+                meta={[textoInvestigacoesAbertas(item.investigacoesAbertas)]}
+                href={ROUTES.misterio(item.slug)}
+              />
+            ))}
+          </CardList>
+        </Grupo>
+      ) : null}
+
       {publicacoes.length > 0 ? (
         <Grupo aria-labelledby="resultado-publicacoes">
           <TituloGrupo id="resultado-publicacoes">
@@ -52,7 +77,7 @@ export function ResultadosBusca({ resultado, criadores }: ResultadosBuscaProps) 
           </TituloGrupo>
           <CardList>
             {investigacoes.map((caso) => (
-              <CaseCard key={caso.id} caso={caso} orientacao="horizontal" />
+              <CaseCardClassico key={caso.id} caso={caso} orientacao="horizontal" href={ROUTES.investigacao(caso.id)} />
             ))}
           </CardList>
         </Grupo>

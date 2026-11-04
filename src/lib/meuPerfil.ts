@@ -12,8 +12,9 @@ export const ID_CRIADOR_DEMONSTRATIVO = "analista-vb";
 // Conquistas ficam no cabeçalho e a patente em cartão próprio (ADR-021).
 export const ABAS_MEU_PERFIL = [
   { chave: "visao-geral", rotulo: "Visão geral" },
-  { chave: "teorias-publicacoes", rotulo: "Teorias e publicações", parametro: "teorias-publicacoes" },
-  { chave: "investigacoes", rotulo: "Mistérios", parametro: "investigacoes" },
+  { chave: "investigacoes", rotulo: "Minhas investigações", parametro: "investigacoes" },
+  { chave: "misterios", rotulo: "Meus mistérios", parametro: "misterios" },
+  { chave: "teorias-publicacoes", rotulo: "Minhas publicações", parametro: "teorias-publicacoes" },
   { chave: "evidencias", rotulo: "Evidências", parametro: "evidencias" },
   { chave: "atividade", rotulo: "Atividade", parametro: "atividade" },
 ] as const;

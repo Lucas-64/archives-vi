@@ -9,14 +9,16 @@ const nextConfig: NextConfig = {
   // responda 404 real. A página /publicacoes nunca renderiza a listagem para esse parâmetro.
   async redirects() {
     return [
-      // Rota antiga de criação (antes de "investigação" virar "mistério" na interface).
-      { source: "/criar/investigacao", destination: "/criar/misterio", permanent: true },
+      // ADR-044: a área comunitária da investigação passa a ser a própria página da investigação.
+      { source: "/publicacoes/investigacao/:slug", destination: "/investigacoes/:slug", permanent: true },
       {
         source: "/publicacoes",
         has: [{ type: "query", key: "investigacao", value: "(?<slug>.+)" }],
-        destination: "/publicacoes/investigacao/:slug",
+        destination: "/investigacoes/:slug",
         permanent: false,
       },
+      // "Criar teoria" simples deixou de existir: /criar abre o formulário de investigação.
+      { source: "/criar", destination: "/criar/investigacao", permanent: true },
     ];
   },
   // Imagens enviadas pela pessoa ficam no Vercel Blob (ADR-043): só o host público do Blob, dentro de imagens/.

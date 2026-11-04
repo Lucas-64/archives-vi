@@ -34,7 +34,7 @@ export interface MeuPerfilAreaProps {
   criador: Criador;
   // Dados provisórios de demonstração (só para a conta de demonstração). Sem eles, tags e patente ficam vazias.
   demonstracao?: DemonstracaoDoPerfil;
-  // Conteúdo servidor das abas "visao-geral", "teorias-publicacoes" e "investigacoes". As demais são estados vazios.
+  // Conteúdo servidor das abas "visao-geral", "investigacoes", "misterios" e "teorias-publicacoes". As demais são estados vazios.
   paineis: Record<string, ReactNode>;
 }
 
@@ -236,14 +236,15 @@ export function MeuPerfilArea({ criador, demonstracao, paineis }: MeuPerfilAreaP
         variante="caixa"
         acoes={
           <Acoes>
-            <LinkPrimario href={ROUTES.criar}>+ Criar teoria</LinkPrimario>
+            <LinkPrimario href={ROUTES.criarInvestigacao}>+ Abrir investigação</LinkPrimario>
             <LinkContorno href={ROUTES.criarMisterio}>+ Criar mistério</LinkContorno>
           </Acoes>
         }
         paineis={{
           "visao-geral": paineis["visao-geral"],
-          "teorias-publicacoes": paineis["teorias-publicacoes"],
           investigacoes: paineis.investigacoes,
+          misterios: paineis.misterios,
+          "teorias-publicacoes": paineis["teorias-publicacoes"],
           evidencias: (
             <EmptyState
               titulo="Evidências"
@@ -373,7 +374,7 @@ const LinkContorno = styled(Link)`
   }
 `;
 
-// Ação principal da linha de abas (ex.: "+ Criar teoria"), com o mesmo gradiente do cabeçalho do site.
+// Ação principal da linha de abas (ex.: "+ Abrir investigação"), com o mesmo gradiente do cabeçalho do site.
 const LinkPrimario = styled(Link)`
   display: inline-flex;
   align-items: center;

@@ -32,11 +32,11 @@ export interface ComunidadeInvestigacaoClassicaProps {
   evidenciasReais?: ReactNode;
   // Investigação do banco: discussão e síntese não têm fonte real e mostram estado vazio rotulado.
   semFonte?: boolean;
-  // O link "Ler o mistério" só aparece quando a página do mistério existe (evita 404).
-  mostrarLinkMisterio?: boolean;
+  // Mistério ao qual esta investigação está vinculada (opcional, ADR-044).
+  misterio?: { slug: string; titulo: string };
 }
 
-// Área comunitária de um mistério, em /publicacoes/investigacao/[slug] (ADR-020). Reúne as seções que
+// Página da investigação, em /investigacoes/[slug] (ADR-044; antes /publicacoes/investigacao/[slug]). Reúne as seções que
 // antes ficavam no detalhe da investigação: teoria, evidências com sugestões, discussão, localização,
 // histórico e síntese. Os componentes são os mesmos; só a página mudou.
 export function ComunidadeInvestigacaoClassica({
@@ -45,7 +45,7 @@ export function ComunidadeInvestigacaoClassica({
   capa,
   evidenciasReais,
   semFonte = false,
-  mostrarLinkMisterio = true,
+  misterio,
 }: ComunidadeInvestigacaoClassicaProps) {
   const evidenciaDiscussao = detalhe.evidencias.find(
     (evidencia) => evidencia.id === detalhe.discussaoEvidenciaId,
@@ -57,13 +57,13 @@ export function ComunidadeInvestigacaoClassica({
         <Breadcrumb
           itens={[
             { label: "Início", href: ROUTES.inicio },
-            { label: "Teorias e investigações", href: ROUTES.teorias },
+            { label: "Investigações", href: ROUTES.investigacoes },
             { label: caso.title },
           ]}
         />
         <Rotulo>Discussão da comunidade</Rotulo>
         <Titulo>{caso.title}</Titulo>
-        {mostrarLinkMisterio ? <LinkMisterio href={ROUTES.investigacao(caso.id)}>Ler o mistério</LinkMisterio> : null}
+        {misterio ? <LinkMisterio href={ROUTES.misterio(misterio.slug)}>Mistério de origem: {misterio.titulo}</LinkMisterio> : null}
       </Cabecalho>
 
       {/* Capa: mesmo bloco da capa do backup (proporção fixa); toda investigação mostra uma imagem. */}

@@ -4,6 +4,8 @@
 
 ## Próximo passo
 
+**Mistério x Investigação (ADR-044, 2026-11-04):** lotes 1 e 2 do Front e Back 1 prontos na branch `claude/project-thread-pdiksy`, sem merge na `main`. Falta o Back 2 (comentários no mistério, filtro `autor` em mistérios, seed novo) e o lote 3 (comentários e curtidas na investigação). Nada vai para a `main` antes do lote 3 validado e da confirmação do Lucas. Rotas e nomes desta seção substituem os das seções antigas abaixo.
+
 **Upload de imagem (ADR-043):** implementado e validado com o Vercel Blob real em 2026-11-03 (token configurado). Pontos com upload: capa da investigação, evidência, teoria, avatar e banner. Sem ponto de upload real: fórum, galeria, Fotografias. Pendências: limpeza de imagens órfãs no Blob (remover do registro não apaga o arquivo).
 
 As sete rotas da fase 2 estão implementadas e verificadas, e a fase 2.1 (acabamento) foi concluída. No lote 1, as entradas de navegação aprovadas foram implementadas (`/explorar` na navegação principal; `/criadores` e `/criar` no cabeçalho desktop) e as decisões de produto foram registradas em `docs/DECISIONS.md` (ADR-012 a ADR-016). No lote 2, as rotas `/perfil/[usuario]`, `/investigacoes/[slug]` e `/publicacao/[slug]` passaram a responder HTTP 404 real para recursos inexistentes, verificado em produção (ADR-014). No lote 3B, a página de não encontrado passou a usar o shell compartilhado do site (`SiteShell`), com status 404 mantido. O trabalho do lote 2 em diante e o perfil social foram commitados em `53acd0ad` e enviados para `origin/main`. Próximas tarefas: (1) decidir a entrada de `/criadores` na barra mobile; (2) isolar o console por página em `next dev`. Nenhuma delas começa sem autorização específica.

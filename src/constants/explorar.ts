@@ -23,11 +23,11 @@ export const EXPLORAR_ITENS: readonly ExplorarItem[] = [
     href: ROUTES.misterios,
   },
   {
-    titulo: "Teorias da comunidade",
+    titulo: "Investigações",
     secao: "teorias",
-    descricao: "As melhores teorias criadas pelos jogadores.",
+    descricao: "Teorias e evidências investigadas pela comunidade.",
     icon: FiFileText,
-    href: ROUTES.teorias,
+    href: ROUTES.investigacoes,
   },
   // Mapa e Galeria não têm rota: aparecem como "em breve", sem link (ADR-036).
   {

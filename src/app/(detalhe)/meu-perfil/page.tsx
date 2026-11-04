@@ -6,7 +6,7 @@ import { MeuPerfilArea } from "../../../components/perfil/MeuPerfilArea";
 import { demonstracaoDoUsuario } from "../../../constants/demonstracaoMamoa";
 import { ROUTES } from "../../../constants/routes";
 import { usuarioDaSessao } from "../../../server/auth/sessaoServidor";
-import { InvestigacoesDoPerfil, PublicacoesDoPerfil, VisaoGeralDoPerfil } from "../perfil/[usuario]/dados";
+import { InvestigacoesDoPerfil, MisteriosDoPerfil, PublicacoesDoPerfil, VisaoGeralDoPerfil } from "../perfil/[usuario]/dados";
 
 // Área pessoal (ADR-021) com dados reais da sessão (ADR-029). A página lê o cookie no servidor, então é
 // dinâmica; as demais rotas do site continuam estáticas. Sem sessão, redireciona para /entrar.
@@ -42,6 +42,7 @@ export default async function MeuPerfilPage() {
             "visao-geral": <VisaoGeralDoPerfil usuario={sessao.usuario} />,
             "teorias-publicacoes": <PublicacoesDoPerfil criador={criador} abaCompleta />,
             investigacoes: <InvestigacoesDoPerfil usuario={sessao.usuario} />,
+            misterios: <MisteriosDoPerfil usuario={sessao.usuario} />,
           }}
         />
       }

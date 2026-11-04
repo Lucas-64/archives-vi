@@ -19,6 +19,7 @@ import {
 import { criadorListado, investigacaoParaCaso, perfilParaCriador, publicacaoParaFront } from "../../../lib/adaptadores";
 import { criadoresDaBusca } from "../../../server/leitura/busca";
 import { investigacoesDaListagem } from "../../../server/leitura/investigacoes";
+import { misteriosDaListagem } from "../../../server/leitura/misterios";
 import { publicacoesDaListagem } from "../../../server/leitura/publicacoes";
 import { LIMITE_LISTA } from "../../../server/leitura/usuarios";
 
@@ -26,7 +27,7 @@ type SearchParams = Promise<{ q?: string | string[]; tipo?: string | string[] }>
 
 export const metadata: Metadata = {
   title: "Buscar | ARCHIVES VI",
-  description: "Busque publicações, investigações e criadores da comunidade.",
+  description: "Busque mistérios, investigações e criadores da comunidade.",
 };
 
 // Parâmetro repetido na URL (?q=a&q=b) usa o primeiro valor.
@@ -36,6 +37,7 @@ function primeiroValor(valor?: string | string[]): string | undefined {
 
 const ROTULO_ABA: Record<AbaBusca, string> = {
   todos: "Todos",
+  misterios: "Mistérios",
   publicacoes: "Publicações",
   investigacoes: "Investigações",
   criadores: "Criadores",
@@ -43,6 +45,7 @@ const ROTULO_ABA: Record<AbaBusca, string> = {
 
 const ROTULO_TIPO_VAZIO: Record<AbaBusca, string> = {
   todos: "",
+  misterios: "em mistérios ",
   publicacoes: "em publicações ",
   investigacoes: "em investigações ",
   criadores: "em criadores ",
@@ -61,7 +64,8 @@ export default async function BuscaPage({ searchParams }: { searchParams: Search
   const aba = lerAbaBusca(primeiroValor(params.tipo));
 
   const buscando = consulta !== "";
-  const [listaPublicacoes, listaInvestigacoes, listaCriadores] = await Promise.all([
+  const [listaMisterios, listaPublicacoes, listaInvestigacoes, listaCriadores] = await Promise.all([
+    buscando && (aba === "todos" || aba === "misterios") ? misteriosDaListagem() : SEM_ITENS,
     buscando && (aba === "todos" || aba === "publicacoes") ? publicacoesDaListagem() : SEM_ITENS,
     buscando && (aba === "todos" || aba === "investigacoes") ? investigacoesDaListagem() : SEM_ITENS,
     buscando && (aba === "todos" || aba === "criadores") ? criadoresDaBusca(consulta) : SEM_ITENS,
@@ -75,12 +79,13 @@ export default async function BuscaPage({ searchParams }: { searchParams: Search
   const encontrados = buscar(consulta, aba, {
     publicacoes,
     investigacoes: listaInvestigacoes.itens.map(investigacaoParaCaso),
+    misterios: listaMisterios.itens,
     criadores: [],
   });
   // Criadores já vêm filtrados pela API (nome sem acento ou usuário).
   const resultado = { ...encontrados, criadores: listaCriadores.itens.map(criadorListado) };
 
-  const avisos = avisosDeLimite({ publicacoes: listaPublicacoes, investigacoes: listaInvestigacoes, criadores: listaCriadores });
+  const avisos = avisosDeLimite({ misterios: listaMisterios, publicacoes: listaPublicacoes, investigacoes: listaInvestigacoes, criadores: listaCriadores });
   const abas = ABAS_BUSCA.map((valor) => ({
     label: ROTULO_ABA[valor],
     href: montarHrefBusca(consulta, valor),
@@ -91,7 +96,7 @@ export default async function BuscaPage({ searchParams }: { searchParams: Search
     <>
       <PageHeader
         titulo="Buscar"
-        descricao="Pesquise publicações, investigações e criadores pelo texto."
+        descricao="Pesquise mistérios, investigações e criadores pelo texto."
       />
 
       <BuscaForm consulta={consulta} aba={aba} />
@@ -102,7 +107,7 @@ export default async function BuscaPage({ searchParams }: { searchParams: Search
         {consulta === "" ? (
           <EmptyState
             titulo="Digite um termo para buscar"
-            descricao="Pesquise publicações por título, resumo e tema, investigações por título, descrição e localização, e criadores por nome ou usuário."
+            descricao="Pesquise mistérios por título, descrição e classificação, investigações por título, descrição e localização, e criadores por nome ou usuário."
           />
         ) : contarResultados(resultado) === 0 ? (
           <EmptyState
@@ -122,12 +127,14 @@ export default async function BuscaPage({ searchParams }: { searchParams: Search
 
 // Avisos de busca parcial: aparecem só quando há mais registros do que os carregados.
 function avisosDeLimite(listas: {
+  misterios: { haMais: boolean };
   publicacoes: { haMais: boolean };
   investigacoes: { haMais: boolean };
   criadores: { haMais: boolean };
 }): string[] {
   const avisos: string[] = [];
   const tipos = [
+    listas.misterios.haMais ? "mistérios" : null,
     listas.publicacoes.haMais ? "publicações" : null,
     listas.investigacoes.haMais ? "investigações" : null,
   ].filter((tipo) => tipo !== null);

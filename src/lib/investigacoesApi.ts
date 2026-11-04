@@ -48,6 +48,8 @@ export interface EntradaInvestigacao {
   tags: string[];
   video?: { url: string; titulo?: string };
   imagem?: string;
+  // Slug do mistério de origem (opcional, ADR-044).
+  misterio?: string;
   teoria: { hipotese: string; argumentosFavoraveis: string[]; perguntaCentral: string; fontes: string[] };
 }
 
@@ -64,6 +66,7 @@ const CAMPOS_CRIACAO = [
   "video.url",
   "video.titulo",
   "imagem",
+  "misterio",
   "teoria.hipotese",
   "teoria.argumentosFavoraveis",
   "teoria.perguntaCentral",

@@ -1,6 +1,6 @@
-import { CaseCard } from "../../../components/cards/CaseCard";
-import { FilterTabs } from "../../../components/filters/FilterTabs";
-import { FiltrosRecolhiveis } from "../../../components/filters/FiltrosRecolhiveis";
+import Link from "next/link";
+
+import { CaseCardClassico } from "../../../components/cards/CaseCardClassico";
 import { SidebarDemonstrativa } from "../../../components/home/Sidebar";
 import { ContentGrid } from "../../../components/layout/ContentGrid";
 import { CardList } from "../../../components/page/CardList";
@@ -9,75 +9,68 @@ import { NotaLista } from "../../../components/page/NotaLista";
 import { PageBody } from "../../../components/page/PageBody";
 import { PageHeader } from "../../../components/page/PageHeader";
 import { EmptyState } from "../../../components/states/EmptyState";
-import { CLASSIFICACOES_MISTERIO } from "../../../constants/classificacoesMisterio";
 import { ROUTES } from "../../../constants/routes";
 import { investigacaoParaCaso } from "../../../lib/adaptadores";
-import { filtrarInvestigacoes, lerClassificacao } from "../../../lib/investigacao";
 import { investigacoesDaListagem } from "../../../server/leitura/investigacoes";
+import { investigacoesDoMisterio, misterioPorSlug } from "../../../server/leitura/misterios";
 import { LIMITE_LISTA } from "../../../server/leitura/usuarios";
 
-// Listagem de mistérios reais (tabela `investigacoes`; ADR-040) (API, via serviço no processo; ADR-029 e ADR-031).
+// Listagem de investigações (tabela `investigacoes`, ADR-044). `?misterio=<slug>` mostra só as vinculadas a um mistério.
 export const dynamic = "force-dynamic";
 
-type SearchParams = Promise<{ classificacao?: string }>;
+type SearchParams = Promise<{ misterio?: string }>;
 
 export default async function InvestigacoesPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
-  const classificacao = lerClassificacao(params.classificacao);
+  const slugMisterio = params.misterio?.trim() || undefined;
 
-  const { itens, haMais } = await investigacoesDaListagem();
+  const [misterio, { itens, haMais }] = await Promise.all([
+    slugMisterio ? misterioPorSlug(slugMisterio) : Promise.resolve(null),
+    slugMisterio ? investigacoesDoMisterio(slugMisterio) : investigacoesDaListagem(),
+  ]);
   const casos = itens.map(investigacaoParaCaso);
-
-  // "Todas" mantém todos os registros. A classificação é aplicada sobre a página carregada.
-  const visiveis = filtrarInvestigacoes(casos, classificacao);
-
-  const abas = [
-    { label: "Todas", href: ROUTES.investigacoes, active: !classificacao },
-    ...CLASSIFICACOES_MISTERIO.map((item) => ({
-      label: item.rotulo,
-      href: `${ROUTES.investigacoes}?classificacao=${item.id}`,
-      active: item.id === classificacao?.id,
-    })),
-  ];
 
   return (
     <ContentGrid
       main={
         <>
           <PageHeader
-            titulo="Mistérios"
-            descricao="Mistérios organizados em torno de evidências, conexões e discussão."
-            acao={<LinkDeAcao href={ROUTES.criarMisterio}>Criar mistério</LinkDeAcao>}
+            titulo="Investigações"
+            descricao="Teorias, pistas e evidências investigadas pela comunidade."
+            acao={<LinkDeAcao href={ROUTES.criarInvestigacao}>Abrir investigação</LinkDeAcao>}
           />
 
-          <FiltrosRecolhiveis resumoAtivo={classificacao ? `Classificação: ${classificacao.rotulo}` : undefined}>
-            <FilterTabs label="Filtrar mistérios por classificação" tabs={abas} />
-          </FiltrosRecolhiveis>
+          {slugMisterio ? (
+            <NotaLista>
+              {misterio ? (
+                <>
+                  Investigações sobre o mistério <Link href={ROUTES.misterio(misterio.slug)}>{misterio.titulo}</Link>.{" "}
+                </>
+              ) : (
+                "Mistério não encontrado. "
+              )}
+              <Link href={ROUTES.investigacoes}>Ver todas as investigações</Link>
+            </NotaLista>
+          ) : null}
 
           <PageBody>
-            {visiveis.length === 0 ? (
+            {casos.length === 0 ? (
               <EmptyState
-                titulo={classificacao ? "Nenhum mistério nesta classificação" : "Nenhum mistério por enquanto"}
+                titulo="Nenhuma investigação por enquanto"
                 descricao={
-                  classificacao
-                    ? `Não há mistérios em "${classificacao.rotulo}" no momento. Tente outra classificação.`
-                    : "Assim que novos mistérios forem publicados, eles aparecem aqui."
+                  slugMisterio
+                    ? "Ainda não há investigações abertas sobre este mistério."
+                    : "Assim que novas investigações forem abertas, elas aparecem aqui."
                 }
               />
             ) : (
               <CardList>
-                {visiveis.map((caso) => (
-                  <CaseCard key={caso.id} caso={caso} orientacao="horizontal" />
+                {casos.map((caso) => (
+                  <CaseCardClassico key={caso.id} caso={caso} orientacao="horizontal" href={ROUTES.investigacao(caso.id)} />
                 ))}
               </CardList>
             )}
-            {haMais ? (
-              <NotaLista>
-                {classificacao
-                  ? `Filtrando entre os ${LIMITE_LISTA} mistérios mais recentes.`
-                  : `Mostrando os ${LIMITE_LISTA} mistérios mais recentes.`}
-              </NotaLista>
-            ) : null}
+            {haMais ? <NotaLista>Mostrando as {LIMITE_LISTA} investigações mais recentes.</NotaLista> : null}
           </PageBody>
         </>
       }

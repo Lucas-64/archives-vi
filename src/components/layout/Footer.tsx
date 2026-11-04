@@ -12,7 +12,7 @@ const COLUNAS = [
     titulo: "Explorar",
     links: [
       { label: "Mistérios", href: ROUTES.misterios },
-      { label: "Teorias e investigações", href: ROUTES.teorias },
+      { label: "Investigações", href: ROUTES.investigacoes },
       { label: "Explorar", href: ROUTES.explorar },
       { label: "Criadores", href: ROUTES.criadores },
     ],
@@ -20,7 +20,7 @@ const COLUNAS = [
   {
     titulo: "Participar",
     links: [
-      { label: "Criar teoria", href: ROUTES.criar },
+      { label: "Abrir investigação", href: ROUTES.criarInvestigacao },
       { label: "Criar mistério", href: ROUTES.criarMisterio },
       { label: "Buscar", href: ROUTES.buscar },
     ],

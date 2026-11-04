@@ -14,6 +14,7 @@ export interface MeuPerfilVisaoGeralProps {
   // Listas reais da pessoa da sessão (API, via serviço no processo). Nada vem de mocks.
   publicacoes: Publicacao[];
   investigacoes: CasoDeCard[];
+  misterios: { slug: string; titulo: string; classificacao: string }[];
 }
 
 const LIMITE_RESUMO = 3;
@@ -23,7 +24,7 @@ const INDISPONIVEL = "Informação ainda não disponível.";
 // Visão geral de Meu Perfil (ADR-021, revisto pelo ADR-037). Coluna principal: "Aguardando sua ação" e
 // "Atividade recente", sem fonte de dados real, então mostram estado vazio rotulado. Coluna lateral: teorias e
 // investigações reais da pessoa, com mensagem de vazio em vez de o cartão sumir.
-export function MeuPerfilVisaoGeral({ publicacoes, investigacoes }: MeuPerfilVisaoGeralProps) {
+export function MeuPerfilVisaoGeral({ publicacoes, investigacoes, misterios }: MeuPerfilVisaoGeralProps) {
   return (
     <Grade>
       <Coluna>
@@ -45,10 +46,10 @@ export function MeuPerfilVisaoGeral({ publicacoes, investigacoes }: MeuPerfilVis
       <Coluna>
         <Cartao aria-labelledby="meu-perfil-teorias">
           <Cabecalho>
-            <Titulo id="meu-perfil-teorias">Minhas teorias</Titulo>
+            <Titulo id="meu-perfil-teorias">Minhas publicações</Titulo>
           </Cabecalho>
           {publicacoes.length === 0 ? (
-            <Vazio>Você ainda não publicou teorias.</Vazio>
+            <Vazio>Você ainda não tem publicações.</Vazio>
           ) : (
             <Resumo>
               {publicacoes.slice(0, LIMITE_RESUMO).map((item) => (
@@ -62,22 +63,22 @@ export function MeuPerfilVisaoGeral({ publicacoes, investigacoes }: MeuPerfilVis
             </Resumo>
           )}
           <Rodape>
-            <IrParaAba aba="teorias-publicacoes">Ver todas as teorias</IrParaAba>
+            <IrParaAba aba="teorias-publicacoes">Ver todas as publicações</IrParaAba>
           </Rodape>
         </Cartao>
 
         <Cartao aria-labelledby="meu-perfil-investigacoes">
           <Cabecalho>
-            <Titulo id="meu-perfil-investigacoes">Meus mistérios</Titulo>
+            <Titulo id="meu-perfil-investigacoes">Minhas investigações</Titulo>
           </Cabecalho>
           {investigacoes.length === 0 ? (
-            <Vazio>Você ainda não abriu mistérios.</Vazio>
+            <Vazio>Você ainda não abriu investigações.</Vazio>
           ) : (
             <Resumo>
               {investigacoes.slice(0, LIMITE_RESUMO).map((caso) => (
                 <li key={caso.id}>
                   <LinhaItem>
-                    <ResumoTitulo href={ROUTES.comunidadeInvestigacao(caso.id)}>{caso.title}</ResumoTitulo>
+                    <ResumoTitulo href={ROUTES.investigacao(caso.id)}>{caso.title}</ResumoTitulo>
                     <StatusBadge status={caso.status} />
                   </LinhaItem>
                 </li>
@@ -85,7 +86,27 @@ export function MeuPerfilVisaoGeral({ publicacoes, investigacoes }: MeuPerfilVis
             </Resumo>
           )}
           <Rodape>
-            <IrParaAba aba="investigacoes">Ver todos os mistérios</IrParaAba>
+            <IrParaAba aba="investigacoes">Ver todas as investigações</IrParaAba>
+          </Rodape>
+        </Cartao>
+
+        <Cartao aria-labelledby="meu-perfil-misterios">
+          <Cabecalho>
+            <Titulo id="meu-perfil-misterios">Meus mistérios</Titulo>
+          </Cabecalho>
+          {misterios.length === 0 ? (
+            <Vazio>Você ainda não criou mistérios.</Vazio>
+          ) : (
+            <Resumo>
+              {misterios.slice(0, LIMITE_RESUMO).map((item) => (
+                <li key={item.slug}>
+                  <ResumoTitulo href={ROUTES.misterio(item.slug)}>{item.titulo}</ResumoTitulo>
+                </li>
+              ))}
+            </Resumo>
+          )}
+          <Rodape>
+            <IrParaAba aba="misterios">Ver todos os mistérios</IrParaAba>
           </Rodape>
         </Cartao>
       </Coluna>

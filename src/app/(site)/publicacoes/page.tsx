@@ -85,8 +85,8 @@ export default async function PublicacoesPage({
       main={
         <>
           <PageHeader
-            titulo="Teorias e investigações"
-            descricao="Teorias, investigações e discussões da comunidade de Leonida."
+            titulo="Publicações"
+            descricao="Teorias e publicações anteriores da comunidade. Para aprofundar um tema, abra uma investigação."
           />
 
           <FilterTabs label="Filtrar publicações" tabs={abas} />

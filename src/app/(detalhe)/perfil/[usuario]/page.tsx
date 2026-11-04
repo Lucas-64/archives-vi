@@ -10,7 +10,7 @@ import { EmptyState } from "../../../../components/states/EmptyState";
 import { ROUTES } from "../../../../constants/routes";
 import { perfilParaCriador } from "../../../../lib/adaptadores";
 import { perfilPublico } from "../../../../server/leitura/usuarios";
-import { InvestigacoesDoPerfil, PublicacoesDoPerfil } from "./dados";
+import { InvestigacoesDoPerfil, MisteriosDoPerfil, PublicacoesDoPerfil } from "./dados";
 
 type Params = Promise<{ usuario: string }>;
 
@@ -57,18 +57,19 @@ export default async function PerfilPage({ params }: { params: Params }) {
           <ProfileHeader criador={criador} />
           <IndicadoresContribuicao
             itens={[
-              { rotulo: "Mistérios", valor: indicadores.investigacoes },
+              { rotulo: "Investigações", valor: indicadores.investigacoes },
               { rotulo: "Publicações", valor: indicadores.publicacoes },
               { rotulo: "Evidências aceitas", valor: indicadores.evidenciasAceitas },
               { rotulo: "Comentários", valor: indicadores.comentarios },
             ]}
-            nota="Contagens de conteúdo público: publicações publicadas, mistérios que a pessoa abriu, evidências aceitas e comentários em publicações."
+            nota="Contagens de conteúdo público: publicações publicadas, investigações que a pessoa abriu, evidências aceitas e comentários em publicações."
           />
           {/* A aba é escolhida no cliente por ?aba=. */}
           <AbasPerfil
             paineis={{
               "visao-geral": <PublicacoesDoPerfil criador={criador} />,
               investigacoes: <InvestigacoesDoPerfil usuario={criador.usuario} />,
+              misterios: <MisteriosDoPerfil usuario={criador.usuario} />,
               "teorias-publicacoes": <PublicacoesDoPerfil criador={criador} abaCompleta />,
               conquistas: (
                 <EmptyState

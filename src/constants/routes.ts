@@ -1,14 +1,18 @@
 export const ROUTES = {
   inicio: "/",
-  misterios: "/investigacoes",
+  // Mistério: postagem simples (ADR-044). Investigação: objeto rico, com evidências e discussão.
+  misterios: "/misterios",
+  misterio: (slug: string) => `/misterios/${slug}`,
+  // Publicações antigas (teorias criadas antes do ADR-044). Sem tela de criação.
   teorias: "/publicacoes",
   investigacoes: "/investigacoes",
   investigacao: (slug: string) => `/investigacoes/${slug}`,
-  // Área comunitária de uma investigação (teoria, evidências, discussão, localização, histórico e síntese).
-  comunidadeInvestigacao: (slug: string) => `/publicacoes/investigacao/${slug}`,
+  // Mantido por compatibilidade: a área comunitária é a própria página da investigação.
+  comunidadeInvestigacao: (slug: string) => `/investigacoes/${slug}`,
   publicacoes: "/publicacoes",
   publicacao: (slug: string) => `/publicacao/${slug}`,
-  criar: "/criar",
+  criar: "/criar/investigacao",
+  criarInvestigacao: "/criar/investigacao",
   criarMisterio: "/criar/misterio",
   explorar: "/explorar",
   criadores: "/criadores",
@@ -31,7 +35,7 @@ export interface NavItem {
 export const MAIN_NAV: readonly NavItem[] = [
   { label: "Início", href: ROUTES.inicio },
   { label: "Mistérios", href: ROUTES.misterios },
-  { label: "Teorias e investigações", href: ROUTES.teorias },
+  { label: "Investigações", href: ROUTES.investigacoes },
   { label: "Explorar", href: ROUTES.explorar },
   // Mapa, Galeria e Fórum não têm rota: aparecem esmaecidos, como "em breve", sem navegar (ADR-036).
   { label: "Mapa", href: null },
@@ -43,7 +47,7 @@ export const MAIN_NAV: readonly NavItem[] = [
 export const MOBILE_NAV: readonly (NavItem & { href: string })[] = [
   { label: "Início", href: ROUTES.inicio },
   { label: "Mistérios", href: ROUTES.misterios },
-  { label: "Teorias", href: ROUTES.teorias },
+  { label: "Investigações", href: ROUTES.investigacoes },
   { label: "Criar", href: ROUTES.criar },
   { label: "Buscar", href: ROUTES.buscar },
 ];
