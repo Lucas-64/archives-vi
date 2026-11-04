@@ -55,6 +55,9 @@ export const LIMITES = {
   curtirMembro: { grupo: "curtir:membro", limite: 60, janelaMs: 60_000 },
   // Provisório (D-F): criar, editar, mudar estado e encerrar investigação.
   investigacaoMutarMembro: { grupo: "investigacao:mutar", limite: 20, janelaMs: 60_000 },
+  // Provisórios (lote 1 de mistérios): criar mistério, por minuto e por dia.
+  misterioCriarMembro: { grupo: "misterio:criar", limite: 5, janelaMs: 60_000 },
+  misterioCriarDia: { grupo: "misterio:criar:dia", limite: 20, janelaMs: 24 * 60 * 60_000 },
   // Provisórios (D-P): sugerir evidência e agir como responsável/moderação (decidir sugestão, mudar status ou papel).
   evidenciaEnviarMembro: { grupo: "evidencia:enviar", limite: 10, janelaMs: 60_000 },
   moderacaoAgir: { grupo: "moderacao:agir", limite: 30, janelaMs: 60_000 },

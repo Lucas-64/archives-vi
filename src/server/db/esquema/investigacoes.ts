@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { boolean, check, index, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
+import { misterios } from "./misterios";
 import { tags } from "./tags";
 import { usuarios } from "./usuarios";
 
@@ -45,6 +46,9 @@ export const investigacoes = pgTable(
     perguntaCentral: text("pergunta_central").notNull(),
     argumentosFavoraveis: text("argumentos_favoraveis").array().notNull().default(sql`'{}'::text[]`),
     fontes: text("fontes").array().notNull().default(sql`'{}'::text[]`),
+    // Vínculo opcional com um mistério (D6). Definido na criação e não editável. `restrict`: um mistério com
+    // investigações não é apagado por engano.
+    misterioId: uuid("misterio_id").references(() => misterios.id, { onDelete: "restrict" }),
     autorId: uuid("autor_id")
       .notNull()
       .references(() => usuarios.id, { onDelete: "restrict" }),
@@ -68,6 +72,7 @@ export const investigacoes = pgTable(
     index("investigacoes_ordem_idx").on(tabela.atualizadoEm.desc(), tabela.id.desc()),
     index("investigacoes_autor_idx").on(tabela.autorId),
     index("investigacoes_categoria_idx").on(tabela.categoria),
+    index("investigacoes_misterio_idx").on(tabela.misterioId, tabela.atualizadoEm.desc(), tabela.id.desc()),
   ],
 );
 
