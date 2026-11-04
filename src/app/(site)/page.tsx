@@ -1,9 +1,8 @@
 import { ContentGrid } from "../../components/layout/ContentGrid";
 import { ExploreCards } from "../../components/home/ExploreCards";
-import { Hero, type DestaqueHero } from "../../components/home/Hero";
+import { Hero } from "../../components/home/Hero";
 import { InvestigacoesRecentes } from "../../components/home/InvestigacoesRecentes";
 import { SidebarDemonstrativa } from "../../components/home/Sidebar";
-import { ROUTES } from "../../constants/routes";
 import { investigacaoParaCaso } from "../../lib/adaptadores";
 import { investigacoesDaListagem } from "../../server/leitura/investigacoes";
 
@@ -19,20 +18,11 @@ export default async function HomePage() {
   const { itens } = await investigacoesDaListagem();
   const recentes = itens.slice(0, QUANTIDADE_RECENTES).map(investigacaoParaCaso);
 
-  // Slides do banner depois da apresentação: as mesmas investigações recentes, sem critério de curadoria.
-  const destaques: DestaqueHero[] = recentes.map((caso) => ({
-    id: caso.id,
-    rotulo: "Mistério recente",
-    titulo: caso.title,
-    descricao: caso.description,
-    href: ROUTES.investigacao(caso.id),
-  }));
-
   return (
     <ContentGrid
       main={
         <>
-          <Hero destaques={destaques} />
+          <Hero />
           <ExploreCards />
           <InvestigacoesRecentes casos={recentes} />
         </>

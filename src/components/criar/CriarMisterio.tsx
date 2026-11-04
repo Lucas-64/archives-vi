@@ -7,6 +7,7 @@ import styled from "styled-components";
 
 import { ROUTES } from "../../constants/routes";
 import { criarInvestigacaoNaApi } from "../../lib/investigacoesApi";
+import { useRascunhoAutomatico } from "../../lib/useRascunhoAutomatico";
 import { useSessao } from "../auth/SessaoProvider";
 import { ROTULO_CATEGORIA, ESTADO_INVESTIGACAO } from "../../lib/investigacaoEstado";
 import { AnchorNav } from "../investigacao/AnchorNav";
@@ -32,7 +33,7 @@ import {
 // Exige sessão (a API também exige). Limites e permissões são decididos pelo servidor.
 export function CriarMisterio() {
   const router = useRouter();
-  const { estado } = useSessao();
+  const { estado, usuario } = useSessao();
   const [rascunho, setRascunho] = useState<RascunhoInvestigacao>(RASCUNHO_VAZIO);
   const [tentouEnviar, setTentouEnviar] = useState(false);
   const [enviando, setEnviando] = useState(false);
@@ -40,6 +41,16 @@ export function CriarMisterio() {
   const [erroGeral, setErroGeral] = useState<string | null>(null);
 
   const errosLocais = validarInvestigacao(rascunho);
+
+  // Rascunho automático (só neste navegador, por usuário). Apagado ao publicar.
+  const chaveRascunho = estado === "autenticado" && usuario ? `rascunho:investigacao:${usuario.usuario}` : null;
+  const autosave = useRascunhoAutomatico<RascunhoInvestigacao>(
+    chaveRascunho,
+    rascunho,
+    RASCUNHO_VAZIO,
+    setRascunho,
+    (r) => JSON.stringify(r) === JSON.stringify(RASCUNHO_VAZIO),
+  );
 
   // Alterar um campo limpa o que o servidor recusou nele (o erro de uma lista some ao editar qualquer item).
   function alterar(proximo: RascunhoInvestigacao, chaves: string[]) {
@@ -64,6 +75,7 @@ export function CriarMisterio() {
     const resultado = await criarInvestigacaoNaApi(montarEntrada(rascunho));
 
     if (resultado.ok) {
+      autosave.limpar();
       // Mantém o estado "enviando" até a navegação, para não permitir um segundo envio.
       router.push(ROUTES.investigacao(resultado.slug));
       return;
@@ -104,6 +116,14 @@ export function CriarMisterio() {
                 descricao="Criar um mistério exige uma conta. Entre ou crie a sua para abrir mistérios."
                 acao={<Link href={ROUTES.entrar}>Entrar</Link>}
               />
+            ) : null}
+            {estado === "autenticado" && autosave.restaurado ? (
+              <AvisoRascunho role="status">
+                Rascunho restaurado neste navegador.{" "}
+                <button type="button" onClick={autosave.descartar}>
+                  Descartar rascunho
+                </button>
+              </AvisoRascunho>
             ) : null}
             {estado === "autenticado" ? (
               <FormularioMisterio
@@ -161,4 +181,19 @@ const Texto = styled.p`
   line-height: 1.6;
   color: ${({ theme }) => theme.colors.text};
   overflow-wrap: anywhere;
+`;
+
+const AvisoRascunho = styled.p`
+  padding: 12px 16px;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  font-size: 14px;
+  color: ${({ theme }) => theme.colors.textSecondary};
+
+  button {
+    color: ${({ theme }) => theme.colors.pink};
+    text-decoration: underline;
+    font: inherit;
+    cursor: pointer;
+  }
 `;

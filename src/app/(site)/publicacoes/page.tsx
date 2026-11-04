@@ -1,10 +1,9 @@
 import Link from "next/link";
 
-import { CaseCardClassico } from "../../../components/cards/CaseCardClassico";
 import { PublicationCardComCapa } from "../../../components/cards/PublicationCardComCapa";
 import { FilterTabs } from "../../../components/filters/FilterTabs";
-import { ContentGrid } from "../../../components/layout/ContentGrid";
 import { Subtitulo } from "../../../components/investigacao/Secao";
+import { ContentGrid } from "../../../components/layout/ContentGrid";
 import { CardList } from "../../../components/page/CardList";
 import { NotaLista } from "../../../components/page/NotaLista";
 import { PageBody } from "../../../components/page/PageBody";
@@ -15,12 +14,10 @@ import { EmptyState } from "../../../components/states/EmptyState";
 import { FILTROS_PUBLICACOES } from "../../../constants/filtrosPublicacoes";
 import { ROUTES } from "../../../constants/routes";
 import { TAGS_TEMATICAS, type TagTematica } from "../../../constants/tagsTematicas";
-import { investigacaoParaCaso, perfilParaCriador, publicacaoParaFront } from "../../../lib/adaptadores";
+import { perfilParaCriador, publicacaoParaFront } from "../../../lib/adaptadores";
 import { getAtualizacoes, getTopicosForum } from "../../../lib/data";
 import { lerTagTematica } from "../../../lib/tags";
-import { investigacoesDaListagem } from "../../../server/leitura/investigacoes";
 import { publicacoesDaListagem } from "../../../server/leitura/publicacoes";
-import { LIMITE_LISTA } from "../../../server/leitura/usuarios";
 import type { TipoPublicacao } from "../../../types/Publicacao";
 
 // Área comunitária unificada de Teorias e Investigações (ADR-020) no layout da versão de backup (commit 355b30ad),
@@ -30,6 +27,9 @@ import type { TipoPublicacao } from "../../../types/Publicacao";
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<{ tipo?: string; tag?: string }>;
+
+// Limite provisório da lista (decisão D2): sem "Ver mais" ainda, evita a lista longa.
+const LIMITE_EXIBIDO = 12;
 
 const TIPOS_VALIDOS: readonly TipoPublicacao[] = ["teoria", "investigacao"];
 
@@ -57,16 +57,13 @@ export default async function PublicacoesPage({
   const tipo = lerTipo(params.tipo);
   const tag = lerTagTematica(params.tag);
 
-  // O filtro de tema vale para as duas listas (a API filtra investigações por tema). "Teorias" mostra só publicações.
-  const mostrarInvestigacoes = tipo === undefined || tipo === "investigacao";
-
-  const [{ itens, haMais }, investigacoesLista, topicos, atualizacoes] = await Promise.all([
+  const [{ itens: todos, haMais: haMaisServidor }, topicos, atualizacoes] = await Promise.all([
     publicacoesDaListagem(tipo, tag),
-    mostrarInvestigacoes ? investigacoesDaListagem(tag) : Promise.resolve({ itens: [], haMais: false }),
     getTopicosForum(),
     getAtualizacoes(),
   ]);
-  const investigacoes = investigacoesLista.itens.map(investigacaoParaCaso);
+  const itens = todos.slice(0, LIMITE_EXIBIDO);
+  const haMais = haMaisServidor || todos.length > LIMITE_EXIBIDO;
   const publicacoes = itens.map((item) => ({
     publicacao: publicacaoParaFront(item),
     autor: perfilParaCriador({ usuario: item.autor.usuario, nome: item.autor.nome, bio: "" }),
@@ -81,7 +78,7 @@ export default async function PublicacoesPage({
   const rotuloPublicacoes =
     tipo === "investigacao" ? "Publicações de investigação" : tipo === "teoria" ? "Teorias" : "Publicações";
 
-  const semNada = publicacoes.length === 0 && investigacoes.length === 0;
+  const semNada = publicacoes.length === 0;
 
   return (
     <ContentGrid
@@ -122,23 +119,6 @@ export default async function PublicacoesPage({
               )
             ) : null}
 
-            {investigacoes.length > 0 ? (
-              <section aria-label="Investigações">
-                <Subtitulo>Investigações</Subtitulo>
-                <CardList>
-                  {investigacoes.map((caso) => (
-                    <CaseCardClassico
-                      key={caso.id}
-                      caso={caso}
-                      orientacao="horizontal"
-                      href={ROUTES.comunidadeInvestigacao(caso.id)}
-                    />
-                  ))}
-                </CardList>
-                {investigacoesLista.haMais ? <NotaLista>Mostrando as {LIMITE_LISTA} investigações mais recentes.</NotaLista> : null}
-              </section>
-            ) : null}
-
             {publicacoes.length > 0 ? (
               <section aria-label={rotuloPublicacoes}>
                 <Subtitulo>{rotuloPublicacoes}</Subtitulo>
@@ -147,7 +127,7 @@ export default async function PublicacoesPage({
                     <PublicationCardComCapa key={publicacao.id} publicacao={publicacao} autor={autor} />
                   ))}
                 </CardList>
-                {haMais ? <NotaLista>Mostrando as {LIMITE_LISTA} publicações mais recentes.</NotaLista> : null}
+                {haMais ? <NotaLista>Mostrando as {LIMITE_EXIBIDO} publicações mais recentes.</NotaLista> : null}
               </section>
             ) : null}
           </PageBody>
