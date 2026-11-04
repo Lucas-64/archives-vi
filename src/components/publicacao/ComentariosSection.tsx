@@ -7,7 +7,7 @@ import styled from "styled-components";
 
 import { ROUTES } from "../../constants/routes";
 import { formatarNumero } from "../../lib/formatacao";
-import { criarComentarioNaApi, listarComentariosNaApi, type ComentarioApi } from "../../lib/publicacoesApi";
+import { criarComentarioNaApi, listarComentariosNaApi, type ComentarioApi, type TipoAlvo } from "../../lib/publicacoesApi";
 import { useSessao } from "../auth/SessaoProvider";
 import { Avatar } from "../ui/Avatar";
 import { Button } from "../ui/Button";
@@ -20,13 +20,15 @@ export interface ComentariosSectionProps {
   total: number;
   iniciais: ComentarioApi[];
   proximoCursor: string | null;
+  // O que está sendo comentado. Padrão: publicação.
+  tipo?: TipoAlvo;
 }
 
 const LIMITE_TEXTO = 2000;
 
 // Comentários reais. A lista e o total vêm do servidor; um comentário só entra na tela depois de o servidor
 // confirmá-lo. Comentar exige sessão; para visitantes o campo fica desabilitado, com link para /entrar.
-export function ComentariosSection({ slug, total, iniciais, proximoCursor }: ComentariosSectionProps) {
+export function ComentariosSection({ slug, total, iniciais, proximoCursor, tipo = "publicacao" }: ComentariosSectionProps) {
   const router = useRouter();
   const { estado } = useSessao();
   const id = useId();
@@ -56,7 +58,7 @@ export function ComentariosSection({ slug, total, iniciais, proximoCursor }: Com
     setErroTexto(undefined);
     setErroGeral(null);
     setEnviando(true);
-    const resultado = await criarComentarioNaApi(slug, limpo);
+    const resultado = await criarComentarioNaApi(slug, limpo, tipo);
     setEnviando(false);
 
     if (resultado.ok) {
@@ -76,7 +78,7 @@ export function ComentariosSection({ slug, total, iniciais, proximoCursor }: Com
     if (!cursor || carregandoMais) return;
     setCarregandoMais(true);
     setErroMais(null);
-    const resultado = await listarComentariosNaApi(slug, cursor);
+    const resultado = await listarComentariosNaApi(slug, cursor, tipo);
     setCarregandoMais(false);
     if (!resultado.ok) {
       setErroMais(resultado.erroGeral ?? "Não foi possível carregar mais comentários.");

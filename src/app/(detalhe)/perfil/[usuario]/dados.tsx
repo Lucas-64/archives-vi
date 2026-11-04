@@ -8,7 +8,7 @@ import { NotaLista } from "../../../../components/page/NotaLista";
 import { Skeleton } from "../../../../components/states/Skeleton";
 import { MeuPerfilVisaoGeral } from "../../../../components/perfil/MeuPerfilVisaoGeral";
 import { investigacaoParaCaso, publicacaoParaFront } from "../../../../lib/adaptadores";
-import { misteriosDaListagem } from "../../../../server/leitura/misterios";
+import { misteriosDoUsuario } from "../../../../server/leitura/misterios";
 import { LIMITE_LISTA, investigacoesDoUsuario, publicacoesDoUsuario } from "../../../../server/leitura/usuarios";
 import type { Criador } from "../../../../types/Criador";
 
@@ -60,19 +60,12 @@ export function InvestigacoesDoPerfil({ usuario }: { usuario: string }) {
   );
 }
 
-// Mistérios da pessoa. A API ainda não filtra mistérios por autor: filtramos os mais recentes da listagem
-// geral (parcial quando há mais de LIMITE_LISTA). Pendência para o Back (filtro `autor`).
-async function misteriosDoUsuario(usuario: string) {
-  const { itens, haMais } = await misteriosDaListagem();
-  return { itens: itens.filter((item) => item.autor.usuario === usuario), haMais };
-}
-
 async function Misterios({ usuario }: { usuario: string }) {
   const { itens, haMais } = await misteriosDoUsuario(usuario);
   return (
     <>
       <MisteriosPerfil itens={itens} />
-      {haMais ? <NotaLista>Considerando só os {LIMITE_LISTA} mistérios mais recentes do site.</NotaLista> : null}
+      {haMais ? <NotaLista>Mostrando os {LIMITE_LISTA} mistérios mais recentes.</NotaLista> : null}
     </>
   );
 }

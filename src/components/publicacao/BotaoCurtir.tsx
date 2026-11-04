@@ -14,11 +14,12 @@ export interface BotaoCurtirProps {
   slug: string;
   curtidas: number;
   euCurti: boolean;
+  tipo?: "publicacao" | "investigacao";
 }
 
 // Curtir pela API real. Não há estado otimista: o botão fica ocupado até o servidor responder e passa a
 // mostrar exatamente o que ele devolveu. Em caso de falha, mantém o estado anterior e explica o que houve.
-export function BotaoCurtir({ slug, curtidas, euCurti }: BotaoCurtirProps) {
+export function BotaoCurtir({ slug, curtidas, euCurti, tipo = "publicacao" }: BotaoCurtirProps) {
   const { estado } = useSessao();
   const [atual, setAtual] = useState({ curtidas, euCurti });
   const [enviando, setEnviando] = useState(false);
@@ -28,7 +29,7 @@ export function BotaoCurtir({ slug, curtidas, euCurti }: BotaoCurtirProps) {
     if (enviando) return;
     setEnviando(true);
     setErro(null);
-    const resultado = await alterarCurtidaNaApi(slug, !atual.euCurti);
+    const resultado = await alterarCurtidaNaApi(slug, !atual.euCurti, tipo);
     setEnviando(false);
     if (resultado.ok) {
       setAtual({ curtidas: resultado.curtidas, euCurti: resultado.euCurti });

@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import { ContentGrid } from "../../../../components/layout/ContentGrid";
+import { ComentariosSection } from "../../../../components/publicacao/ComentariosSection";
+import { Skeleton } from "../../../../components/states/Skeleton";
 import { MisterioPagina } from "../../../../components/misterio/MisterioPagina";
-import { misterioPorSlug } from "../../../../server/leitura/misterios";
+import { comentariosDoMisterio, misterioPorSlug } from "../../../../server/leitura/misterios";
 
 type Params = Promise<{ slug: string }>;
 
@@ -16,6 +19,11 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const dados = await misterioPorSlug(slug);
   if (!dados) return { title: "Mistério não encontrado | ARCHIVES VI" };
   return { title: `${dados.titulo} | ARCHIVES VI`, description: dados.descricao };
+}
+
+async function Comentarios({ slug, total }: { slug: string; total: number }) {
+  const { itens, proximoCursor } = await comentariosDoMisterio(slug);
+  return <ComentariosSection tipo="misterio" slug={slug} total={total} iniciais={itens} proximoCursor={proximoCursor} />;
 }
 
 export default async function MisterioPage({ params }: { params: Params }) {
@@ -36,6 +44,11 @@ export default async function MisterioPage({ params }: { params: Params }) {
           autor={dados.autor}
           criadoEm={dados.criadoEm}
           investigacoesAbertas={dados.investigacoesAbertas}
+          comentarios={
+            <Suspense fallback={<Skeleton height="200px" radius="lg" />}>
+              <Comentarios slug={dados.slug} total={dados.comentarios} />
+            </Suspense>
+          }
         />
       }
     />

@@ -32,6 +32,9 @@ export interface ComunidadeInvestigacaoClassicaProps {
   evidenciasReais?: ReactNode;
   // Investigação do banco: discussão e síntese não têm fonte real e mostram estado vazio rotulado.
   semFonte?: boolean;
+  // Investigação do banco: discussão real (comentários) e ações (curtir).
+  discussaoReal?: ReactNode;
+  acoesReais?: ReactNode;
   // Mistério ao qual esta investigação está vinculada (opcional, ADR-044).
   misterio?: { slug: string; titulo: string };
 }
@@ -46,6 +49,8 @@ export function ComunidadeInvestigacaoClassica({
   evidenciasReais,
   semFonte = false,
   misterio,
+  discussaoReal,
+  acoesReais,
 }: ComunidadeInvestigacaoClassicaProps) {
   const evidenciaDiscussao = detalhe.evidencias.find(
     (evidencia) => evidencia.id === detalhe.discussaoEvidenciaId,
@@ -63,6 +68,7 @@ export function ComunidadeInvestigacaoClassica({
         />
         <Rotulo>Discussão da comunidade</Rotulo>
         <Titulo>{caso.title}</Titulo>
+        {acoesReais}
         {misterio ? <LinkMisterio href={ROUTES.misterio(misterio.slug)}>Mistério de origem: {misterio.titulo}</LinkMisterio> : null}
       </Cabecalho>
 
@@ -89,7 +95,9 @@ export function ComunidadeInvestigacaoClassica({
       </Secao>
 
       <Secao id="discussao" titulo="Discussão">
-        {semFonte ? (
+        {discussaoReal ? (
+          discussaoReal
+        ) : semFonte ? (
           <SemDados>A discussão desta investigação aparece aqui quando houver registro.</SemDados>
         ) : (
           <DiscussaoSection

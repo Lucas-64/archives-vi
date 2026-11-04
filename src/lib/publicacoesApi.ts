@@ -59,15 +59,18 @@ export function criarPublicacaoNaApi(dados: { titulo: string; corpo: string; ima
   });
 }
 
-export function criarComentarioNaApi(slug: string, textoDoComentario: string) {
-  return chamar("/api/v1/comentarios", "POST", { alvo: `publicacao:${slug}`, texto: textoDoComentario }, ["texto"], (json) => {
+// Alvo dos comentários: publicação (padrão), mistério ou investigação (ADR-044).
+export type TipoAlvo = "publicacao" | "misterio" | "investigacao";
+
+export function criarComentarioNaApi(slug: string, textoDoComentario: string, tipo: TipoAlvo = "publicacao") {
+  return chamar("/api/v1/comentarios", "POST", { alvo: `${tipo}:${slug}`, texto: textoDoComentario }, ["texto"], (json) => {
     const comentario = lerComentario(json);
     return comentario ? { comentario } : null;
   });
 }
 
-export function listarComentariosNaApi(slug: string, cursor: string) {
-  const query = new URLSearchParams({ alvo: `publicacao:${slug}`, cursor });
+export function listarComentariosNaApi(slug: string, cursor: string, tipo: TipoAlvo = "publicacao") {
+  const query = new URLSearchParams({ alvo: `${tipo}:${slug}`, cursor });
   return chamar(`/api/v1/comentarios?${query}`, "GET", undefined, [], (json) => {
     const pagina = json as { itens?: unknown[]; proximoCursor?: unknown } | null;
     if (!Array.isArray(pagina?.itens)) return null;
@@ -80,8 +83,9 @@ export function listarComentariosNaApi(slug: string, cursor: string) {
   });
 }
 
-export function alterarCurtidaNaApi(slug: string, curtir: boolean) {
-  return chamar(`/api/v1/publicacoes/${encodeURIComponent(slug)}/curtida`, curtir ? "PUT" : "DELETE", undefined, [], (json) => {
+export function alterarCurtidaNaApi(slug: string, curtir: boolean, tipo: "publicacao" | "investigacao" = "publicacao") {
+  const base = tipo === "investigacao" ? "investigacoes" : "publicacoes";
+  return chamar(`/api/v1/${base}/${encodeURIComponent(slug)}/curtida`, curtir ? "PUT" : "DELETE", undefined, [], (json) => {
     const e = json as { curtidas?: unknown; euCurti?: unknown } | null;
     return typeof e?.curtidas === "number" && typeof e.euCurti === "boolean" ? { curtidas: e.curtidas, euCurti: e.euCurti } : null;
   });

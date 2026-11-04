@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import styled from "styled-components";
 
 import { ROUTES } from "../../constants/routes";
@@ -9,7 +10,6 @@ import { classificacaoDoMisterio, textoInvestigacoesAbertas } from "../../lib/mi
 import { ImagemCapa } from "../investigacao-classica/ImagemCapa";
 import { VideoYoutube } from "../investigacao/VideoYoutube";
 import { Breadcrumb } from "../navigation/Breadcrumb";
-import { EmptyState } from "../states/EmptyState";
 import { ClassificacaoBadge } from "../ui/ClassificacaoBadge";
 
 export interface MisterioPaginaProps {
@@ -22,6 +22,8 @@ export interface MisterioPaginaProps {
   autor: { nome: string; usuario: string };
   criadoEm: string;
   investigacoesAbertas: number;
+  // Comentários simples, montados no servidor (lista real e formulário).
+  comentarios: ReactNode;
 }
 
 // Página simples do mistério (ADR-044): para ler ou assistir. Sem evidências, votos nem ferramentas de
@@ -68,12 +70,9 @@ export function MisterioPagina(p: MisterioPaginaProps) {
         </Botao>
       </Aprofundar>
 
-      <section aria-labelledby="misterio-comentarios">
-        <Subtitulo id="misterio-comentarios">Comentários</Subtitulo>
-        <EmptyState
-          titulo="Comentários ainda não disponíveis"
-          descricao="Os comentários simples deste mistério chegam em breve. Para discutir a fundo, abra uma investigação."
-        />
+      <section aria-label="Comentários do mistério">
+        {p.comentarios}
+        <Nota>Comentários simples. Para discutir a fundo, com evidências, abra uma investigação.</Nota>
       </section>
     </Pagina>
   );
@@ -169,10 +168,8 @@ const Botao = styled(Link)`
   }
 `;
 
-const Subtitulo = styled.h2`
-  margin-bottom: 12px;
-  font-family: ${({ theme }) => theme.fonts.display};
-  font-size: 24px;
-  font-weight: 700;
-  text-transform: uppercase;
+const Nota = styled.p`
+  margin-top: 12px;
+  font-size: 13px;
+  color: ${({ theme }) => theme.colors.textSecondary};
 `;

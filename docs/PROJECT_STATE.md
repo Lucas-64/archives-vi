@@ -4,7 +4,7 @@
 
 ## Próximo passo
 
-**Mistério x Investigação (ADR-044, 2026-11-04):** lotes 1 e 2 do Front e Back 1 prontos na branch `claude/project-thread-pdiksy`, sem merge na `main`. Falta o Back 2 (comentários no mistério, filtro `autor` em mistérios, seed novo) e o lote 3 (comentários e curtidas na investigação). Nada vai para a `main` antes do lote 3 validado e da confirmação do Lucas. Rotas e nomes desta seção substituem os das seções antigas abaixo.
+**Mistério x Investigação (ADR-044, 2026-11-04):** lotes 1 e 2 do Front e Back 1 prontos na branch `claude/project-thread-pdiksy`, sem merge na `main`. Back 2 e o lote 3 do Front (comentários no mistério, comentários e curtida na investigação, filtro `autor`) também estão prontos na mesma branch. Falta a revisão do Lucas. Nada vai para a `main` antes do lote 3 validado e da confirmação do Lucas. Rotas e nomes desta seção substituem os das seções antigas abaixo.
 
 **Upload de imagem (ADR-043):** implementado e validado com o Vercel Blob real em 2026-11-03 (token configurado). Pontos com upload: capa da investigação, evidência, teoria, avatar e banner. Sem ponto de upload real: fórum, galeria, Fotografias. Pendências: limpeza de imagens órfãs no Blob (remover do registro não apaga o arquivo).
 

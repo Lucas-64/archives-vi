@@ -5,6 +5,8 @@ import { Suspense } from "react";
 import { ComunidadeInvestigacaoClassica } from "../../../../components/investigacao-classica/ComunidadeInvestigacaoClassica";
 import { InvestigacaoSidebarClassica } from "../../../../components/investigacao-classica/InvestigacaoSidebarClassica";
 import { EvidenciasInvestigacao } from "../../../../components/investigacao/EvidenciasInvestigacao";
+import { BotaoCurtir } from "../../../../components/publicacao/BotaoCurtir";
+import { ComentariosSection } from "../../../../components/publicacao/ComentariosSection";
 import { ContentGrid } from "../../../../components/layout/ContentGrid";
 import { EmptyState } from "../../../../components/states/EmptyState";
 import { getInvestigacaoPorSlug } from "../../../../lib/data";
@@ -21,6 +23,7 @@ import { usuarioDaSessao, type UsuarioDaSessao } from "../../../../server/auth/s
 import type { InvestigacaoDetalhePublico } from "../../../../server/contracts/investigacoes";
 import {
   evidenciasAceitas,
+  comentariosDaInvestigacao,
   filaDeSugestoes,
   historicoDaInvestigacao,
   investigacaoPorSlug,
@@ -74,6 +77,13 @@ async function Evidencias({ dados, sessao }: { dados: InvestigacaoDetalhePublico
       fila={fila.itens.map(sugestaoParaFront)}
       filaTemMais={fila.haMais}
     />
+  );
+}
+
+async function Discussao({ dados }: { dados: InvestigacaoDetalhePublico }) {
+  const { itens, proximoCursor } = await comentariosDaInvestigacao(dados.slug);
+  return (
+    <ComentariosSection tipo="investigacao" slug={dados.slug} total={dados.comentarios} iniciais={itens} proximoCursor={proximoCursor} />
   );
 }
 
@@ -131,6 +141,12 @@ export default async function ComunidadeInvestigacaoPage({ params }: { params: P
           capa={caso.capa}
           misterio={dados.misterio}
           semFonte
+          acoesReais={<BotaoCurtir tipo="investigacao" slug={dados.slug} curtidas={dados.curtidas} euCurti={dados.euCurti} />}
+          discussaoReal={
+            <Suspense fallback={<Skeleton height="200px" radius="lg" />}>
+              <Discussao dados={dados} />
+            </Suspense>
+          }
           evidenciasReais={
             <Suspense fallback={<Skeleton height="260px" radius="lg" />}>
               <Evidencias dados={dados} sessao={sessao} />
