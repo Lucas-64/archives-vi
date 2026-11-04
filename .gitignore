@@ -9,3 +9,19 @@ next-env.d.ts
 npm-debug.log*
 Thumbs.db
 Desktop.ini
+
+# Arquivos locais fora do projeto
+/Maquinas_de_Turing_Fundamentos_Computabilidade_Limites.pptx
+/apresentacao_maquinas_turing_canva.pdf
+/generate_turing_presentation.py
+/Microsoft/
+__pycache__/
+/docs/BACKEND_HANDOFF.md
+
+# Diagnóstico local de migração
+/diagnostico-migracao.cjs
+/diagnostico-neon.cjs
+/diagnostico-migrate.cmd
+/verificar-migracoes.cjs
+/drizzle-migrate.log
+/migrate-debug.log
