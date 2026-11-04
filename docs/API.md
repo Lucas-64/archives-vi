@@ -4,7 +4,7 @@ Status: **v1.2, stack confirmada pelo Lucas em 2026-10-20 (Next.js Route Handler
 
 **Etapas:** rotas marcadas **[A]** fazem parte do MVP-A (implementar primeiro); **[B]** são MVP-B (reservadas, não implementar agora). **Desenvolvimento e testes 100% locais e gratuitos**; nenhum serviço externo é necessário para nenhuma rota [A].
 
-**Implementado e testado até agora (Tarefas 2 a 8):** convenções da seção 1 (erros, paginação, validação), as rotas de autenticação da seção 3 (`cadastro`, `entrar`, `sair`, `eu`) as quatro rotas de publicações da seção 7 (`GET /publicacoes`, `GET /publicacoes/{slug}`, `GET /publicacoes/{slug}/relacionadas`, `POST /publicacoes`) e, da Tarefa 5, `GET`/`POST /comentarios` (só alvo `publicacao:{slug}`) e `PUT`/`DELETE /publicacoes/{slug}/curtida`, e, da Tarefa 6, as rotas de investigações da seção 5 marcadas como implementadas, marcadas com **(implementado)**, e, da Tarefa 7, as rotas de evidências, sugestões, `GET /me/sugestoes`, moderação de `status`, troca de papéis e leitura da auditoria (seções 6 e 12), e, da Tarefa 8, `GET /criadores`, `GET /usuarios/{usuario}`, suas listas de publicações e investigações e `PATCH /me/perfil` (seção 4). e, do lote 1 de Mistérios (2026-11-04), a §15: `GET`/`POST /misterios`, `GET /misterios/{slug}`, `misterio` na criação de investigações, `GET /investigacoes?misterio=` e o campo `investigacoesAbertas`. Todo o resto continua proposta. Os esquemas Zod em `src/server/contracts/` e os testes são a fonte de verdade do que está implementado.
+**Implementado e testado até agora (Tarefas 2 a 8):** convenções da seção 1 (erros, paginação, validação), as rotas de autenticação da seção 3 (`cadastro`, `entrar`, `sair`, `eu`) as quatro rotas de publicações da seção 7 (`GET /publicacoes`, `GET /publicacoes/{slug}`, `GET /publicacoes/{slug}/relacionadas`, `POST /publicacoes`) e, da Tarefa 5, `GET`/`POST /comentarios` (só alvo `publicacao:{slug}`) e `PUT`/`DELETE /publicacoes/{slug}/curtida`, e, da Tarefa 6, as rotas de investigações da seção 5 marcadas como implementadas, marcadas com **(implementado)**, e, da Tarefa 7, as rotas de evidências, sugestões, `GET /me/sugestoes`, moderação de `status`, troca de papéis e leitura da auditoria (seções 6 e 12), e, da Tarefa 8, `GET /criadores`, `GET /usuarios/{usuario}`, suas listas de publicações e investigações e `PATCH /me/perfil` (seção 4). e, do lote 3 do backend, a §16 (comentários em mistério e investigação, curtida de investigação, filtro `autor`), e, do lote 1 de Mistérios (2026-11-04), a §15: `GET`/`POST /misterios`, `GET /misterios/{slug}`, `misterio` na criação de investigações, `GET /investigacoes?misterio=` e o campo `investigacoesAbertas`. Todo o resto continua proposta. Os esquemas Zod em `src/server/contracts/` e os testes são a fonte de verdade do que está implementado.
 
 Base: `/api/v1`, mesma origem do site (ver decisão D5 do plano). Formato: JSON, UTF-8, idioma dos campos e mensagens: português do Brasil. Os nomes dos campos seguem os tipos que o front já usa (`src/types/`) para reduzir adaptação.
 
@@ -133,6 +133,7 @@ interface MisterioResumo {          // MisterioDetalhePublico é o mesmo tipo
   autor: { nome: string; usuario: string };
   criadoEm: string; atualizadoEm: string;     // ISO 8601 UTC
   investigacoesAbertas: number;     // investigações vinculadas e NÃO encerradas pelo autor (D4)
+  comentarios: number;              // lote 3
 }
 ```
 
@@ -148,7 +149,7 @@ interface MisterioResumo {          // MisterioDetalhePublico é o mesmo tipo
 | `GET /investigacoes?misterio={slug}` | P | Acrescenta o filtro à lista de §5 (combina com `categoria` e `tag`): só as investigações vinculadas a esse mistério, **abertas e encerradas**, com a paginação e a visibilidade de sempre. Mistério inexistente ou `oculto`: `404`; slug fora do formato: `422` |
 | `POST /investigacoes` | M | Aceita `misterio?: string` (slug). Vazio/ausente = investigação sem mistério. Mistério inexistente, `oculto` ou slug inválido: `422` com `campos.misterio`, e **nada é gravado**. O vínculo é definido só na criação: `PATCH /investigacoes/{slug}` recusa `misterio` com `422` |
 
-Não existem (ainda) edição, ocultação ou exclusão de mistério por API; `oculto` é um estado reservado à moderação futura e já é respeitado em toda leitura. Comentários no mistério (alvo `misterio:{slug}`) e o seed novo são do lote 2.
+Não existem (ainda) edição, ocultação ou exclusão de mistério por API; `oculto` é um estado reservado à moderação futura e já é respeitado em toda leitura. Comentários, curtidas e o filtro `autor` estão na §16.
 
 ### 15.3 Regras
 
@@ -157,6 +158,27 @@ Não existem (ainda) edição, ocultação ou exclusão de mistério por API; `o
 - **Slug**: mistérios, investigações e publicações dividem um único espaço de slugs; criar com título já usado gera outro sufixo.
 - **Remoção**: `investigacoes.misterio_id` é `ON DELETE RESTRICT`; um mistério com investigações não pode ser apagado no banco.
 - Autor, ocultação e visibilidade: o autor do mistério **não** tem poderes sobre as investigações vinculadas (cada investigação continua sendo do seu responsável).
+
+## 16. Comentários, curtidas e filtro por autor **(implementado, lote 3 do backend)**
+
+Migração `0009_comentarios_curtidas_alvos`. Contrato congelado para o front.
+
+| Rota | Acesso | Notas |
+|---|---|---|
+| `GET /comentarios?alvo=` | P | `alvo` agora aceita `publicacao:{slug}`, `misterio:{slug}` e `investigacao:{slug}` (evidência continua fora: `422`). Mesma lista de antes (`ComentarioPublico`, do mais antigo ao mais novo, `?limite=`, `?cursor=`). Alvo inexistente (ou mistério `oculto`): `404`; alvo malformado: `422` |
+| `POST /comentarios` | M | `{ alvo, texto }`, mesmas regras (texto 1 a 2000, estrito, 20 por minuto por membro) para os três alvos. `201 ComentarioPublico`. Sem edição, exclusão nem respostas |
+| `PUT /investigacoes/{slug}/curtida` | M | Idempotente. `200 { curtidas, euCurti }`. 404 se a investigação não existe. 60 por minuto por membro (junto com as curtidas de publicação) |
+| `DELETE /investigacoes/{slug}/curtida` | M | Idempotente; remove só a curtida do próprio membro. `200 { curtidas, euCurti }` |
+| `GET /misterios?autor={usuario}` | P | Só os mistérios da conta (combina com `classificacao`). Conta inexistente: `404`; formato inválido: `422` |
+| `GET /investigacoes?autor={usuario}` | P | Só as investigações de que a conta é responsável (mesmo filtro que `/usuarios/{usuario}/investigacoes`, agora também na lista geral) |
+
+**Campos novos**: `InvestigacaoResumo` e `InvestigacaoDetalhePublico` ganham `comentarios`, `curtidas` e `euCurti` (falso para visitante; vem verdadeiro na leitura com sessão). `MisterioResumo` ganha `comentarios`. Mistério não tem curtida (D5 limita a curtida à investigação).
+
+**Aceitar/recusar evidências (D5)**: já existe (§6, `POST /investigacoes/{slug}/sugestoes/{id}/aceitar|recusar`); nenhum sistema novo de votos foi criado.
+
+**Leitura para as páginas** (`src/server/leitura/*`): `misteriosDoUsuario(usuario)`, `comentariosDoMisterio(slug)`, `comentariosDaInvestigacao(slug)`.
+
+**Seed (D8)**: `npm run seed:demonstracao-misterios -- --confirmar` agora cria um mistério por classificação, com investigações vinculadas de exemplo (uma encerrada, para testar `investigacoesAbertas`), na conta `autor_demonstracao`. Só banco de desenvolvimento; recusa `NODE_ENV=production`. É idempotente por slug e **não apaga nada**: para limpar os dados antigos de exemplo, resete o banco de desenvolvimento (a decisão D8 autoriza; não foi feito por mim).
 
 ## 14. Limites de taxa
 

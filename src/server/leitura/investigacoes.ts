@@ -8,6 +8,8 @@ import type { InvestigacaoDetalhePublico, InvestigacaoResumo, RegistroHistoricoP
 import { esquemaSlug } from "../contracts/publicacoes";
 import { obterDb } from "../db/cliente";
 import { ErroApi } from "../http/erros";
+import type { ComentarioPublico } from "../contracts/interacoes";
+import { listarComentarios } from "../servicos/interacoes";
 import { listarEvidencias, listarSugestoes, listarSugestoesDoMembro, type Ator } from "../servicos/evidencias";
 import { listarHistorico, listarInvestigacoes, obterInvestigacao } from "../servicos/investigacoes";
 import { LIMITE_LISTA, type ListaLimitada } from "./usuarios";
@@ -59,4 +61,10 @@ export const filaDeSugestoes = cache(async (slug: string, ator: Ator): Promise<L
 export const minhasSugestoesNaInvestigacao = cache(async (slug: string, ator: Ator): Promise<SugestaoDoMembro[]> => {
   const pagina = await listarSugestoesDoMembro({ db: obterDb(), agora }, ator, {}, { limite: 100 });
   return pagina.itens.filter((item) => item.investigacao.slug === slug);
+});
+
+// Comentários da investigação (a "Discussão"), do mais antigo ao mais novo.
+export const comentariosDaInvestigacao = cache(async (slug: string): Promise<{ itens: ComentarioPublico[]; proximoCursor: string | null }> => {
+  const pagina = await listarComentarios({ db: obterDb(), agora }, { tipo: "investigacao", slug }, { limite: LIMITE_LISTA });
+  return { itens: pagina.itens, proximoCursor: pagina.proximoCursor };
 });

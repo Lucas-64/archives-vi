@@ -7,19 +7,30 @@ export const LIMITES_COMENTARIO = { texto: { minimo: 1, maximo: 2000 } } as cons
 // \t, \n e \r passam; NUL e demais caracteres de controle não são texto.
 const CONTROLE = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
 
-// Alvo no formato do contrato: "publicacao:{slug}". Investigação e evidência ainda não têm comentários.
+export const TIPOS_ALVO_COMENTARIO = ["publicacao", "misterio", "investigacao"] as const;
+export type TipoAlvoComentario = (typeof TIPOS_ALVO_COMENTARIO)[number];
+export interface AlvoComentario {
+  tipo: TipoAlvoComentario;
+  slug: string;
+}
+
+// Alvo no formato do contrato: "publicacao:{slug}", "misterio:{slug}" ou "investigacao:{slug}".
+// Evidência ainda não tem comentários.
 const esquemaAlvo = z
   .string({ error: "Informe o alvo do comentário." })
   .trim()
-  .superRefine((valor, ctx) => {
+  .transform((valor, ctx): AlvoComentario => {
     const [tipo, ...resto] = valor.split(":");
-    if (tipo !== "publicacao") {
-      ctx.addIssue({ code: "custom", message: "Por enquanto só é possível comentar em publicações (publicacao:{slug})." });
-    } else if (!esquemaSlug.safeParse(resto.join(":")).success) {
-      ctx.addIssue({ code: "custom", message: "Alvo inválido." });
+    if (!(TIPOS_ALVO_COMENTARIO as readonly string[]).includes(tipo)) {
+      ctx.addIssue({ code: "custom", message: "Alvo inválido. Use publicacao:{slug}, misterio:{slug} ou investigacao:{slug}." });
+      return z.NEVER;
     }
-  })
-  .transform((valor) => valor.slice("publicacao:".length));
+    if (!esquemaSlug.safeParse(resto.join(":")).success) {
+      ctx.addIssue({ code: "custom", message: "Alvo inválido." });
+      return z.NEVER;
+    }
+    return { tipo: tipo as TipoAlvoComentario, slug: resto.join(":") };
+  });
 
 export const esquemaListarComentarios = z.object({ alvo: esquemaAlvo });
 

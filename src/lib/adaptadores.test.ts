@@ -39,7 +39,7 @@ describe("adaptadores API -> front", () => {
   it("investigação: id = slug, sem imagem, data só com o dia, tags filtradas", () => {
     const c = investigacaoParaCaso({
       id: "uuid", slug: "minha-inv", titulo: "Titulo", descricao: "Desc", imagem: null, status: "investigating",
-      categoria: "symbol", tags: ["simbolos-mensagens", "x"], contagemEvidencias: 2, atualizadoEm: "2026-10-21T10:11:12.000Z", possuiDetalhe: true,
+      categoria: "symbol", tags: ["simbolos-mensagens", "x"], contagemEvidencias: 2, comentarios: 0, curtidas: 0, euCurti: false, atualizadoEm: "2026-10-21T10:11:12.000Z", possuiDetalhe: true,
     });
     expect(c).toMatchObject({ id: "minha-inv", title: "Titulo", status: "investigating", category: "symbol", evidenceCount: 2, updatedAt: "2026-10-21", tags: ["simbolos-mensagens"] });
     expect(c.image).toBeUndefined();
@@ -49,7 +49,7 @@ describe("adaptadores API -> front", () => {
   it("detalhe da investigação: só o que a API tem, datas só com o dia, sem campos inventados", () => {
     const d = investigacaoDetalheParaFront({
       id: "uuid", slug: "minha-inv", titulo: "T", descricao: "D", imagem: null, status: "investigating", categoria: "symbol", tags: [],
-      contagemEvidencias: 1, atualizadoEm: "2026-10-21T10:00:00.000Z", possuiDetalhe: true, estado: "em_andamento", encerradaPeloAutor: false,
+      contagemEvidencias: 1, comentarios: 0, curtidas: 0, euCurti: false, atualizadoEm: "2026-10-21T10:00:00.000Z", possuiDetalhe: true, estado: "em_andamento", encerradaPeloAutor: false,
       autor: { nome: "Ana", usuario: "ana_s" }, criadoEm: "2026-10-20T23:00:00.000Z",
       teoria: { hipotese: "h", argumentosFavoraveis: ["a"], perguntaCentral: "p", fontes: [] },
       contagens: { revisoes: 2, evidencias: 1 }, permissoes: { podeGerenciar: true, podeSugerirEvidencia: true, podeModerar: false },

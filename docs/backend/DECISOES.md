@@ -94,3 +94,12 @@ Registro curto. As decisões arquiteturais estão em `docs/DECISIONS.md` (ADR-02
 - **Permissões**: qualquer membro autenticado cria mistério (como investigações, D-A). Sem edição, ocultação ou exclusão por API neste lote.
 - **Dados de exemplo**: o seed existente (`seedDemonstracaoMisterios`) NÃO foi alterado e continua criando investigações; a reescrita (D8) é do lote 2. Nenhum reset de banco foi feito; nada rodou fora do banco descartável dos testes.
 
+## 2026-11-04 (Lote 3 do backend, Back 2; D5 e D8)
+
+- **Migração `0009`**: `comentarios` ganha `misterio_id` e `investigacao_id` (cascade), `publicacao_id` vira anulável e um CHECK exige exatamente um alvo (`num_nonnulls = 1`). Curtida de investigação em tabela própria `investigacao_curtidas` (PK composta), sem mexer em `curtidas` das publicações.
+- **Alvo de comentário** é `{ tipo, slug }` no serviço; `listarComentarios` mudou de assinatura (recebe o alvo). Mistério oculto responde 404 para comentar e listar.
+- **Contagens** (`comentarios`, `curtidas`, `euCurti`) em consultas agrupadas, sem N+1. Os campos novos são obrigatórios nos tipos; ajustei duas fixtures de `src/lib/adaptadores.test.ts` (Front) só para compilar.
+- **Sem curtida em mistério** (D5 só pediu na investigação). Evidência: sem sistema novo; vale o aceitar/recusar existente.
+- **Filtro `autor`** por nome de usuário nas duas listas; conta inexistente é 404.
+- **Seed D8** reescrito (mistério por classificação + investigações vinculadas). Não roda sozinho, não apaga dados antigos e não foi executado em nenhum banco real.
+

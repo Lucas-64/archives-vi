@@ -133,7 +133,6 @@ describe("comentários", () => {
       { alvo, texto: 5 },
       { alvo },
       { texto: "sem alvo" },
-      { alvo: "investigacao:algo", texto: "oi" },
       { alvo: "evidencia:abc", texto: "oi" },
       { alvo: "publicacao:Slug Inválido", texto: "oi" },
       { alvo: slug, texto: "oi" },
@@ -221,7 +220,7 @@ describe("comentários", () => {
   it("parâmetros inválidos: alvo ausente 422, limite 51 422, cursor adulterado 400", async () => {
     const slug = await novaPublicacao();
     expect((await listarC(null)).status).toBe(422);
-    expect((await listarC("investigacao:x")).status).toBe(422);
+    expect((await listarC("evidencia:x")).status).toBe(422);
     expect((await listarC(`publicacao:${slug}`, "&limite=51")).status).toBe(422);
     expect((await listarC(`publicacao:${slug}`, "&cursor=%%%")).status).toBe(400);
     const falso = Buffer.from(JSON.stringify({ criadoEm: "2026-02-31T00:00:00Z", id: "00000000-0000-4000-8000-000000000000" })).toString("base64url");

@@ -4,7 +4,7 @@ import { consumirLimite, LIMITES } from "../auth/limiteTaxa";
 import type { CursorMisterios, EntradaCriarMisterio, MisterioDetalhePublico, MisterioResumo } from "../contracts/misterios";
 import type { Banco } from "../db/cliente";
 import { codigoPg } from "../db/erros";
-import { investigacoes, misterios, usuarios } from "../db/esquema";
+import { comentarios, investigacoes, misterios, usuarios } from "../db/esquema";
 import { ErroApi } from "../http/erros";
 import { fatiarPagina, type Pagina } from "../http/paginacao";
 import { escolherSlugLivre, type Executor } from "./slugs";
@@ -44,7 +44,19 @@ async function abertasDe(db: Executor, ids: string[]): Promise<Map<string, numbe
   return mapa;
 }
 
-function resumoDe(linha: Linha, abertas: number): MisterioResumo {
+async function comentariosDe(db: Executor, ids: string[]): Promise<Map<string, number>> {
+  const mapa = new Map<string, number>();
+  if (ids.length === 0) return mapa;
+  const linhas = await db
+    .select({ id: comentarios.misterioId, total: sql<number>`count(*)::int` })
+    .from(comentarios)
+    .where(inArray(comentarios.misterioId, ids))
+    .groupBy(comentarios.misterioId);
+  for (const l of linhas) if (l.id) mapa.set(l.id, l.total);
+  return mapa;
+}
+
+function resumoDe(linha: Linha, abertas: number, numComentarios: number): MisterioResumo {
   const m = linha.mis;
   return {
     id: m.id,
@@ -58,6 +70,7 @@ function resumoDe(linha: Linha, abertas: number): MisterioResumo {
     criadoEm: iso(m.criadoEm),
     atualizadoEm: iso(m.atualizadoEm),
     investigacoesAbertas: abertas,
+    comentarios: numComentarios,
   };
 }
 
@@ -73,11 +86,16 @@ async function buscarLinha(db: Executor, slug: string): Promise<Linha | undefine
 
 export async function listarMisterios(
   deps: DependenciasMisterios,
-  filtros: { classificacao?: string },
+  filtros: { classificacao?: string; autor?: string },
   paginacao: { limite: number; cursor?: CursorMisterios },
 ): Promise<Pagina<MisterioResumo>> {
   const condicoes: SQL[] = [eq(misterios.status, "publicado")];
   if (filtros.classificacao) condicoes.push(eq(misterios.classificacao, filtros.classificacao as never));
+  if (filtros.autor) {
+    const [conta] = await deps.db.select({ id: usuarios.id }).from(usuarios).where(eq(usuarios.usuario, filtros.autor));
+    if (!conta) throw new ErroApi("nao_encontrado", "Usuário não encontrado.");
+    condicoes.push(eq(misterios.autorId, conta.id));
+  }
   if (paginacao.cursor) {
     const c = paginacao.cursor;
     condicoes.push(sql`(${misterios.atualizadoEm}, ${misterios.id}) < (${c.atualizadoEm}::timestamptz, ${c.id}::uuid)`);
@@ -97,15 +115,18 @@ export async function listarMisterios(
   }
   // O cursor guarda o instante com microssegundos, que o driver (Date) perderia.
   const pagina = fatiarPagina(linhas, paginacao.limite, (ultima) => ({ atualizadoEm: ultima.atualizadoEmTexto, id: ultima.mis.id }));
-  const abertas = await abertasDe(deps.db, pagina.itens.map((l) => l.mis.id));
-  return { itens: pagina.itens.map((l) => resumoDe(l, abertas.get(l.mis.id) ?? 0)), proximoCursor: pagina.proximoCursor };
+  const ids = pagina.itens.map((l) => l.mis.id);
+  const abertas = await abertasDe(deps.db, ids);
+  const coms = await comentariosDe(deps.db, ids);
+  return { itens: pagina.itens.map((l) => resumoDe(l, abertas.get(l.mis.id) ?? 0, coms.get(l.mis.id) ?? 0)), proximoCursor: pagina.proximoCursor };
 }
 
 export async function obterMisterio(deps: DependenciasMisterios, slug: string): Promise<MisterioDetalhePublico> {
   const linha = await buscarLinha(deps.db, slug);
   if (!linha) throw new ErroApi("nao_encontrado", MENSAGEM_NAO_ENCONTRADO);
   const abertas = await abertasDe(deps.db, [linha.mis.id]);
-  return resumoDe(linha, abertas.get(linha.mis.id) ?? 0);
+  const coms = await comentariosDe(deps.db, [linha.mis.id]);
+  return resumoDe(linha, abertas.get(linha.mis.id) ?? 0, coms.get(linha.mis.id) ?? 0);
 }
 
 // Usado pela criação de investigações: o mistério precisa existir e estar publicado.

@@ -41,7 +41,7 @@ export const relacionadasDaPublicacao = cache(async (slug: string): Promise<Publ
 
 export const comentariosDaPublicacao = cache(
   async (slug: string): Promise<{ itens: ComentarioPublico[]; proximoCursor: string | null }> => {
-    const pagina = await listarComentarios({ db: obterDb(), agora }, slug, { limite: LIMITE_COMENTARIOS });
+    const pagina = await listarComentarios({ db: obterDb(), agora }, { tipo: "publicacao", slug }, { limite: LIMITE_COMENTARIOS });
     return { itens: pagina.itens, proximoCursor: pagina.proximoCursor };
   },
 );

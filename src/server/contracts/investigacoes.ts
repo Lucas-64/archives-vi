@@ -125,6 +125,8 @@ export const esquemaListarInvestigacoes = z.object({
   tag: z.enum(IDS_TAGS, { error: "Tema desconhecido." }).optional(),
   // Só as investigações vinculadas a este mistério (slug).
   misterio: esquemaSlug.optional(),
+  // Só as de que esta conta (`usuario`) é responsável. Conta inexistente: 404.
+  autor: z.string().regex(/^[a-z0-9_]{3,30}$/, "Usuário inválido.").optional(),
   // Toda investigação da API tem teoria; o parâmetro existe pelo contrato e só aceita "true".
   comDetalhe: z.literal("true", { error: "Use comDetalhe=true." }).optional(),
 });
@@ -155,6 +157,10 @@ export interface InvestigacaoResumo {
   misterio?: { slug: string; titulo: string };
   tags: string[];
   contagemEvidencias: number;
+  // Comentários e curtidas da investigação (D5). `euCurti` é falso para visitante.
+  comentarios: number;
+  curtidas: number;
+  euCurti: boolean;
   video?: { url: string; titulo?: string };
   atualizadoEm: string;
   possuiDetalhe: boolean;

@@ -13,8 +13,10 @@ import type {
 import type { Banco } from "../db/cliente";
 import { codigoPg } from "../db/erros";
 import {
+  comentarios,
   evidencias,
   IDS_TAGS,
+  investigacaoCurtidas,
   investigacaoHistorico,
   investigacaoTags,
   investigacoes,
@@ -96,6 +98,41 @@ async function contagemEvidenciasDe(db: Executor, ids: string[]): Promise<Map<st
   return mapa;
 }
 
+export interface Interacoes {
+  comentarios: number;
+  curtidas: number;
+  euCurti: boolean;
+}
+
+// Comentários e curtidas por investigação, em consultas agrupadas (sem N+1).
+async function interacoesDe(db: Executor, ids: string[], visitanteId?: string): Promise<Map<string, Interacoes>> {
+  const mapa = new Map<string, Interacoes>();
+  if (ids.length === 0) return mapa;
+  const [coms, curs, minhas] = await Promise.all([
+    db
+      .select({ id: comentarios.investigacaoId, total: sql<number>`count(*)::int` })
+      .from(comentarios)
+      .where(inArray(comentarios.investigacaoId, ids))
+      .groupBy(comentarios.investigacaoId),
+    db
+      .select({ id: investigacaoCurtidas.investigacaoId, total: sql<number>`count(*)::int` })
+      .from(investigacaoCurtidas)
+      .where(inArray(investigacaoCurtidas.investigacaoId, ids))
+      .groupBy(investigacaoCurtidas.investigacaoId),
+    visitanteId
+      ? db
+          .select({ id: investigacaoCurtidas.investigacaoId })
+          .from(investigacaoCurtidas)
+          .where(and(inArray(investigacaoCurtidas.investigacaoId, ids), eq(investigacaoCurtidas.usuarioId, visitanteId)))
+      : Promise.resolve([] as { id: string }[]),
+  ]);
+  const nc = new Map(coms.map((l) => [l.id, l.total]));
+  const nl = new Map(curs.map((l) => [l.id, l.total]));
+  const eu = new Set(minhas.map((l) => l.id));
+  for (const id of ids) mapa.set(id, { comentarios: nc.get(id) ?? 0, curtidas: nl.get(id) ?? 0, euCurti: eu.has(id) });
+  return mapa;
+}
+
 // Mutações devolvem o detalhe já na ótica de quem agiu.
 export const comVisitante = (deps: DependenciasInvestigacoes, usuario: { id: string; papel: string }): DependenciasInvestigacoes => ({
   ...deps,
@@ -103,7 +140,7 @@ export const comVisitante = (deps: DependenciasInvestigacoes, usuario: { id: str
   visitantePapel: usuario.papel,
 });
 
-function resumoDe(linha: Linha, tags: string[], contagemEvidencias: number): InvestigacaoResumo {
+function resumoDe(linha: Linha, tags: string[], contagemEvidencias: number, interacoes: Interacoes): InvestigacaoResumo {
   const i = linha.inv;
   return {
     id: i.id,
@@ -117,6 +154,7 @@ function resumoDe(linha: Linha, tags: string[], contagemEvidencias: number): Inv
     ...(linha.misterioSlug && linha.misterioTitulo ? { misterio: { slug: linha.misterioSlug, titulo: linha.misterioTitulo } } : {}),
     tags,
     contagemEvidencias,
+    ...interacoes,
     ...(i.videoUrl ? { video: { url: i.videoUrl, ...(i.videoTitulo ? { titulo: i.videoTitulo } : {}) } } : {}),
     atualizadoEm: iso(i.atualizadoEm),
     possuiDetalhe: true,
@@ -127,12 +165,13 @@ async function detalheDe(db: Executor, linha: Linha, visitanteId?: string, visit
   const i = linha.inv;
   const temas = await temasDe(db, [i.id]);
   const evidenciasAceitas = (await contagemEvidenciasDe(db, [i.id])).get(i.id) ?? 0;
+  const interacoes = (await interacoesDe(db, [i.id], visitanteId)).get(i.id)!;
   const [{ total }] = await db
     .select({ total: sql<number>`count(*)::int` })
     .from(investigacaoHistorico)
     .where(and(eq(investigacaoHistorico.investigacaoId, i.id), eq(investigacaoHistorico.tipo, "teoria")));
   return {
-    ...resumoDe(linha, temas.get(i.id) ?? [], evidenciasAceitas),
+    ...resumoDe(linha, temas.get(i.id) ?? [], evidenciasAceitas, interacoes),
     estado: i.estado,
     encerradaPeloAutor: i.encerradaPeloAutor,
     autor: { nome: linha.autorNome, usuario: linha.autorUsuario },
@@ -166,12 +205,17 @@ async function buscarLinha(db: Executor, slug: string): Promise<Linha | undefine
 
 export async function listarInvestigacoes(
   deps: DependenciasInvestigacoes,
-  filtros: { categoria?: string; tag?: string; autorId?: string; misterio?: string },
+  filtros: { categoria?: string; tag?: string; autorId?: string; autor?: string; misterio?: string },
   paginacao: { limite: number; cursor?: CursorInvestigacoes },
 ): Promise<Pagina<InvestigacaoResumo>> {
   const condicoes: SQL[] = [];
   if (filtros.categoria) condicoes.push(eq(investigacoes.categoria, filtros.categoria as never));
   if (filtros.autorId) condicoes.push(eq(investigacoes.autorId, filtros.autorId));
+  if (filtros.autor) {
+    const [conta] = await deps.db.select({ id: usuarios.id }).from(usuarios).where(eq(usuarios.usuario, filtros.autor));
+    if (!conta) throw new ErroApi("nao_encontrado", "Usuário não encontrado.");
+    condicoes.push(eq(investigacoes.autorId, conta.id));
+  }
   if (filtros.misterio) {
     // Mistério inexistente ou oculto responde 404 (e não uma lista vazia que pareceria válida).
     const { id } = await exigirMisterioPublicado(deps.db, filtros.misterio).catch((erro) => {
@@ -210,7 +254,8 @@ export async function listarInvestigacoes(
   const ids = pagina.itens.map((l) => l.inv.id);
   const temas = await temasDe(deps.db, ids);
   const totais = await contagemEvidenciasDe(deps.db, ids);
-  return { itens: pagina.itens.map((l) => resumoDe(l, temas.get(l.inv.id) ?? [], totais.get(l.inv.id) ?? 0)), proximoCursor: pagina.proximoCursor };
+  const interacoes = await interacoesDe(deps.db, ids, deps.visitanteId);
+  return { itens: pagina.itens.map((l) => resumoDe(l, temas.get(l.inv.id) ?? [], totais.get(l.inv.id) ?? 0, interacoes.get(l.inv.id)!)), proximoCursor: pagina.proximoCursor };
 }
 
 export async function obterInvestigacao(deps: DependenciasInvestigacoes, slug: string): Promise<InvestigacaoDetalhePublico> {

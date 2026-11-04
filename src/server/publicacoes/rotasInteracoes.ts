@@ -7,7 +7,7 @@ import { ErroApi } from "../http/erros";
 import { decodificarCursor, lerPaginacao } from "../http/paginacao";
 import { envolver, json } from "../http/resposta";
 import { lerCorpo, validarQuery } from "../http/validar";
-import { criarComentario, curtir, descurtir, listarComentarios } from "../servicos/interacoes";
+import { criarComentario, curtir, curtirInvestigacao, descurtir, descurtirInvestigacao, listarComentarios } from "../servicos/interacoes";
 
 const LIMITE_CORPO_BYTES = 8_000;
 
@@ -30,9 +30,9 @@ export function criarManipuladoresInteracoes(opcoes: OpcoesRotasInteracoes = {})
     return resposta;
   };
 
-  async function slugDaCurtida(contexto: ContextoSlug): Promise<string> {
+  async function slugDaCurtida(contexto: ContextoSlug, mensagem = "Publicação não encontrada."): Promise<string> {
     const resultado = esquemaSlug.safeParse((await contexto.params).slug);
-    if (!resultado.success) throw new ErroApi("nao_encontrado", "Publicação não encontrada.");
+    if (!resultado.success) throw new ErroApi("nao_encontrado", mensagem);
     return resultado.data;
   }
 
@@ -68,6 +68,22 @@ export function criarManipuladoresInteracoes(opcoes: OpcoesRotasInteracoes = {})
       const dependencias = deps();
       const sessao = await exigirSessao(dependencias.db, requisicao, cookie, agora());
       return semCache(json(await descurtir(dependencias, sessao.usuario.id, await slugDaCurtida(contexto))));
+    }),
+
+    curtirInvestigacao: envolver(async (requisicao, contexto: ContextoSlug) => {
+      exigirOrigemConfiavel(requisicao);
+      const dependencias = deps();
+      const sessao = await exigirSessao(dependencias.db, requisicao, cookie, agora());
+      const slug = await slugDaCurtida(contexto, "Investigação não encontrada.");
+      return semCache(json(await curtirInvestigacao(dependencias, sessao.usuario.id, slug)));
+    }),
+
+    descurtirInvestigacao: envolver(async (requisicao, contexto: ContextoSlug) => {
+      exigirOrigemConfiavel(requisicao);
+      const dependencias = deps();
+      const sessao = await exigirSessao(dependencias.db, requisicao, cookie, agora());
+      const slug = await slugDaCurtida(contexto, "Investigação não encontrada.");
+      return semCache(json(await descurtirInvestigacao(dependencias, sessao.usuario.id, slug)));
     }),
   };
 }

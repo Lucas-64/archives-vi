@@ -128,7 +128,8 @@ describe("POST /investigacoes", () => {
       permissoes: { podeGerenciar: true, podeSugerirEvidencia: true, podeModerar: false },
     });
     // D-D: nada que dependa de tabelas inexistentes.
-    for (const ausente of ["sintese", "evidencias", "participantes", "comentarios"]) expect(c).not.toHaveProperty(ausente);
+    for (const ausente of ["sintese", "evidencias", "participantes"]) expect(c).not.toHaveProperty(ausente);
+    expect(c).toMatchObject({ comentarios: 0, curtidas: 0, euCurti: false });
     // Task 7 (D-K): os campos que dependiam da tabela de evidências agora existem; os demais seguem omitidos.
     expect(c.permissoes).not.toHaveProperty("podeComentar");
     expect(c.contagens).not.toHaveProperty("participantes");
@@ -346,7 +347,7 @@ describe("leitura", () => {
     const c = await (await listar("?tag=locais-mapas&categoria=sighting")).json();
     const item = c.itens[0];
     expect(item).toMatchObject({ slug: "lista-0", imagem: null, status: "investigating", categoria: "sighting", tags: ["ovnis-extraterrestres", "locais-mapas"], possuiDetalhe: true });
-    expect(Object.keys(item).sort()).toEqual(["atualizadoEm", "categoria", "contagemEvidencias", "descricao", "id", "imagem", "possuiDetalhe", "slug", "status", "tags", "titulo"]);
+    expect(Object.keys(item).sort()).toEqual(["atualizadoEm", "categoria", "comentarios", "contagemEvidencias", "curtidas", "descricao", "euCurti", "id", "imagem", "possuiDetalhe", "slug", "status", "tags", "titulo"]);
     const texto = JSON.stringify(await (await listar("?limite=50")).json());
     for (const proibido of [dono.email, outro.email, dono.id, outro.id, "senha", "hash", "autor"]) expect(texto).not.toContain(proibido);
   });
@@ -371,7 +372,7 @@ describe("leitura", () => {
     expect(r.status).toBe(200);
     expect(c.autor).toEqual({ nome: dono.usuario, usuario: dono.usuario });
     expect(Object.keys(c).sort()).toEqual([
-      "atualizadoEm", "autor", "categoria", "contagemEvidencias", "contagens", "criadoEm", "descricao", "encerradaPeloAutor", "estado", "id", "imagem", "permissoes", "possuiDetalhe", "slug", "status", "tags", "teoria", "titulo",
+      "atualizadoEm", "autor", "categoria", "comentarios", "contagemEvidencias", "contagens", "criadoEm", "curtidas", "descricao", "encerradaPeloAutor", "estado", "euCurti", "id", "imagem", "permissoes", "possuiDetalhe", "slug", "status", "tags", "teoria", "titulo",
     ]);
     for (const proibido of [dono.email, dono.id, "senha", "hash", "papel"]) expect(JSON.stringify(c)).not.toContain(proibido);
     const respostas = await Promise.all([detalhe("nao-existe"), detalhe("Slug Inválido!")]);

@@ -26,6 +26,8 @@ export type EntradaCriarMisterio = z.output<typeof esquemaCriarMisterio>;
 
 export const esquemaListarMisterios = z.object({
   classificacao: z.enum(CLASSIFICACOES_MISTERIO_API, { error: "Classificação inválida." }).optional(),
+  // Só os mistérios desta conta (`usuario`). Conta inexistente: 404.
+  autor: z.string().regex(/^[a-z0-9_]{3,30}$/, "Usuário inválido.").optional(),
 });
 
 const INSTANTE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?Z$/;
@@ -46,6 +48,7 @@ export interface MisterioResumo {
   atualizadoEm: string;
   // Investigações vinculadas e não encerradas pelo autor (D4).
   investigacoesAbertas: number;
+  comentarios: number;
 }
 
 export type MisterioDetalhePublico = MisterioResumo;
