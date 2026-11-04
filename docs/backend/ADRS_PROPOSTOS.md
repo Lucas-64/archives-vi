@@ -26,3 +26,14 @@ Por que: uma única base e um único deploy futuro, sem CORS, camada `src/server
 Consequências: Node 22.12+ para as ferramentas de teste (Vitest 5), enquanto o Next aceita 20.9+. Hospedagem, banco gerenciado, e-mail e armazenamento de arquivos de produção **não estão decididos nem contratados**; o código fala com interfaces (`DATABASE_URL`, futuramente `Armazenamento` e `EnviadorEmail`) para que a escolha seja reversível. `generateStaticParams` com `dynamicParams = false` (ADR-014) não acomoda conteúdo criado depois do build: será revisitado só na integração, em ADR próprio.
 
 Status: Proposto (a decisão de stack já foi tomada pelo Lucas; falta o registro).
+
+## ADR-044 (texto proposto, para o Front registrar em `docs/DECISIONS.md`): Mistério e Investigação como tipos distintos
+
+Decisão (Lucas, 2026-11-04, D1 a D8 da auditoria `auditoria-misterios-investigacoes-v2`): **Mistério** é a postagem simples (título, descrição, classificação, imagem ou vídeo, com comentários no lote 2), tabela `misterios`. **Investigação** é o objeto rico (hipótese, pergunta central, argumentos, fontes, evidências, histórico), tabela `investigacoes`, que absorve o antigo "Criar teoria"; `publicacoes` fica sem tela de criação. O vínculo mistério → investigação é **opcional** (`investigacoes.misterio_id`) e "aberta" significa não encerrada pelo autor (`investigacoesAbertas`). Substitui, no que for incompatível, os ADR-013 (sem vínculo), ADR-020, ADR-038 e ADR-043 (nomes das entradas de criação).
+
+Por que: o modelo anterior chamava de "Mistério" o objeto rico e de "Teoria" o simples, o oposto do conceito do produto. Separar os tipos evita migrar dados (os de exemplo são recriados) e permite ligar mistérios e investigações sem duplicar o modelo.
+
+Consequências: a classificação do mistério vira coluna; a exceção por slug (`src/lib/investigacao.ts`) fica obsoleta para mistérios novos; a busca deixa de listar mistérios até a aba "Mistérios" (lote 2); a migração `0008` só deve ir à `main` com o lote 3 validado (comentários e curtidas em investigação).
+
+Status: Proposto (aguardando registro pelo Front).
+

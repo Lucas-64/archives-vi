@@ -18,12 +18,14 @@ import {
   investigacaoHistorico,
   investigacaoTags,
   investigacoes,
+  misterios,
   usuarios,
   type EstadoInvestigacao,
   type TipoHistorico,
 } from "../db/esquema";
 import { ErroApi } from "../http/erros";
 import { fatiarPagina, type Pagina } from "../http/paginacao";
+import { exigirMisterioPublicado } from "./misterios";
 import { escolherSlugLivre, type Executor } from "./slugs";
 
 export interface DependenciasInvestigacoes {
@@ -54,6 +56,9 @@ const colunas = {
   autorNome: usuarios.nome,
   autorUsuario: usuarios.usuario,
   atualizadoEmTexto: instante(investigacoes.atualizadoEm),
+  // Só mistério publicado é exposto; oculto vira "sem mistério" na leitura.
+  misterioSlug: sql<string | null>`case when ${misterios.status} = 'publicado' then ${misterios.slug} end`,
+  misterioTitulo: sql<string | null>`case when ${misterios.status} = 'publicado' then ${misterios.titulo} end`,
 };
 
 type Linha = {
@@ -61,6 +66,8 @@ type Linha = {
   autorNome: string;
   autorUsuario: string;
   atualizadoEmTexto: string;
+  misterioSlug: string | null;
+  misterioTitulo: string | null;
 };
 
 const ordem = [desc(investigacoes.atualizadoEm), desc(investigacoes.id)] as const;
@@ -107,6 +114,7 @@ function resumoDe(linha: Linha, tags: string[], contagemEvidencias: number): Inv
     status: i.status,
     categoria: i.categoria,
     ...(i.localizacao ? { localizacao: i.localizacao } : {}),
+    ...(linha.misterioSlug && linha.misterioTitulo ? { misterio: { slug: linha.misterioSlug, titulo: linha.misterioTitulo } } : {}),
     tags,
     contagemEvidencias,
     ...(i.videoUrl ? { video: { url: i.videoUrl, ...(i.videoTitulo ? { titulo: i.videoTitulo } : {}) } } : {}),
@@ -151,18 +159,27 @@ async function buscarLinha(db: Executor, slug: string): Promise<Linha | undefine
     .select(colunas)
     .from(investigacoes)
     .innerJoin(usuarios, eq(usuarios.id, investigacoes.autorId))
+    .leftJoin(misterios, eq(misterios.id, investigacoes.misterioId))
     .where(eq(investigacoes.slug, slug));
   return linha;
 }
 
 export async function listarInvestigacoes(
   deps: DependenciasInvestigacoes,
-  filtros: { categoria?: string; tag?: string; autorId?: string },
+  filtros: { categoria?: string; tag?: string; autorId?: string; misterio?: string },
   paginacao: { limite: number; cursor?: CursorInvestigacoes },
 ): Promise<Pagina<InvestigacaoResumo>> {
   const condicoes: SQL[] = [];
   if (filtros.categoria) condicoes.push(eq(investigacoes.categoria, filtros.categoria as never));
   if (filtros.autorId) condicoes.push(eq(investigacoes.autorId, filtros.autorId));
+  if (filtros.misterio) {
+    // Mistério inexistente ou oculto responde 404 (e não uma lista vazia que pareceria válida).
+    const { id } = await exigirMisterioPublicado(deps.db, filtros.misterio).catch((erro) => {
+      if (erro instanceof ErroApi && erro.codigo === "validacao") throw new ErroApi("nao_encontrado", "Mistério não encontrado.");
+      throw erro;
+    });
+    condicoes.push(eq(investigacoes.misterioId, id));
+  }
   if (filtros.tag) {
     condicoes.push(
       sql`exists (select 1 from ${investigacaoTags} where ${investigacaoTags.investigacaoId} = ${investigacoes.id} and ${investigacaoTags.tagId} = ${filtros.tag})`,
@@ -179,6 +196,7 @@ export async function listarInvestigacoes(
       .select(colunas)
       .from(investigacoes)
       .innerJoin(usuarios, eq(usuarios.id, investigacoes.autorId))
+      .leftJoin(misterios, eq(misterios.id, investigacoes.misterioId))
       .where(condicoes.length ? and(...condicoes) : undefined)
       .orderBy(...ordem)
       .limit(paginacao.limite + 1);
@@ -286,6 +304,7 @@ export async function criarInvestigacao(
       );
     }
 
+    const misterio = entrada.misterio ? await exigirMisterioPublicado(tx, entrada.misterio) : undefined;
     const novoSlug = await escolherSlugLivre(tx, entrada.titulo);
     const [criada] = await tx
       .insert(investigacoes)
@@ -302,6 +321,7 @@ export async function criarInvestigacao(
         perguntaCentral: entrada.teoria.perguntaCentral,
         argumentosFavoraveis: entrada.teoria.argumentosFavoraveis,
         fontes: entrada.teoria.fontes,
+        misterioId: misterio?.id ?? null,
         autorId: autor.id,
         criadoEm: agora,
         atualizadoEm: agora,

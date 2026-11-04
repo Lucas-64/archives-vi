@@ -4,6 +4,7 @@ export * from "./limitesTaxa";
 export * from "./tags";
 export * from "./publicacoes";
 export * from "./interacoes";
+export * from "./misterios";
 export * from "./investigacoes";
 export * from "./evidencias";
 export * from "./auditoria";

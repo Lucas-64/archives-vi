@@ -4,7 +4,7 @@ Status: **v1.2, stack confirmada pelo Lucas em 2026-10-20 (Next.js Route Handler
 
 **Etapas:** rotas marcadas **[A]** fazem parte do MVP-A (implementar primeiro); **[B]** são MVP-B (reservadas, não implementar agora). **Desenvolvimento e testes 100% locais e gratuitos**; nenhum serviço externo é necessário para nenhuma rota [A].
 
-**Implementado e testado até agora (Tarefas 2 a 8):** convenções da seção 1 (erros, paginação, validação), as rotas de autenticação da seção 3 (`cadastro`, `entrar`, `sair`, `eu`) as quatro rotas de publicações da seção 7 (`GET /publicacoes`, `GET /publicacoes/{slug}`, `GET /publicacoes/{slug}/relacionadas`, `POST /publicacoes`) e, da Tarefa 5, `GET`/`POST /comentarios` (só alvo `publicacao:{slug}`) e `PUT`/`DELETE /publicacoes/{slug}/curtida`, e, da Tarefa 6, as rotas de investigações da seção 5 marcadas como implementadas, marcadas com **(implementado)**, e, da Tarefa 7, as rotas de evidências, sugestões, `GET /me/sugestoes`, moderação de `status`, troca de papéis e leitura da auditoria (seções 6 e 12), e, da Tarefa 8, `GET /criadores`, `GET /usuarios/{usuario}`, suas listas de publicações e investigações e `PATCH /me/perfil` (seção 4). Todo o resto continua proposta. Os esquemas Zod em `src/server/contracts/` e os testes são a fonte de verdade do que está implementado.
+**Implementado e testado até agora (Tarefas 2 a 8):** convenções da seção 1 (erros, paginação, validação), as rotas de autenticação da seção 3 (`cadastro`, `entrar`, `sair`, `eu`) as quatro rotas de publicações da seção 7 (`GET /publicacoes`, `GET /publicacoes/{slug}`, `GET /publicacoes/{slug}/relacionadas`, `POST /publicacoes`) e, da Tarefa 5, `GET`/`POST /comentarios` (só alvo `publicacao:{slug}`) e `PUT`/`DELETE /publicacoes/{slug}/curtida`, e, da Tarefa 6, as rotas de investigações da seção 5 marcadas como implementadas, marcadas com **(implementado)**, e, da Tarefa 7, as rotas de evidências, sugestões, `GET /me/sugestoes`, moderação de `status`, troca de papéis e leitura da auditoria (seções 6 e 12), e, da Tarefa 8, `GET /criadores`, `GET /usuarios/{usuario}`, suas listas de publicações e investigações e `PATCH /me/perfil` (seção 4). e, do lote 1 de Mistérios (2026-11-04), a §15: `GET`/`POST /misterios`, `GET /misterios/{slug}`, `misterio` na criação de investigações, `GET /investigacoes?misterio=` e o campo `investigacoesAbertas`. Todo o resto continua proposta. Os esquemas Zod em `src/server/contracts/` e os testes são a fonte de verdade do que está implementado.
 
 Base: `/api/v1`, mesma origem do site (ver decisão D5 do plano). Formato: JSON, UTF-8, idioma dos campos e mensagens: português do Brasil. Os nomes dos campos seguem os tipos que o front já usa (`src/types/`) para reduzir adaptação.
 
@@ -116,6 +116,48 @@ type PerfilPublico = {
 
 `GET /saude` (P, sem dados sensíveis: `{ ok: true }`) para verificação de implantação. `GET /atividade/online` fica **fora** até D20 (hoje o número 312 é fixo).
 
+## 15. Mistérios e vínculo com investigações **(implementado, lote 1 de Mistérios)**
+
+Contrato **congelado** para o front (migração `0008_misterios`). Mistério é a postagem simples (título, descrição, classificação, imagem ou vídeo); **investigação** continua sendo a tabela `investigacoes` (§5), agora com vínculo **opcional** a um mistério (D6). Decisões D1 a D8 da auditoria `auditoria-misterios-investigacoes-v2`.
+
+### 15.1 Tipos
+
+```ts
+type ClassificacaoMisterio = "em-andamento" | "resolvido" | "easter-egg" | "curiosidade"; // ids de src/constants/classificacoesMisterio.ts
+
+interface MisterioResumo {          // MisterioDetalhePublico é o mesmo tipo
+  id: string; slug: string; titulo: string; descricao: string;
+  imagem: string | null;            // URL do Vercel Blob (ADR-043); nulo = o front usa a imagem padrão
+  classificacao: ClassificacaoMisterio;
+  video?: { url: string; titulo?: string };   // YouTube
+  autor: { nome: string; usuario: string };
+  criadoEm: string; atualizadoEm: string;     // ISO 8601 UTC
+  investigacoesAbertas: number;     // investigações vinculadas e NÃO encerradas pelo autor (D4)
+}
+```
+
+`InvestigacaoResumo` (e, por extensão, `InvestigacaoDetalhePublico`) ganha `misterio?: { slug: string; titulo: string }`, presente só quando há vínculo com mistério **publicado**.
+
+### 15.2 Rotas
+
+| Rota | Acesso | Notas |
+|---|---|---|
+| `GET /misterios` | P | `?classificacao=` (um dos quatro ids; outro valor dá `422`), `?limite=` (padrão 20, máx. 50), `?cursor=`. Só mistérios `publicado`, do mais recentemente atualizado ao mais antigo; cursor opaco por `(atualizadoEm, id)`. Cada item traz `investigacoesAbertas`. Vazia é `200 { itens: [], proximoCursor: null }`. `no-store` |
+| `GET /misterios/{slug}` | P | `200 MisterioDetalhePublico`. Slug fora do formato, inexistente ou `oculto`: `404`. `no-store` |
+| `POST /misterios` | M | `{ titulo, descricao, classificacao?, imagem?, video? }`, estrito (`status`, `slug`, `autor`… dão `422`). `titulo` 3 a 120, `descricao` 20 a 500, `classificacao` padrão `em-andamento`, `imagem` só URL do upload (ADR-043), `video` só YouTube (`{ url, titulo? }`). Qualquer membro autenticado cria; o autor vem da sessão e o mistério nasce `publicado`. CSRF antes da sessão e a sessão antes do corpo (limite 10 KB). `201` + `Location` + `MisterioDetalhePublico` com `investigacoesAbertas: 0`. Limites: 5 por minuto e 20 por dia por membro (provisórios) |
+| `GET /investigacoes?misterio={slug}` | P | Acrescenta o filtro à lista de §5 (combina com `categoria` e `tag`): só as investigações vinculadas a esse mistério, **abertas e encerradas**, com a paginação e a visibilidade de sempre. Mistério inexistente ou `oculto`: `404`; slug fora do formato: `422` |
+| `POST /investigacoes` | M | Aceita `misterio?: string` (slug). Vazio/ausente = investigação sem mistério. Mistério inexistente, `oculto` ou slug inválido: `422` com `campos.misterio`, e **nada é gravado**. O vínculo é definido só na criação: `PATCH /investigacoes/{slug}` recusa `misterio` com `422` |
+
+Não existem (ainda) edição, ocultação ou exclusão de mistério por API; `oculto` é um estado reservado à moderação futura e já é respeitado em toda leitura. Comentários no mistério (alvo `misterio:{slug}`) e o seed novo são do lote 2.
+
+### 15.3 Regras
+
+- **"Aberta"** = `encerrada_pelo_autor = false` (D4), a mesma regra do limite de abertas por membro. Encerrar a investigação reduz `investigacoesAbertas` na hora; ela continua na lista do mistério.
+- O **limite de 3 investigações abertas por membro** (§5) vale também para as vinculadas: vincular não dá cota extra. Estourar dá `409` com a mensagem de sempre.
+- **Slug**: mistérios, investigações e publicações dividem um único espaço de slugs; criar com título já usado gera outro sufixo.
+- **Remoção**: `investigacoes.misterio_id` é `ON DELETE RESTRICT`; um mistério com investigações não pode ser apagado no banco.
+- Autor, ocultação e visibilidade: o autor do mistério **não** tem poderes sobre as investigações vinculadas (cada investigação continua sendo do seu responsável).
+
 ## 14. Limites de taxa
 
 | Grupo | Limite | Estado |
@@ -126,6 +168,7 @@ type PerfilPublico = {
 | `POST /comentarios` | 20 por minuto por membro | **implementado** (provisório) |
 | `PUT`/`DELETE …/curtida` | 60 por minuto por membro | **implementado** (provisório) |
 | `POST/PATCH` de investigações | 20 por minuto por membro | **implementado** (provisório) |
+| `POST /misterios` | 5 por minuto e 20 por dia por membro | **implementado** (provisório) |
 | `POST …/evidencias` | 10 por minuto por membro + 10 pendentes por investigação | **implementado** (provisório, D-P) |
 | Decidir sugestão, `PATCH …/status`, `PATCH …/papel` | 30 por minuto por pessoa | **implementado** (provisório, D-P) |
 | `PATCH /me/perfil` | 10 por minuto por membro | **implementado** (provisório) |

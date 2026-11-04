@@ -3,6 +3,7 @@ import { z } from "zod";
 import { CATEGORIAS_INVESTIGACAO, ESTADOS_INVESTIGACAO } from "../db/esquema/investigacoes";
 import { IDS_TAGS } from "../db/esquema/tags";
 import { esquemaUrlImagem } from "./imagem";
+import { esquemaSlug } from "./publicacoes";
 import { extrairIdYoutube } from "../investigacoes/youtube";
 
 // Limites iniciais e provisórios (D-F), espelhados nos CHECKs da migração 0004.
@@ -37,6 +38,18 @@ const lista = (rotulo: string) =>
     .array(texto(rotulo, 1, LIMITES_INVESTIGACAO.item.maximo), { error: "Informe uma lista." })
     .max(LIMITES_INVESTIGACAO.itensPorLista, `Use no máximo ${LIMITES_INVESTIGACAO.itensPorLista} itens.`);
 
+// Compartilhado com os mistérios (mesmo vídeo do YouTube, mesmos limites).
+export const esquemaVideo = z
+  .object({
+    url: z
+      .string({ error: "Informe o link do vídeo." })
+      .trim()
+      .max(LIMITES_INVESTIGACAO.videoUrl, "O link do vídeo é longo demais.")
+      .refine((v) => extrairIdYoutube(v) !== undefined, "Use um link de vídeo do YouTube."),
+    titulo: texto("o título do vídeo", 1, LIMITES_INVESTIGACAO.videoTitulo).optional(),
+  })
+  .strict();
+
 const campos = {
   titulo: texto("o título", LIMITES_INVESTIGACAO.titulo.minimo, LIMITES_INVESTIGACAO.titulo.maximo),
   descricao: texto("a descrição", LIMITES_INVESTIGACAO.descricao.minimo, LIMITES_INVESTIGACAO.descricao.maximo),
@@ -45,16 +58,7 @@ const campos = {
   tags: z
     .array(z.enum(IDS_TAGS, { error: "Tema desconhecido." }), { error: "Informe uma lista de temas." })
     .refine((valores) => new Set(valores).size === valores.length, "Temas repetidos."),
-  video: z
-    .object({
-      url: z
-        .string({ error: "Informe o link do vídeo." })
-        .trim()
-        .max(LIMITES_INVESTIGACAO.videoUrl, "O link do vídeo é longo demais.")
-        .refine((v) => extrairIdYoutube(v) !== undefined, "Use um link de vídeo do YouTube."),
-      titulo: texto("o título do vídeo", 1, LIMITES_INVESTIGACAO.videoTitulo).optional(),
-    })
-    .strict(),
+  video: esquemaVideo,
   // Imagem de capa: URL pública do Vercel Blob devolvida pelo envio (ADR-043); URL https livre é recusada.
   imagem: esquemaUrlImagem,
   hipotese: texto("a hipótese", LIMITES_INVESTIGACAO.hipotese.minimo, LIMITES_INVESTIGACAO.hipotese.maximo),
@@ -82,6 +86,8 @@ export const esquemaCriarInvestigacao = z
     tags: campos.tags.default([]),
     video: campos.video.optional(),
     imagem: campos.imagem.optional(),
+    // Slug do mistério ao qual a investigação se vincula (opcional, D6). Só na criação; não é editável.
+    misterio: esquemaSlug.optional(),
     teoria: esquemaTeoria,
   })
   .strict();
@@ -117,6 +123,8 @@ export const esquemaMudarEstado = z
 export const esquemaListarInvestigacoes = z.object({
   categoria: z.enum(CATEGORIAS_INVESTIGACAO, { error: "Categoria inválida." }).optional(),
   tag: z.enum(IDS_TAGS, { error: "Tema desconhecido." }).optional(),
+  // Só as investigações vinculadas a este mistério (slug).
+  misterio: esquemaSlug.optional(),
   // Toda investigação da API tem teoria; o parâmetro existe pelo contrato e só aceita "true".
   comDetalhe: z.literal("true", { error: "Use comDetalhe=true." }).optional(),
 });
@@ -143,6 +151,8 @@ export interface InvestigacaoResumo {
   status: string;
   categoria: string;
   localizacao?: string;
+  // Mistério vinculado, se houver (só mistérios publicados aparecem).
+  misterio?: { slug: string; titulo: string };
   tags: string[];
   contagemEvidencias: number;
   video?: { url: string; titulo?: string };

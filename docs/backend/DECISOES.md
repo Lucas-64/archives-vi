@@ -82,3 +82,15 @@ Registro curto. As decisões arquiteturais estão em `docs/DECISIONS.md` (ADR-02
   - *Proteção do próprio papel*: a checagem "não altera o próprio papel" roda **antes** da de "papel de administrador" e tem mensagem própria. Correção de erro meu na proposta, que a chamou de inalcançável: ela é alcançável. A cobertura agora afirma a mensagem de cada caso (`moderacao.test.ts`), e a mutação que remove só a primeira passa a ser detectada.
   - *`atualizado_em` da investigação* não muda com mudança de status pela moderação nem com aceitação de evidência (decisão técnica da Tarefa 7). **Para avaliação separada**, sem alteração: o efeito é que a lista ordenada por atualização não "sobe" uma investigação por esses eventos.
   - *`tsx`* fica só em `devDependencies` e `npm run admin:criar` depende dele: decisão de implantação (instalar devDependencies no passo de bootstrap, ou compilar o script) **pendente**.
+
+## 2026-11-04 (Lote 1 de Mistérios, Back 1; decisões D1 a D8 do Lucas)
+
+- **Escopo**: migração `0008_misterios` (tabela `misterios` e `investigacoes.misterio_id` opcional), `GET`/`POST /misterios`, `GET /misterios/{slug}`, `misterio` na criação de investigações, `GET /investigacoes?misterio=`, `investigacoesAbertas`, `src/server/leitura/misterios.ts`, testes e `docs/API.md` §15. Fora (lote 2): comentários no mistério, seed novo, aba "Mistérios" da busca.
+- **Classificação é coluna** (`em-andamento`, `resolvido`, `easter-egg`, `curiosidade`, CHECK no banco), não derivada de `status`. A exceção provisória por slug do front deixa de ser necessária para mistérios criados por esta API.
+- **Mistério não tem localização, categoria nem temas** no banco: a tabela segue a lista da auditoria (título, descrição, classificação, imagem, vídeo, autor, status, datas). Se o formulário curto precisar de mais campos, é nova migração.
+- **Vínculo**: FK `ON DELETE RESTRICT`, definido só na criação e não editável (PATCH recusa `misterio`); mistério inexistente/oculto na criação dá `422` e não grava. Investigação de mistério que depois foi ocultado simplesmente deixa de exibir o `misterio`.
+- **`GET /investigacoes?misterio=` com slug desconhecido dá `404`**, não lista vazia, para o front distinguir "sem investigações" de "mistério inexistente".
+- **Limites provisórios** de criação de mistério: 5/min e 20/dia por membro (a definir pelo Lucas).
+- **Permissões**: qualquer membro autenticado cria mistério (como investigações, D-A). Sem edição, ocultação ou exclusão por API neste lote.
+- **Dados de exemplo**: o seed existente (`seedDemonstracaoMisterios`) NÃO foi alterado e continua criando investigações; a reescrita (D8) é do lote 2. Nenhum reset de banco foi feito; nada rodou fora do banco descartável dos testes.
+
